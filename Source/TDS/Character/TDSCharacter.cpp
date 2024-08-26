@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -13,6 +14,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
+#include "TimerManager.h"
+
+DEFINE_LOG_CATEGORY_STATIC(TDSCharacterLog, All, All);
 
 ATDSCharacter::ATDSCharacter()
 {
@@ -98,6 +102,11 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ATDSCharacter::InputAxisX);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ATDSCharacter::InputAxisY);
+	PlayerInputComponent->BindAxis(TEXT("MouseWheel"), this, &ATDSCharacter::CameraSlide);
+	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Pressed, this, &ATDSCharacter::OnStartWalking);
+	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Released, this, &ATDSCharacter::OnStartRunning);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ATDSCharacter::OnStartAiming);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ATDSCharacter::OnStartRunning);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -108,6 +117,21 @@ void ATDSCharacter::InputAxisX(float Value)
 void ATDSCharacter::InputAxisY(float Value)
 {
 	AxisY = Value;
+}
+
+void ATDSCharacter::OnStartWalking()
+{
+	ChangeMovementState(EMovementState::Walk_State);
+}
+
+void ATDSCharacter::OnStartAiming()
+{
+	ChangeMovementState(EMovementState::Aim_State);
+}
+
+void ATDSCharacter::OnStartRunning()
+{
+	ChangeMovementState(EMovementState::Run_State);
 }
 
 void ATDSCharacter::MovementTick(float DeltaTime)
@@ -144,4 +168,64 @@ void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
 {
 	MovementState = InMovementState;
 	CharacterUpdate();
+}
+
+void ATDSCharacter::CameraSlide(float Value)
+{
+	float DistanceToCamera = CameraBoom->TargetArmLength;
+	if (Value == 0 || !GetWorld())
+	{
+		return;
+	}
+	if (Value < 0)
+	{
+		if (DistanceToCamera + CameraStep <= CameraHeightMax)
+		{
+			if (!DoSmoothScrolling)
+			{
+				CameraBoom->TargetArmLength = DistanceToCamera + CameraStep;
+			}
+			else
+			{
+				DoSlideUp = true;
+				GetWorld()->GetTimerManager().SetTimer(CameraTimerHandle, this, &ATDSCharacter::CameraScroll, TimerStep, true);
+			}
+		}
+	}
+	else if (Value > 0)
+	{
+		if (DistanceToCamera - CameraStep >= CameraHeightMin)
+		{
+			if (!DoSmoothScrolling)
+			{
+				CameraBoom->TargetArmLength = DistanceToCamera - CameraStep;
+			}
+			else
+			{
+				DoSlideUp = false;
+				GetWorld()->GetTimerManager().SetTimer(CameraTimerHandle, this, &ATDSCharacter::CameraScroll, TimerStep, true);
+			}
+		}
+	}
+}
+
+void ATDSCharacter::CameraScroll()
+{
+	CurrentCameraDistance += SmoothCameraStep;
+	float Distance = CameraBoom->TargetArmLength;
+	if (DoSlideUp)
+	{
+		Distance += SmoothCameraStep;
+	}
+	else
+	{
+		Distance -= SmoothCameraStep;
+	}
+	CameraBoom->TargetArmLength = Distance;
+
+	if (CurrentCameraDistance >= CameraStep)
+	{
+		CurrentCameraDistance = 0;
+		GetWorld()->GetTimerManager().ClearTimer(CameraTimerHandle);
+	}
 }
