@@ -6,6 +6,7 @@
 #include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "../Components/TDSStaminaComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -15,6 +16,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Components/TextRenderComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSCharacterLog, All, All);
 
@@ -61,6 +63,22 @@ ATDSCharacter::ATDSCharacter()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	StaminaComponent = CreateDefaultSubobject<UTDSStaminaComponent>("StaminaComponent");
+	StaminaTextComponent = CreateDefaultSubobject<UTextRenderComponent>("StaminaTextComponent");
+	StaminaTextComponent->SetupAttachment(GetRootComponent());
+}
+
+void ATDSCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	check(StaminaComponent);
+	check(StaminaTextComponent);
+
+	OnStaminaChanged(StaminaComponent->GetStamina());
+	
+	StaminaComponent->OnStaminaEmpty.AddUObject(this, &ATDSCharacter::OnStaminaEmpty);
+	StaminaComponent->OnStaminaChanged.AddUObject(this, &ATDSCharacter::OnStaminaChanged);	
 }
 
 void ATDSCharacter::Tick(float DeltaSeconds)
@@ -99,6 +117,7 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ATDSCharacter::InputAxisX);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ATDSCharacter::InputAxisY);
@@ -107,6 +126,8 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Released, this, &ATDSCharacter::OnStartRunning);
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ATDSCharacter::OnStartAiming);
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ATDSCharacter::OnStartRunning);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ATDSCharacter::OnStartSprinting);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ATDSCharacter::OnStopSprinting);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -134,6 +155,58 @@ void ATDSCharacter::OnStartRunning()
 	ChangeMovementState(EMovementState::Run_State);
 }
 
+void ATDSCharacter::OnStartSprinting()
+{
+	if ((GetMovementDirection() <= SprintAngleThreshold) && StaminaComponent->CanSprinting())
+	{
+		WantsToSprint = true;
+		if (!GetVelocity().IsZero())
+		{
+			StaminaComponent->ChangeSpamina(WantsToSprint);
+		}
+		ChangeMovementState(EMovementState::Sprint_State);
+	}
+	else
+	{
+		OnStopSprinting();
+	}	
+}
+
+void ATDSCharacter::OnStopSprinting()
+{
+	WantsToSprint = false;
+	StaminaComponent->ChangeSpamina(WantsToSprint);
+	ChangeMovementState(EMovementState::Run_State);
+}
+
+float ATDSCharacter::GetMovementDirection() const
+{
+	FVector VelocityVector = GetVelocity();
+	VelocityVector.Z = 0;
+
+	FVector ForwardVector = GetActorForwardVector();
+	ForwardVector.Z = 0;
+
+	if (VelocityVector.IsNearlyZero() || ForwardVector.IsNearlyZero())
+	{
+		return 0.0f;
+	}
+	
+	VelocityVector.Normalize();
+	ForwardVector.Normalize();
+
+	float DotProduct = FVector::DotProduct(VelocityVector, ForwardVector);
+	float AngleRadians = FMath::Acos(DotProduct);
+	float AnlgeDegrees = FMath::RadiansToDegrees(AngleRadians);
+
+	return AnlgeDegrees;
+}
+
+bool ATDSCharacter::IsSprinting() const
+{
+	return WantsToSprint && ((GetMovementDirection() <= SprintAngleThreshold)) && !GetVelocity().IsZero();
+}
+
 void ATDSCharacter::MovementTick(float DeltaTime)
 {
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), AxisX);
@@ -158,6 +231,7 @@ void ATDSCharacter::CharacterUpdate()
 	case EMovementState::Aim_State: ResSpeed = MovementInfo.AimSpeed; break;
 	case EMovementState::Walk_State: ResSpeed = MovementInfo.WalkSpeed; break;
 	case EMovementState::Run_State: ResSpeed = MovementInfo.RunSpeed; break;
+	case EMovementState::Sprint_State: ResSpeed = MovementInfo.SprintSpeed; break;
 	default: break;
 	}
 
@@ -228,4 +302,14 @@ void ATDSCharacter::CameraScroll()
 		CurrentCameraDistance = 0;
 		GetWorld()->GetTimerManager().ClearTimer(CameraTimerHandle);
 	}
+}
+
+void ATDSCharacter::OnStaminaEmpty()
+{
+	OnStopSprinting();
+}
+
+void ATDSCharacter::OnStaminaChanged(float Stamina)
+{
+	StaminaTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Stamina)));
 }

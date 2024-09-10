@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "TDSGameMode.generated.h"
 
+class ATDS_HUD;
+
 UCLASS(minimalapi)
 class ATDSGameMode : public AGameModeBase
 {
@@ -13,6 +15,11 @@ class ATDSGameMode : public AGameModeBase
 
 public:
 	ATDSGameMode();
+	virtual void StartPlay() override;
+
+private:
+	UPROPERTY()
+	ATDS_HUD* HUD;
 };
 
 
