@@ -112,6 +112,8 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 		}
 	}
 	MovementTick(DeltaSeconds);
+
+	UpdateSprintByRule();
 }
 
 void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -179,6 +181,14 @@ void ATDSCharacter::OnStopSprinting()
 	ChangeMovementState(EMovementState::Run_State);
 }
 
+void ATDSCharacter::UpdateSprintByRule()
+{
+	if (GetMovementDirection() > SprintAngleThreshold)
+	{
+		OnStopSprinting();
+	}
+}
+
 float ATDSCharacter::GetMovementDirection() const
 {
 	FVector VelocityVector = GetVelocity();
@@ -207,7 +217,7 @@ bool ATDSCharacter::IsSprinting() const
 	return WantsToSprint && ((GetMovementDirection() <= SprintAngleThreshold)) && !GetVelocity().IsZero();
 }
 
-void ATDSCharacter::MovementTick(float DeltaTime)
+void ATDSCharacter::MovementTick(float DeltaSeconds)
 {
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), AxisX);
 	AddMovementInput(FVector(0.0f, 1.0f, 0.0f), AxisY);

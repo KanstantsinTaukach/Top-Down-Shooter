@@ -62,9 +62,11 @@ private:
 
 	void OnStartSprinting();
 	void OnStopSprinting();
+
+	void UpdateSprintByRule();
 	
 	UFUNCTION()
-	void MovementTick(float DeltaTime);
+	void MovementTick(float DeltaSeconds);
 
 	UFUNCTION()
 	void CameraSlide(float Value);	
