@@ -62,8 +62,6 @@ private:
 
 	void OnStartSprinting();
 	void OnStopSprinting();
-
-	void UpdateSprintByRule();
 	
 	UFUNCTION()
 	void MovementTick(float DeltaSeconds);

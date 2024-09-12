@@ -112,8 +112,6 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 		}
 	}
 	MovementTick(DeltaSeconds);
-
-	UpdateSprintByRule();
 }
 
 void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -181,14 +179,6 @@ void ATDSCharacter::OnStopSprinting()
 	ChangeMovementState(EMovementState::Run_State);
 }
 
-void ATDSCharacter::UpdateSprintByRule()
-{
-	if (GetMovementDirection() > SprintAngleThreshold)
-	{
-		OnStopSprinting();
-	}
-}
-
 float ATDSCharacter::GetMovementDirection() const
 {
 	FVector VelocityVector = GetVelocity();
@@ -219,17 +209,31 @@ bool ATDSCharacter::IsSprinting() const
 
 void ATDSCharacter::MovementTick(float DeltaSeconds)
 {
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), AxisX);
-	AddMovementInput(FVector(0.0f, 1.0f, 0.0f), AxisY);
+	const FRotator Rotation = TopDownCameraComponent->GetComponentRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FVector DirectionForward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector DirectionRight = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PlayerController)
+	AddMovementInput(DirectionForward, AxisX);
+	AddMovementInput(DirectionRight, AxisY);
+
+	if (MovementState == EMovementState::Sprint_State)
 	{
-		FHitResult ResultHit;
-		PlayerController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery6, false, ResultHit);
+		FVector myRotationVector = GetVelocity();
+		FRotator myRotator = myRotationVector.ToOrientationRotator();
+		SetActorRotation((FQuat(myRotator)));
+	}
+	else
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PlayerController)
+		{
+			FHitResult ResultHit;
+			PlayerController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery6, false, ResultHit);
 
-		float FindRatatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
-		SetActorRotation(FQuat(FRotator(0.0f, FindRatatorResultYaw, 0.0f)));
+			float FindRatatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
+			SetActorRotation(FQuat(FRotator(0.0f, FindRatatorResultYaw, 0.0f)));
+		}
 	}
 }
 
