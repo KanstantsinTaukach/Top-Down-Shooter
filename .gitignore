@@ -2,6 +2,10 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,unrealengine
 
 /Content/StarterBundle
+/Content/ModSci_Engineer
+/Content/ModSci_EngiProps
+/Content/ModSciInteriors
+/Content/Spaceshipinterior
 
 ### UnrealEngine ###
 # Visual Studio 2015 user specific files
