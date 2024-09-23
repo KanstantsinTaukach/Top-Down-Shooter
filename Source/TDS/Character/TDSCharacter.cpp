@@ -66,7 +66,7 @@ ATDSCharacter::ATDSCharacter()
 
 	StaminaComponent = CreateDefaultSubobject<UTDSStaminaComponent>("StaminaComponent");
 	StaminaTextComponent = CreateDefaultSubobject<UTextRenderComponent>("StaminaTextComponent");
-	StaminaTextComponent->SetupAttachment(GetRootComponent());
+	StaminaTextComponent->SetupAttachment(GetRootComponent());	
 }
 
 void ATDSCharacter::BeginPlay()
@@ -78,7 +78,7 @@ void ATDSCharacter::BeginPlay()
 	OnStaminaChanged(StaminaComponent->GetStamina());
 	
 	StaminaComponent->OnStaminaEmpty.AddUObject(this, &ATDSCharacter::OnStaminaEmpty);
-	StaminaComponent->OnStaminaChanged.AddUObject(this, &ATDSCharacter::OnStaminaChanged);	
+	StaminaComponent->OnStaminaChanged.AddUObject(this, &ATDSCharacter::OnStaminaChanged);
 }
 
 void ATDSCharacter::Tick(float DeltaSeconds)

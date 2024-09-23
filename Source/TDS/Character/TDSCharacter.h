@@ -87,7 +87,7 @@ private:
 
 protected:
 	float AxisX = 0.0f;
-	float AxisY = 0.0f;
+	float AxisY = 0.0f;	
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
