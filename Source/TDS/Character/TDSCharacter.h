@@ -27,15 +27,6 @@ public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns CursorToWorld subobject **/
-	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	float GetMovementDirection() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	bool IsSprinting() const;
 
 private:
 	/** Top down camera */
@@ -46,49 +37,26 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
-	/** A decal that projects to the cursor location. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UDecalComponent* CursorToWorld;	
+public:
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	float GetMovementDirection() const;
 
-private:
-	void InputAxisX(float Value);
-	void InputAxisY(float Value);
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	bool IsSprinting() const;
 
-	void OnStartWalking();
-	void OnStartAiming();
-	void OnStartRunning();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
+	UMaterialInterface* CursorMaterial = nullptr;
 
-	bool WantsToSprint = false;
-
-	void OnStartSprinting();
-	void OnStopSprinting();
-	
-	UFUNCTION()
-	void MovementTick(float DeltaSeconds);
-
-	UFUNCTION()
-	void CameraSlide(float Value);	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
+	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
 
 	UFUNCTION(BlueprintCallable)
-	void CharacterUpdate();
-
-	UFUNCTION(BlueprintCallable)
-	void ChangeMovementState(EMovementState InMovementState);	
-
-	bool DoSlideUp = true;
-	float CurrentCameraDistance = 0;
-
-	FTimerHandle CameraTimerHandle;
-
-	void CameraScroll();
-
-	void OnStaminaEmpty();
-	void OnStaminaChanged(float Stamina);
+	UDecalComponent* GetCursorToWorld();
 
 protected:
 	float AxisX = 0.0f;
-	float AxisY = 0.0f;	
-	
+	float AxisY = 0.0f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
 
@@ -117,10 +85,43 @@ protected:
 	float CameraStep = 100.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UTDSStaminaComponent* StaminaComponent;	
+	UTDSStaminaComponent* StaminaComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTextRenderComponent* StaminaTextComponent;
 
+	UDecalComponent* CurrentCursor = nullptr;
+
 	virtual void BeginPlay() override;
+
+private:
+	void InputAxisX(float Value);
+	void InputAxisY(float Value);
+
+	void OnStartWalking();
+	void OnStartAiming();
+	void OnStartRunning();
+
+	bool WantsToSprint = false;
+	void OnStartSprinting();
+	void OnStopSprinting();
+	
+	bool DoSlideUp = true;
+	float CurrentCameraDistance = 0;
+	void CameraScroll();
+	FTimerHandle CameraTimerHandle;
+	UFUNCTION()
+	void CameraSlide(float Value);
+
+	UFUNCTION()
+	void MovementTick(float DeltaSeconds);
+	
+	UFUNCTION(BlueprintCallable)
+	void CharacterUpdate();
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeMovementState(EMovementState InMovementState);	
+
+	void OnStaminaEmpty();
+	void OnStaminaChanged(float Stamina);
 };
