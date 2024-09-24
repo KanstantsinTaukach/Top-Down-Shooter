@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "../Components/TDSStaminaComponent.h"
+#include "../Weapons/TDS_WeaponDefault.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -61,6 +62,8 @@ ATDSCharacter::ATDSCharacter()
 void ATDSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InitWeapon();
 
 	if (CursorMaterial)
 	{
@@ -301,6 +304,26 @@ void ATDSCharacter::CameraScroll()
 	}
 }
 
+void ATDSCharacter::InitWeapon()
+{
+	FVector SpawnLocation = FVector(0);
+	FRotator SpawnTotation = FRotator(0);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.Instigator = GetInstigator();
+
+	auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnTotation, SpawnParams));
+	
+	if (MyWeapon)
+	{
+		FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+		CurrentWeapon = MyWeapon;
+		CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+	}
+}
+
 void ATDSCharacter::OnStaminaEmpty()
 {
 	OnStopSprinting();
@@ -314,4 +337,9 @@ void ATDSCharacter::OnStaminaChanged(float Stamina)
 UDecalComponent* ATDSCharacter::GetCursorToWorld()
 {
 	return CurrentCursor;
+}
+
+ATDS_WeaponDefault* ATDSCharacter::GetCurrentWeapon()
+{
+	return CurrentWeapon;
 }

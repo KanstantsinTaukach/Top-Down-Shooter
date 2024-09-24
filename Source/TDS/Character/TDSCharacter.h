@@ -9,6 +9,7 @@
 
 class UTDSStaminaComponent;
 class UTextRenderComponent;
+class ATDS_WeaponDefault;
 
 UCLASS(Blueprintable)
 class ATDSCharacter : public ACharacter
@@ -38,12 +39,6 @@ private:
 	class USpringArmComponent* CameraBoom;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	float GetMovementDirection() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	bool IsSprinting() const;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	UMaterialInterface* CursorMaterial = nullptr;
 
@@ -52,6 +47,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UDecalComponent* GetCursorToWorld();
+
+	UFUNCTION(BlueprintCallable)
+	ATDS_WeaponDefault* GetCurrentWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	float GetMovementDirection() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	bool IsSprinting() const;	
 
 protected:
 	float AxisX = 0.0f;
@@ -90,7 +94,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTextRenderComponent* StaminaTextComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
+	TSubclassOf<ATDS_WeaponDefault> InitWeaponClass = nullptr;
+
 	UDecalComponent* CurrentCursor = nullptr;
+	ATDS_WeaponDefault* CurrentWeapon = nullptr;
 
 	virtual void BeginPlay() override;
 
@@ -121,6 +129,9 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementState(EMovementState InMovementState);	
+
+	UFUNCTION(BlueprintCallable)
+	void InitWeapon();
 
 	void OnStaminaEmpty();
 	void OnStaminaChanged(float Stamina);

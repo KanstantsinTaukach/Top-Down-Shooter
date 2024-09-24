@@ -10,6 +10,6 @@ public class TDS : ModuleRules
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "NavigationSystem", "AIModule", "UMG", "Niagara"});
 
-        PublicIncludePaths.AddRange(new string[] { "TDS/Character", "TDS/FunctionLibrary", "TDS/Game", "TDS/Components", "TDS/UI" });
+        PublicIncludePaths.AddRange(new string[] { "TDS/Character", "TDS/FunctionLibrary", "TDS/Game", "TDS/Components", "TDS/UI", "TDS/Weapons" });
     }
 }
