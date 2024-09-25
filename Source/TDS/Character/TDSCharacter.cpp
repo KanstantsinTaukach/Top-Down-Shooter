@@ -114,6 +114,8 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ATDSCharacter::OnStartRunning);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ATDSCharacter::OnStartSprinting);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ATDSCharacter::OnStopSprinting);
+	PlayerInputComponent->BindAction(TEXT("FireEvent"), IE_Pressed, this, &ATDSCharacter::InputAttackPressed);
+	PlayerInputComponent->BindAction(TEXT("FireEvent"), IE_Released, this, &ATDSCharacter::InputAttackReleased);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -244,6 +246,30 @@ void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
 	CharacterUpdate();
 }
 
+void ATDSCharacter::InputAttackPressed()
+{
+	AttackCharEvent(true);
+}
+
+void ATDSCharacter::InputAttackReleased()
+{
+	AttackCharEvent(false);
+}
+
+void ATDSCharacter::AttackCharEvent(bool bIsFiring)
+{
+	ATDS_WeaponDefault* myWeapon = nullptr;
+	myWeapon = GetCurrentWeapon();
+	if (myWeapon)
+	{
+		myWeapon->SetWeaponStateFire(bIsFiring);
+	}
+	else
+	{
+		UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::AttackCharEvent - CurrentWeapon is NULL!"));
+	}
+}
+
 void ATDSCharacter::CameraSlide(float Value)
 {
 	float DistanceToCamera = CameraBoom->TargetArmLength;
@@ -307,14 +333,14 @@ void ATDSCharacter::CameraScroll()
 void ATDSCharacter::InitWeapon()
 {
 	FVector SpawnLocation = FVector(0);
-	FRotator SpawnTotation = FRotator(0);
+	FRotator SpawnRotation = FRotator(0);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.Instigator = GetInstigator();
 
-	auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnTotation, SpawnParams));
+	auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
 	
 	if (MyWeapon)
 	{

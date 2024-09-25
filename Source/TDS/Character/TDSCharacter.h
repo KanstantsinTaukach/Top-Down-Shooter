@@ -57,6 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool IsSprinting() const;	
 
+	UFUNCTION(BlueprintCallable)
+	void AttackCharEvent(bool bIsFiring);
+
 protected:
 	float AxisX = 0.0f;
 	float AxisY = 0.0f;
@@ -113,6 +116,9 @@ private:
 	bool WantsToSprint = false;
 	void OnStartSprinting();
 	void OnStopSprinting();
+
+	void InputAttackPressed();
+	void InputAttackReleased();
 	
 	bool DoSlideUp = true;
 	float CurrentCameraDistance = 0;

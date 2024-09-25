@@ -15,7 +15,17 @@ class TDS_API ATDS_WeaponDefault : public AActor
 	GENERATED_BODY()
 	
 public:	
-	ATDS_WeaponDefault();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
+	bool WeaponFiring = false;
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponStateFire(bool bIsFire);
+
+	void Fire();
+
+	FProjectileInfo GetProjectile();
+
+	ATDS_WeaponDefault();	
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -37,5 +47,12 @@ protected:
 
 	void WeaponInit();
 
+	void FireTick(float DeltaTime);
+
 	virtual void BeginPlay() override;
+
+private:
+	float FireTime = 0.0f; //Timers flags
+
+	bool CheckWeaponCanFire();
 };

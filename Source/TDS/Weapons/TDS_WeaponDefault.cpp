@@ -1,6 +1,7 @@
 // Top Down Shooter. All Rights Reserved
 
 #include "TDS_WeaponDefault.h"
+#include "TDS_ProjectileDefault.h"
 #include "Components/ArrowComponent.h"
 
 ATDS_WeaponDefault::ATDS_WeaponDefault()
@@ -35,6 +36,22 @@ void ATDS_WeaponDefault::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FireTick(DeltaTime);
+}
+
+void ATDS_WeaponDefault::FireTick(float DeltaTime)
+{
+	if (WeaponFiring)
+	{
+		if (FireTime < 0.0f)
+		{
+			Fire();
+		}
+	}
+	else
+	{
+		FireTime -= DeltaTime;
+	}
 }
 
 void ATDS_WeaponDefault::WeaponInit()
@@ -47,5 +64,58 @@ void ATDS_WeaponDefault::WeaponInit()
 	if (StaticMeshWeapon && !StaticMeshWeapon->GetStaticMesh())
 	{
 		StaticMeshWeapon->DestroyComponent(true);
+	}
+}
+
+void ATDS_WeaponDefault::SetWeaponStateFire(bool bIsFire)
+{
+	if (CheckWeaponCanFire())
+	{
+		WeaponFiring = bIsFire;
+	}
+	else
+	{
+		WeaponFiring = false;
+	}
+}
+
+bool ATDS_WeaponDefault::CheckWeaponCanFire()
+{
+	return true;
+}
+
+FProjectileInfo ATDS_WeaponDefault::GetProjectile()
+{
+	return WeaponSettings.ProjectileSettings;
+}
+
+void ATDS_WeaponDefault::Fire()
+{
+	FireTime = WeaponSettings.RateOfFire;
+
+	if (ShootLocation)
+	{
+		FVector SpawnLocation = ShootLocation->GetComponentLocation();
+		FRotator SpawnRotation = ShootLocation->GetComponentRotation();
+		FProjectileInfo ProjectileInfo;
+		ProjectileInfo = GetProjectile();
+
+		if (ProjectileInfo.Projectile)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnParams.Owner = GetOwner();
+			SpawnParams.Instigator = GetInstigator();
+
+			auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
+			if (MyProjectile)
+			{
+				MyProjectile->InitialLifeSpan = 20.0f;
+			}
+		}
+		else
+		{
+			//ToDo Projectile null Init trace fire
+		}
 	}
 }
