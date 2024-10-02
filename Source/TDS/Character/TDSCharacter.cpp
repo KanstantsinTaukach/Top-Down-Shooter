@@ -244,6 +244,13 @@ void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
 {
 	MovementState = InMovementState;
 	CharacterUpdate();
+
+	//Weapon state update
+	ATDS_WeaponDefault* MyWeapon = GetCurrentWeapon();
+	if (MyWeapon)
+	{
+		MyWeapon->UpdateStateWeapon(MovementState);
+	}
 }
 
 void ATDSCharacter::InputAttackPressed()
@@ -347,6 +354,8 @@ void ATDSCharacter::InitWeapon()
 		FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
 		CurrentWeapon = MyWeapon;
 		CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+
+		MyWeapon->UpdateStateWeapon(MovementState);
 	}
 }
 

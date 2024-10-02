@@ -110,7 +110,9 @@ void ATDS_WeaponDefault::Fire()
 			auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
 			if (MyProjectile)
 			{
+				//todo Init Projectle settings by id in table row(or keep in weapon table)
 				MyProjectile->InitialLifeSpan = 20.0f;
+				//Projectile->bulletProjectileMovement->InitialSpeed = 2500.0f;
 			}
 		}
 		else
@@ -118,4 +120,15 @@ void ATDS_WeaponDefault::Fire()
 			//ToDo Projectile null Init trace fire
 		}
 	}
+}
+
+void ATDS_WeaponDefault::UpdateStateWeapon(EMovementState InMovementState)
+{
+	// todo Dispersion
+	ChangeDispersion();
+}
+
+void ATDS_WeaponDefault::ChangeDispersion()
+{
+
 }

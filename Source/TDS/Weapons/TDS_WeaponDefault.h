@@ -23,6 +23,8 @@ public:
 
 	void Fire();
 
+	void UpdateStateWeapon(EMovementState InMovementState);
+
 	FProjectileInfo GetProjectile();
 
 	ATDS_WeaponDefault();	
@@ -55,4 +57,6 @@ private:
 	float FireTime = 0.0f; //Timers flags
 
 	bool CheckWeaponCanFire();
+
+	void ChangeDispersion();
 };
