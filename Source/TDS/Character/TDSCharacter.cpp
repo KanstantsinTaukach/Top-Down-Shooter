@@ -117,6 +117,7 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ATDSCharacter::OnStopSprinting);
 	PlayerInputComponent->BindAction(TEXT("FireEvent"), IE_Pressed, this, &ATDSCharacter::InputAttackPressed);
 	PlayerInputComponent->BindAction(TEXT("FireEvent"), IE_Released, this, &ATDSCharacter::InputAttackReleased);
+	PlayerInputComponent->BindAction(TEXT("ReloadEvent"), IE_Released, this, &ATDSCharacter::TryReloadWeapon);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -395,4 +396,12 @@ UDecalComponent* ATDSCharacter::GetCursorToWorld()
 ATDS_WeaponDefault* ATDSCharacter::GetCurrentWeapon()
 {
 	return CurrentWeapon;
+}
+
+void ATDSCharacter::TryReloadWeapon()
+{
+	if (CurrentWeapon && CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSettings.MaxRound)
+	{
+		CurrentWeapon->InitReload();
+	}
 }

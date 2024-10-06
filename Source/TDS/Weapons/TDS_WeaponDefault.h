@@ -28,9 +28,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponStateFire(bool bIsFire);
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetWeaponRound();
+
 	void Fire();
 
 	void UpdateStateWeapon(EMovementState InMovementState);
+
+	void InitReload();
 
 	FProjectileInfo GetProjectile();
 
@@ -49,15 +54,19 @@ protected:
 	UArrowComponent* ShootLocation = nullptr;
 
 	void FireTick(float DeltaTime);
+	void ReloadTick(float DeltaTime);
 
 	void WeaponInit();
 
 	virtual void BeginPlay() override;
 
 private:
-	float FireTime = 0.0f; //Timers flags
+	float FireTimer = 0.0f; //Timers flags
+	float ReloadTimer = 0.0f;
 
 	bool CheckWeaponCanFire();
 
 	void ChangeDispersion();
+
+	void FinishReload();
 };

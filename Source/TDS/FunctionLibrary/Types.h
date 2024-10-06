@@ -87,7 +87,7 @@ struct FWeaponInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	float RateOfFire = 0.1f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
-	float Reloadtime = 2.0f;
+	float ReloadTime = 2.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	int32 MaxRound = 10;
 

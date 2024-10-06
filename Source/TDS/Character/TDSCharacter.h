@@ -141,4 +141,6 @@ private:
 
 	void OnStaminaEmpty();
 	void OnStaminaChanged(float Stamina);
+
+	void TryReloadWeapon();
 };

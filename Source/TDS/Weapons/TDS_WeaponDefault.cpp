@@ -37,20 +37,46 @@ void ATDS_WeaponDefault::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FireTick(DeltaTime);
+	ReloadTick(DeltaTime);
 }
 
 void ATDS_WeaponDefault::FireTick(float DeltaTime)
 {
 	if (WeaponFiring)
 	{
-		if (FireTime < 0.0f)
+		if (FireTimer < 0.0f)
 		{
-			Fire();
+			if (GetWeaponRound() > 0 && !WeaponReloading)
+			{
+				Fire();
+			}
+			else
+			{
+				if (!WeaponReloading)
+				{
+					InitReload();
+				}
+			}
 		}
-	}
-	else
+		else
+		{
+			FireTimer -= DeltaTime;
+		}
+	}	
+}
+
+void ATDS_WeaponDefault::ReloadTick(float DeltaTime)
+{
+	if (WeaponReloading)
 	{
-		FireTime -= DeltaTime;
+		if (ReloadTimer < 0.0f)
+		{
+			FinishReload();
+		}
+		else
+		{
+			ReloadTimer -= DeltaTime;
+		}
 	}
 }
 
@@ -91,7 +117,8 @@ FProjectileInfo ATDS_WeaponDefault::GetProjectile()
 
 void ATDS_WeaponDefault::Fire()
 {
-	FireTime = WeaponSettings.RateOfFire;
+	FireTimer = WeaponSettings.RateOfFire;
+	--WeaponInfo.Round;
 
 	if (ShootLocation)
 	{
@@ -131,4 +158,24 @@ void ATDS_WeaponDefault::UpdateStateWeapon(EMovementState InMovementState)
 void ATDS_WeaponDefault::ChangeDispersion()
 {
 
+}
+
+int32 ATDS_WeaponDefault::GetWeaponRound()
+{
+	return WeaponInfo.Round;
+}
+
+void ATDS_WeaponDefault::InitReload()
+{
+	WeaponReloading = true;
+
+	ReloadTimer = WeaponSettings.ReloadTime;
+
+	//todo add AnimReload
+}
+
+void ATDS_WeaponDefault::FinishReload()
+{
+	WeaponReloading = false;
+	WeaponInfo.Round = WeaponSettings.MaxRound;
 }
