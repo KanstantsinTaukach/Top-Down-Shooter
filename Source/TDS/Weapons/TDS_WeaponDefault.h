@@ -17,6 +17,13 @@ class TDS_API ATDS_WeaponDefault : public AActor
 public:	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
 	bool WeaponFiring = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
+	bool WeaponReloading = false;
+
+	UPROPERTY()
+	FWeaponInfo WeaponSettings;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
+	FAdditionalWeaponInfo WeaponInfo;
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponStateFire(bool bIsFire);
@@ -34,22 +41,16 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	USceneComponent* SceneComponent = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	USkeletalMeshComponent* SkeletalMeshWeapon = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UStaticMeshComponent* StaticMeshWeapon = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UArrowComponent* ShootLocation = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
-	FWeaponInfo WeaponSettings;
+	void FireTick(float DeltaTime);
 
 	void WeaponInit();
-
-	void FireTick(float DeltaTime);
 
 	virtual void BeginPlay() override;
 

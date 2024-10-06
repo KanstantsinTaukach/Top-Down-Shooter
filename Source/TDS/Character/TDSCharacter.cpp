@@ -8,6 +8,7 @@
 #include "Components/InputComponent.h"
 #include "../Components/TDSStaminaComponent.h"
 #include "../Weapons/TDS_WeaponDefault.h"
+#include "../Game/TDSGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -63,7 +64,7 @@ void ATDSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitWeapon();
+	InitWeapon(InitWeaponName);
 
 	if (CursorMaterial)
 	{
@@ -337,26 +338,43 @@ void ATDSCharacter::CameraScroll()
 	}
 }
 
-void ATDSCharacter::InitWeapon()
+void ATDSCharacter::InitWeapon(FName IDWeapon)
 {
-	FVector SpawnLocation = FVector(0);
-	FRotator SpawnRotation = FRotator(0);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Owner = GetOwner();
-	SpawnParams.Instigator = GetInstigator();
-
-	auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
-	
-	if (MyWeapon)
+	auto myGI = Cast<UTDSGameInstance>(GetGameInstance());
+	FWeaponInfo MyWeaponInfo;
+	if (myGI)
 	{
-		FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
-		CurrentWeapon = MyWeapon;
-		CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+		if (myGI->GetWeaponInfoByName(IDWeapon, MyWeaponInfo))
+		{
+			if (MyWeaponInfo.WeaponClass)
+			{
+				FVector SpawnLocation = FVector(0);
+				FRotator SpawnRotation = FRotator(0);
 
-		MyWeapon->UpdateStateWeapon(MovementState);
-	}
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				SpawnParams.Owner = GetOwner();
+				SpawnParams.Instigator = GetInstigator();
+
+				auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
+
+				if (MyWeapon)
+				{
+					FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+					CurrentWeapon = MyWeapon;
+					CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+
+					MyWeapon->WeaponSettings = MyWeaponInfo;
+
+					MyWeapon->UpdateStateWeapon(MovementState);
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::InitWeapon - Weapon not found if table"));
+		}
+	}	
 }
 
 void ATDSCharacter::OnStaminaEmpty()

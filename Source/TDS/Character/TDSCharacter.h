@@ -98,7 +98,7 @@ protected:
 	UTextRenderComponent* StaminaTextComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
-	TSubclassOf<ATDS_WeaponDefault> InitWeaponClass = nullptr;
+	FName InitWeaponName;
 
 	UDecalComponent* CurrentCursor = nullptr;
 	ATDS_WeaponDefault* CurrentWeapon = nullptr;
@@ -137,7 +137,7 @@ private:
 	void ChangeMovementState(EMovementState InMovementState);	
 
 	UFUNCTION(BlueprintCallable)
-	void InitWeapon();
+	void InitWeapon(FName IDWeapon);
 
 	void OnStaminaEmpty();
 	void OnStaminaChanged(float Stamina);
