@@ -4,6 +4,8 @@
 #include "TSD_GameplayWidget.h"
 #include "Components/ProgressBar.h"
 #include "../Components/TDSStaminaComponent.h"
+#include "../Character/TDSCharacter.h"
+#include "../Weapons/TDS_WeaponDefault.h"
 
 float UTSD_GameplayWidget::GetStaminaPercent() const
 {
@@ -22,3 +24,18 @@ float UTSD_GameplayWidget::GetStaminaPercent() const
 	return StaminaComponent->GetStaminaPercent();
 }
 
+float UTSD_GameplayWidget::GetReloadPercent() const
+{
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return 0.0f;
+	}
+
+	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
+	if (!Weapon)
+	{
+		return 0.0f;
+	}
+	return Weapon->GetReloadPercent();
+}

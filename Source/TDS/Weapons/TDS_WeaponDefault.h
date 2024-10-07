@@ -37,6 +37,8 @@ public:
 
 	void InitReload();
 
+	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
+
 	FProjectileInfo GetProjectile();
 
 	ATDS_WeaponDefault();	

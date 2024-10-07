@@ -4,6 +4,8 @@
 #include "TDS_ProjectileDefault.h"
 #include "Components/ArrowComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
+
 ATDS_WeaponDefault::ATDS_WeaponDefault()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -47,13 +49,15 @@ void ATDS_WeaponDefault::FireTick(float DeltaTime)
 		if (FireTimer < 0.0f)
 		{
 			if (GetWeaponRound() > 0 && !WeaponReloading)
-			{
+			{				
 				Fire();
+				UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::FireTick - %d bullets lost"), GetWeaponRound());
 			}
 			else
 			{
 				if (!WeaponReloading)
 				{
+					UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::FireTick - %d bullets lost, RELOAD WEAPON"), GetWeaponRound());
 					InitReload();
 				}
 			}

@@ -366,6 +366,7 @@ void ATDSCharacter::InitWeapon(FName IDWeapon)
 					CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 
 					MyWeapon->WeaponSettings = MyWeaponInfo;
+					MyWeapon->WeaponInfo.Round = MyWeaponInfo.MaxRound;
 
 					MyWeapon->UpdateStateWeapon(MovementState);
 				}

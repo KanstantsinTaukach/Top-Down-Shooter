@@ -17,7 +17,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	float GetStaminaPercent() const;
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	float GetReloadPercent() const;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* StaminaBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* ReloadBar;
 };
