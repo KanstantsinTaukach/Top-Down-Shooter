@@ -18,7 +18,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
-#include "Components/TextRenderComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSCharacterLog, All, All);
 
@@ -56,8 +55,6 @@ ATDSCharacter::ATDSCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	StaminaComponent = CreateDefaultSubobject<UTDSStaminaComponent>("StaminaComponent");
-	StaminaTextComponent = CreateDefaultSubobject<UTextRenderComponent>("StaminaTextComponent");
-	StaminaTextComponent->SetupAttachment(GetRootComponent());	
 }
 
 void ATDSCharacter::BeginPlay()
@@ -72,7 +69,6 @@ void ATDSCharacter::BeginPlay()
 	}
 
 	check(StaminaComponent);
-	check(StaminaTextComponent);
 
 	OnStaminaChanged(StaminaComponent->GetStamina());
 	
@@ -229,27 +225,24 @@ void ATDSCharacter::MovementTick(float DeltaSeconds)
 				FVector Displacement = FVector(0);
 				switch (MovementState)
 				{
-				case EMovementState::Aim_State: Displacement = FVector(0.0f, 0.0f, 160.0f); break;
-				case EMovementState::Walk_State: Displacement = FVector(0.0f, 0.0f, 120.0f); break;
-				case EMovementState::Run_State: Displacement = FVector(0.0f, 0.0f, 120.0f); break;
+				case EMovementState::Aim_State: 
+					Displacement = FVector(0.0f, 0.0f, 160.0f); 
+					CurrentWeapon->ShouldReduceDispersion = true; 
+					break;
+				case EMovementState::Walk_State: 
+					Displacement = FVector(0.0f, 0.0f, 120.0f); 
+					CurrentWeapon->ShouldReduceDispersion = false; 
+					break;
+				case EMovementState::Run_State: 
+					Displacement = FVector(0.0f, 0.0f, 120.0f); 
+					CurrentWeapon->ShouldReduceDispersion = false; 
+					break;
 				case EMovementState::Sprint_State: break;
 				default: break;
 				}
 
 				CurrentWeapon->ShootEndLocation = ResultHit.Location + Displacement;
 			}	
-		}
-	}
-
-	if (CurrentWeapon)
-	{
-		if (FMath::IsNearlyZero(GetVelocity().Size(), 0.5f))
-		{
-			CurrentWeapon->ShouldReduceDispersion = true;
-		}
-		else
-		{
-			CurrentWeapon->ShouldReduceDispersion = false;
 		}
 	}
 }
@@ -413,7 +406,7 @@ void ATDSCharacter::OnStaminaEmpty()
 
 void ATDSCharacter::OnStaminaChanged(float Stamina)
 {
-	StaminaTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Stamina)));
+	
 }
 
 UDecalComponent* ATDSCharacter::GetCursorToWorld()

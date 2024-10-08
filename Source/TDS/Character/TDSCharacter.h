@@ -8,7 +8,6 @@
 #include "TDSCharacter.generated.h"
 
 class UTDSStaminaComponent;
-class UTextRenderComponent;
 class ATDS_WeaponDefault;
 
 UCLASS(Blueprintable)
@@ -93,9 +92,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSStaminaComponent* StaminaComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UTextRenderComponent* StaminaTextComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
 	FName InitWeaponName;

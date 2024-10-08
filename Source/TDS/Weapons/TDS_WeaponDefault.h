@@ -50,6 +50,8 @@ public:
 	void InitReload();
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
+
+	int32 GetNumberProjectileByShot() const;
 	
 	FProjectileInfo GetProjectile();
 
@@ -69,8 +71,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool ShowDebug = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool ByBarrel = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	float SizeVectorToChangeShootDirectionLogic = 100.0f;
 

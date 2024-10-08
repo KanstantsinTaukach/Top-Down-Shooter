@@ -4,6 +4,7 @@
 #include "TDS_ProjectileDefault.h"
 #include "DrawDebugHelpers.h"
 #include "Components/ArrowComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
 
@@ -159,6 +160,11 @@ void ATDS_WeaponDefault::Fire()
 	--WeaponInfo.Round;
 	ChangeDispersionByShot();
 
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundFireWeapon, ShootLocation->GetComponentLocation());
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeapon, ShootLocation->GetComponentTransform());
+
+	int32 NumberProjectile = GetNumberProjectileByShot();
+
 	if (ShootLocation)
 	{
 		FVector SpawnLocation = ShootLocation->GetComponentLocation();
@@ -166,32 +172,38 @@ void ATDS_WeaponDefault::Fire()
 		FProjectileInfo ProjectileInfo;
 		ProjectileInfo = GetProjectile();
 
-		FVector Direction = GetFireEndLocation() - SpawnLocation;
-		Direction.Normalize();
-
-		FMatrix MyMatrix(Direction, FVector(0, 0, 0), FVector(0, 0, 0), FVector::ZeroVector);
-		SpawnRotation = MyMatrix.Rotator();
-
-		if (ProjectileInfo.Projectile)
+		FVector EndLocation;
+		for (int8 i = 0; i < NumberProjectile; ++i)
 		{
-			//Projectile Init ballistic fire
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			SpawnParams.Owner = GetOwner();
-			SpawnParams.Instigator = GetInstigator();
+			EndLocation = GetFireEndLocation();
 
-			auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
-			if (MyProjectile)
+			FVector Direction = EndLocation - SpawnLocation;
+			Direction.Normalize();
+
+			FMatrix MyMatrix(Direction, FVector(0, 0, 0), FVector(0, 0, 0), FVector::ZeroVector);
+			SpawnRotation = MyMatrix.Rotator();
+
+			if (ProjectileInfo.Projectile)
 			{
-				//todo Init Projectle settings by id in table row(or keep in weapon table)
-				MyProjectile->InitialLifeSpan = 20.0f;
-				//Projectile->bulletProjectileMovement->InitialSpeed = 2500.0f;
+				//Projectile Init ballistic fire
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				SpawnParams.Owner = GetOwner();
+				SpawnParams.Instigator = GetInstigator();
+
+				auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
+				if (MyProjectile)
+				{
+					//todo Init Projectle settings by id in table row(or keep in weapon table)
+					MyProjectile->InitialLifeSpan = 20.0f;
+					//Projectile->bulletProjectileMovement->InitialSpeed = 2500.0f;
+				}
 			}
-		}
-		else
-		{
-			//ToDo Projectile null Init trace fire
-		}
+			else
+			{
+				//ToDo Projectile null Init trace fire
+			}
+		}		
 	}
 }
 
@@ -258,15 +270,24 @@ FVector ATDS_WeaponDefault::GetFireEndLocation() const
 	bool bShootDirection = false;
 	FVector EndLocation = FVector(0.0f);
 
-	if (ByBarrel)
+	FVector tmpV = (ShootLocation->GetComponentLocation() - ShootEndLocation);
+	if (tmpV.Size() > SizeVectorToChangeShootDirectionLogic)
 	{
 		EndLocation = ShootLocation->GetComponentLocation() + ApplyDispersionToShoot((ShootLocation->GetComponentLocation() - ShootEndLocation).GetSafeNormal()) * -20000.0f;
-		DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), -(ShootLocation->GetComponentLocation() - ShootEndLocation), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+		
+		if (ShowDebug)
+		{
+			DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), -(ShootLocation->GetComponentLocation() - ShootEndLocation), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+		}
 	}
 	else
 	{
 		EndLocation = ShootLocation->GetComponentLocation() + ApplyDispersionToShoot(ShootLocation->GetForwardVector()) * 20000.0f;
-		DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), ShootLocation->GetForwardVector(), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+
+		if (ShowDebug)
+		{
+			DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), ShootLocation->GetForwardVector(), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+		}
 	}
 
 	if (ShowDebug)
@@ -278,7 +299,7 @@ FVector ATDS_WeaponDefault::GetFireEndLocation() const
 		//direction projectile current fly
 		DrawDebugLine(GetWorld(), ShootLocation->GetComponentLocation(), EndLocation, FColor::Black, false, 10.0f, (uint8)'\000', 0.5f);
 
-		DrawDebugSphere(GetWorld(), ShootLocation->GetComponentLocation() + ShootLocation->GetForwardVector()*SizeVectorToChangeShootDirectionLogic, 10.0f, 8, FColor::Red, false, 10.0f);
+		//DrawDebugSphere(GetWorld(), ShootLocation->GetComponentLocation() + ShootLocation->GetForwardVector()*SizeVectorToChangeShootDirectionLogic, 10.0f, 8, FColor::Red, false, 10.0f);
 	}
 
 	return EndLocation;
@@ -293,4 +314,9 @@ float ATDS_WeaponDefault::GetCurrentDispersion() const
 {
 	float Result = CurrentDispersion;
 	return Result;
+}
+
+int32 ATDS_WeaponDefault::GetNumberProjectileByShot() const
+{
+	return WeaponSettings.NumberProjectilesByShot;
 }
