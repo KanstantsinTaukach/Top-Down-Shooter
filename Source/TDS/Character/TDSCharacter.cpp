@@ -223,6 +223,33 @@ void ATDSCharacter::MovementTick(float DeltaSeconds)
 
 			float FindRatatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
 			SetActorRotation(FQuat(FRotator(0.0f, FindRatatorResultYaw, 0.0f)));
+
+			if (CurrentWeapon)
+			{
+				FVector Displacement = FVector(0);
+				switch (MovementState)
+				{
+				case EMovementState::Aim_State: Displacement = FVector(0.0f, 0.0f, 160.0f); break;
+				case EMovementState::Walk_State: Displacement = FVector(0.0f, 0.0f, 120.0f); break;
+				case EMovementState::Run_State: Displacement = FVector(0.0f, 0.0f, 120.0f); break;
+				case EMovementState::Sprint_State: break;
+				default: break;
+				}
+
+				CurrentWeapon->ShootEndLocation = ResultHit.Location + Displacement;
+			}	
+		}
+	}
+
+	if (CurrentWeapon)
+	{
+		if (FMath::IsNearlyZero(GetVelocity().Size(), 0.5f))
+		{
+			CurrentWeapon->ShouldReduceDispersion = true;
+		}
+		else
+		{
+			CurrentWeapon->ShouldReduceDispersion = false;
 		}
 	}
 }

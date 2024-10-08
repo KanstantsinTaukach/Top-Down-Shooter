@@ -25,6 +25,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
 	FAdditionalWeaponInfo WeaponInfo;
 
+	//flags
+	bool BlockFire = false;
+	//dispersion
+	bool ShouldReduceDispersion = false;
+	float CurrentDispersion = 0.0f;
+	float CurrentDispersionMax = 1.0f;
+	float CurrentDispersionMin = 0.1f;
+	float CurrentDispersionRecoil = 1.0f;
+	float CurrentDispersionReduction = 1.0f;
+
+	FVector ShootEndLocation = FVector(0);
+
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponStateFire(bool bIsFire);
 
@@ -38,7 +50,7 @@ public:
 	void InitReload();
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
-
+	
 	FProjectileInfo GetProjectile();
 
 	ATDS_WeaponDefault();	
@@ -54,9 +66,17 @@ protected:
 	UStaticMeshComponent* StaticMeshWeapon = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UArrowComponent* ShootLocation = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool ShowDebug = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool ByBarrel = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	float SizeVectorToChangeShootDirectionLogic = 100.0f;
 
 	void FireTick(float DeltaTime);
 	void ReloadTick(float DeltaTime);
+	void DispersionTick(float DeltaTime);
 
 	void WeaponInit();
 
@@ -68,7 +88,11 @@ private:
 
 	bool CheckWeaponCanFire();
 
-	void ChangeDispersion();
+	void ChangeDispersionByShot();
 
 	void FinishReload();
+
+	FVector GetFireEndLocation() const;
+	FVector ApplyDispersionToShoot(FVector DirectionShoot) const;
+	float GetCurrentDispersion() const;
 };

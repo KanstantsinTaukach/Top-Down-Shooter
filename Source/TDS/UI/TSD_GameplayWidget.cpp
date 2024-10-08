@@ -20,7 +20,7 @@ float UTSD_GameplayWidget::GetStaminaPercent() const
 	if (!StaminaComponent)
 	{
 		return 0.0f;
-	}
+	}	
 	return StaminaComponent->GetStaminaPercent();
 }
 
@@ -37,5 +37,6 @@ float UTSD_GameplayWidget::GetReloadPercent() const
 	{
 		return 0.0f;
 	}
+
 	return Weapon->GetReloadPercent();
 }

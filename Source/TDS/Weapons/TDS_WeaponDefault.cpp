@@ -2,6 +2,7 @@
 
 #include "TDS_WeaponDefault.h"
 #include "TDS_ProjectileDefault.h"
+#include "DrawDebugHelpers.h"
 #include "Components/ArrowComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
@@ -40,6 +41,7 @@ void ATDS_WeaponDefault::Tick(float DeltaTime)
 
 	FireTick(DeltaTime);
 	ReloadTick(DeltaTime);
+	DispersionTick(DeltaTime);
 }
 
 void ATDS_WeaponDefault::FireTick(float DeltaTime)
@@ -84,6 +86,37 @@ void ATDS_WeaponDefault::ReloadTick(float DeltaTime)
 	}
 }
 
+void ATDS_WeaponDefault::DispersionTick(float DeltaTime)
+{
+	if (!WeaponReloading)
+	{
+		if (!WeaponFiring)
+		{
+			if (ShouldReduceDispersion)
+			{
+				CurrentDispersion = CurrentDispersion - CurrentDispersionReduction;
+			}
+			else
+			{
+				CurrentDispersion = CurrentDispersion + CurrentDispersionReduction;
+			}
+		}
+
+		if (CurrentDispersion < CurrentDispersionMin)
+		{
+			CurrentDispersion = CurrentDispersionMin;
+		}
+		else if (CurrentDispersion > CurrentDispersionMax)
+		{
+			CurrentDispersion = CurrentDispersionMax;
+		}
+	}
+	if (ShowDebug)
+	{
+		UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::DispersionTick - Dispersion: MAX = %f, MIN = %f, Current = %f"), CurrentDispersionMax, CurrentDispersionMin, CurrentDispersion);
+	}
+}
+
 void ATDS_WeaponDefault::WeaponInit()
 {
 	if (SkeletalMeshWeapon && !SkeletalMeshWeapon->SkeletalMesh)
@@ -106,12 +139,13 @@ void ATDS_WeaponDefault::SetWeaponStateFire(bool bIsFire)
 	else
 	{
 		WeaponFiring = false;
+		FireTimer = 0.01f;
 	}
 }
 
 bool ATDS_WeaponDefault::CheckWeaponCanFire()
 {
-	return true;
+	return !BlockFire;
 }
 
 FProjectileInfo ATDS_WeaponDefault::GetProjectile()
@@ -123,6 +157,7 @@ void ATDS_WeaponDefault::Fire()
 {
 	FireTimer = WeaponSettings.RateOfFire;
 	--WeaponInfo.Round;
+	ChangeDispersionByShot();
 
 	if (ShootLocation)
 	{
@@ -131,8 +166,15 @@ void ATDS_WeaponDefault::Fire()
 		FProjectileInfo ProjectileInfo;
 		ProjectileInfo = GetProjectile();
 
+		FVector Direction = GetFireEndLocation() - SpawnLocation;
+		Direction.Normalize();
+
+		FMatrix MyMatrix(Direction, FVector(0, 0, 0), FVector(0, 0, 0), FVector::ZeroVector);
+		SpawnRotation = MyMatrix.Rotator();
+
 		if (ProjectileInfo.Projectile)
 		{
+			//Projectile Init ballistic fire
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			SpawnParams.Owner = GetOwner();
@@ -156,12 +198,39 @@ void ATDS_WeaponDefault::Fire()
 void ATDS_WeaponDefault::UpdateStateWeapon(EMovementState InMovementState)
 {
 	// todo Dispersion
-	ChangeDispersion();
+	BlockFire = false;
+	switch (InMovementState)
+	{
+	case EMovementState::Aim_State:
+		CurrentDispersionMax = WeaponSettings.DispersionWeapon.Aim_StateDispersionAimMax;
+		CurrentDispersionMin = WeaponSettings.DispersionWeapon.Aim_StateDispersionAimMin;
+		CurrentDispersionRecoil = WeaponSettings.DispersionWeapon.Aim_StateDispersionAimRecoil;
+		CurrentDispersionReduction = WeaponSettings.DispersionWeapon.Aim_StateDispersionReduction;
+		break;
+	case EMovementState::Walk_State:
+		CurrentDispersionMax = WeaponSettings.DispersionWeapon.Walk_StateDispersionAimMax;
+		CurrentDispersionMin = WeaponSettings.DispersionWeapon.Walk_StateDispersionAimMin;
+		CurrentDispersionRecoil = WeaponSettings.DispersionWeapon.Walk_StateDispersionAimRecoil;
+		CurrentDispersionReduction = WeaponSettings.DispersionWeapon.Walk_StateDispersionReduction;
+		break;
+	case EMovementState::Run_State:
+		CurrentDispersionMax = WeaponSettings.DispersionWeapon.Run_StateDispersionAimMax;
+		CurrentDispersionMin = WeaponSettings.DispersionWeapon.Run_StateDispersionAimMin;
+		CurrentDispersionRecoil = WeaponSettings.DispersionWeapon.Run_StateDispersionAimRecoil;
+		CurrentDispersionReduction = WeaponSettings.DispersionWeapon.Run_StateDispersionReduction;
+		break;
+	case EMovementState::Sprint_State:
+		BlockFire = true;
+		SetWeaponStateFire(false);
+		break;
+	default:
+		break;
+	}
 }
 
-void ATDS_WeaponDefault::ChangeDispersion()
+void ATDS_WeaponDefault::ChangeDispersionByShot()
 {
-
+	CurrentDispersion += CurrentDispersionRecoil;
 }
 
 int32 ATDS_WeaponDefault::GetWeaponRound()
@@ -182,4 +251,46 @@ void ATDS_WeaponDefault::FinishReload()
 {
 	WeaponReloading = false;
 	WeaponInfo.Round = WeaponSettings.MaxRound;
+}
+
+FVector ATDS_WeaponDefault::GetFireEndLocation() const
+{
+	bool bShootDirection = false;
+	FVector EndLocation = FVector(0.0f);
+
+	if (ByBarrel)
+	{
+		EndLocation = ShootLocation->GetComponentLocation() + ApplyDispersionToShoot((ShootLocation->GetComponentLocation() - ShootEndLocation).GetSafeNormal()) * -20000.0f;
+		DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), -(ShootLocation->GetComponentLocation() - ShootEndLocation), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+	}
+	else
+	{
+		EndLocation = ShootLocation->GetComponentLocation() + ApplyDispersionToShoot(ShootLocation->GetForwardVector()) * 20000.0f;
+		DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), ShootLocation->GetForwardVector(), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+	}
+
+	if (ShowDebug)
+	{
+		//direction weapon look
+		DrawDebugLine(GetWorld(), ShootLocation->GetComponentLocation(), ShootLocation->GetComponentLocation() + ShootLocation->GetForwardVector() * 500.0f, FColor::Cyan, false, 10.0f, (uint8)'\000', 0.5f);
+		//direction projectile must fly
+		DrawDebugLine(GetWorld(), ShootLocation->GetComponentLocation(), ShootEndLocation, FColor::Red, false, 10.0f, (uint8)'\000', 0.5f);
+		//direction projectile current fly
+		DrawDebugLine(GetWorld(), ShootLocation->GetComponentLocation(), EndLocation, FColor::Black, false, 10.0f, (uint8)'\000', 0.5f);
+
+		DrawDebugSphere(GetWorld(), ShootLocation->GetComponentLocation() + ShootLocation->GetForwardVector()*SizeVectorToChangeShootDirectionLogic, 10.0f, 8, FColor::Red, false, 10.0f);
+	}
+
+	return EndLocation;
+}
+
+FVector ATDS_WeaponDefault::ApplyDispersionToShoot(FVector DirectionShoot) const
+{
+	return FMath::VRandCone(DirectionShoot, GetCurrentDispersion() * PI / 180.0f);
+}
+
+float ATDS_WeaponDefault::GetCurrentDispersion() const
+{
+	float Result = CurrentDispersion;
+	return Result;
 }

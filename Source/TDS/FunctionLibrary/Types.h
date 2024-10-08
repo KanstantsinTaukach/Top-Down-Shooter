@@ -64,16 +64,31 @@ struct FWeaponDispersion
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
-	float DispersionAimStart = 0.5f;
+	float Aim_StateDispersionAimMax = 2.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Aim_StateDispersionAimMin = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Aim_StateDispersionAimRecoil = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Aim_StateDispersionReduction = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
-	float DispersionAimMax = 1.0f;
+	float Walk_StateDispersionAimMax = 5.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Walk_StateDispersionAimMin = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Walk_StateDispersionAimRecoil = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Walk_StateDispersionReduction = 0.2f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
-	float DispersionAimMin = 0.1f;
-
+	float Run_StateDispersionAimMax = 10.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
-	float DispersionAimShootCoef = 1.0f;
+	float Run_StateDispersionAimMin = 4.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Run_StateDispersionAimRecoil = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	float Run_StateDispersionReduction = 0.1f;
 };
 
 USTRUCT(BlueprintType)
