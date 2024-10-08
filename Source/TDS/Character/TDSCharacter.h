@@ -59,6 +59,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AttackCharEvent(bool bIsFiring);
 
+	UFUNCTION()
+	void WeaponReloadStart(UAnimMontage* AnimMontage);
+	UFUNCTION()
+	void WeaponReloadEnd();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void WeaponReloadStart_BP(UAnimMontage* AnimMontage);
+	UFUNCTION(BlueprintNativeEvent)
+	void WeaponReloadEnd_BP();
+
 protected:
 	float AxisX = 0.0f;
 	float AxisY = 0.0f;

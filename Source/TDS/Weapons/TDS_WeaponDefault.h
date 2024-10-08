@@ -9,12 +9,20 @@
 
 class UArrowComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadStartSignature, UAnimMontage*, AnimMontage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadEndSignature);
+
 UCLASS()
 class TDS_API ATDS_WeaponDefault : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
+	ATDS_WeaponDefault();
+
+	FOnWeaponReloadStartSignature OnWeaponReloadStart;
+	FOnWeaponReloadEndSignature OnWeaponReloadEnd;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
 	bool WeaponFiring = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
@@ -54,9 +62,7 @@ public:
 	int32 GetNumberProjectileByShot() const;
 	
 	FProjectileInfo GetProjectile();
-
-	ATDS_WeaponDefault();	
-
+	
 	virtual void Tick(float DeltaTime) override;
 
 protected:

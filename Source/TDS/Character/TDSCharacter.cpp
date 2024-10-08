@@ -387,8 +387,11 @@ void ATDSCharacter::InitWeapon(FName IDWeapon)
 
 					MyWeapon->WeaponSettings = MyWeaponInfo;
 					MyWeapon->WeaponInfo.Round = MyWeaponInfo.MaxRound;
-
+										
 					MyWeapon->UpdateStateWeapon(MovementState);
+
+					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
+					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
 				}
 			}
 		}
@@ -425,4 +428,24 @@ void ATDSCharacter::TryReloadWeapon()
 	{
 		CurrentWeapon->InitReload();
 	}
+}
+
+void ATDSCharacter::WeaponReloadStart(UAnimMontage* AnimMontage)
+{
+	WeaponReloadStart_BP(AnimMontage);
+}
+
+void ATDSCharacter::WeaponReloadEnd()
+{
+	WeaponReloadEnd_BP();
+}
+
+void ATDSCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* AnimMontage)
+{
+	//in BP
+}
+
+void ATDSCharacter::WeaponReloadEnd_BP_Implementation()
+{
+	//in BP
 }

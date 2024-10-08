@@ -256,13 +256,18 @@ void ATDS_WeaponDefault::InitReload()
 
 	ReloadTimer = WeaponSettings.ReloadTime;
 
-	//todo add AnimReload
+	if (WeaponSettings.AnimCharacterReload)
+	{
+		OnWeaponReloadStart.Broadcast(WeaponSettings.AnimCharacterReload);
+	}	
 }
 
 void ATDS_WeaponDefault::FinishReload()
 {
 	WeaponReloading = false;
 	WeaponInfo.Round = WeaponSettings.MaxRound;
+
+	OnWeaponReloadEnd.Broadcast();
 }
 
 FVector ATDS_WeaponDefault::GetFireEndLocation() const
