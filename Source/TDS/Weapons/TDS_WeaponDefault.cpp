@@ -194,9 +194,7 @@ void ATDS_WeaponDefault::Fire()
 				auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
 				if (MyProjectile)
 				{
-					//todo Init Projectle settings by id in table row(or keep in weapon table)
-					MyProjectile->InitialLifeSpan = 20.0f;
-					//Projectile->bulletProjectileMovement->InitialSpeed = 2500.0f;
+					MyProjectile->InitProjectile(WeaponSettings.ProjectileSettings);
 				}
 			}
 			else
@@ -255,6 +253,7 @@ void ATDS_WeaponDefault::InitReload()
 	WeaponReloading = true;
 
 	ReloadTimer = WeaponSettings.ReloadTime;
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
 
 	if (WeaponSettings.AnimCharacterReload)
 	{

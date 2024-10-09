@@ -19,7 +19,7 @@ class TDS_API ATDS_ProjectileDefault : public AActor
 public:	
 	ATDS_ProjectileDefault();
 
-	virtual void Tick(float DeltaTime) override;
+	void InitProjectile(FProjectileInfo InitParam);
 
 	UFUNCTION()
 	void BulletCollisionSphereHit(class UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

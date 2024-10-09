@@ -50,7 +50,14 @@ struct FProjectileInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
 	float ProjectileInitSpeed = 2000.0f;
 
-	//Hit FX Actor?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	TMap<TEnumAsByte<EPhysicalSurface>, UMaterialInterface*> HitDecals;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	USoundBase* HitSound = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	TMap<TEnumAsByte<EPhysicalSurface>, UParticleSystem*> HitFXs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
 	bool bIsLikeBomb = false;
