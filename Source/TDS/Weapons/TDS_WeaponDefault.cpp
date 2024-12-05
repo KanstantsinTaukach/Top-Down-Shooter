@@ -25,7 +25,7 @@ ATDS_WeaponDefault::ATDS_WeaponDefault()
 	StaticMeshWeapon->SetCollisionProfileName("NoCollision");
 	StaticMeshWeapon->SetupAttachment(RootComponent);
 
-	ShootLocation = CreateDefaultSubobject<UArrowComponent>("Shoot Location");
+	ShootLocation = CreateDefaultSubobject<UArrowComponent>("ShootLocation");
 	ShootLocation->SetupAttachment(GetRootComponent());
 }
 
@@ -163,6 +163,15 @@ void ATDS_WeaponDefault::Fire()
 	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundFireWeapon, ShootLocation->GetComponentLocation());
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeapon, ShootLocation->GetComponentTransform());
 
+	if (WeaponSettings.EffectFireWeaponBack)
+	{
+		FVector ForwardVec = ShootLocation->GetForwardVector();
+		FVector ReservedVec = -ForwardVec;
+		FRotator ReversedSpawnRotation = ReservedVec.Rotation();
+
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeaponBack, ShootLocation->GetComponentLocation() - ForwardVec * 120.f, ReversedSpawnRotation);
+	}	
+
 	int32 NumberProjectile = GetNumberProjectileByShot();
 
 	if (ShootLocation)
@@ -186,6 +195,7 @@ void ATDS_WeaponDefault::Fire()
 			if (ProjectileInfo.Projectile)
 			{
 				//Projectile Init ballistic fire
+
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				SpawnParams.Owner = GetOwner();
@@ -195,11 +205,15 @@ void ATDS_WeaponDefault::Fire()
 				if (MyProjectile)
 				{
 					MyProjectile->InitProjectile(WeaponSettings.ProjectileSettings);
+					UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::Fire - Projectile #%d"), i);
+					UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::initialSpeed of projectile is: %f"), WeaponSettings.ProjectileSettings.ProjectileInitSpeed);
 				}
 			}
 			else
 			{
 				//ToDo Projectile null Init trace fire
+
+				//GetWorld()->LineTraceSingleByChannel();
 			}
 		}		
 	}
@@ -255,9 +269,9 @@ void ATDS_WeaponDefault::InitReload()
 	ReloadTimer = WeaponSettings.ReloadTime;
 	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
 
-	if (WeaponSettings.AnimCharacterReload)
+	if (WeaponSettings.AnimWeaponInfo.AnimCharReload)
 	{
-		OnWeaponReloadStart.Broadcast(WeaponSettings.AnimCharacterReload);
+		OnWeaponReloadStart.Broadcast(WeaponSettings.AnimWeaponInfo.AnimCharReload);
 	}	
 }
 

@@ -78,7 +78,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool ShowDebug = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	float SizeVectorToChangeShootDirectionLogic = 100.0f;
+	float SizeVectorToChangeShootDirectionLogic = 250.0f;
 
 	void FireTick(float DeltaTime);
 	void ReloadTick(float DeltaTime);
