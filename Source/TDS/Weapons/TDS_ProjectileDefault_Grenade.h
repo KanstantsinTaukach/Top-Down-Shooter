@@ -12,6 +12,9 @@ class TDS_API ATDS_ProjectileDefault_Grenade : public ATDS_ProjectileDefault
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileType")
+	bool HasDelayBeforeExplosion = false;
+
 	virtual void Tick(float DeltaTime) override;
 
 	void TimerExplode(float DeltaTime);

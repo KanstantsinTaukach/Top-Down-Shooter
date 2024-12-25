@@ -9,6 +9,7 @@
 
 class UArrowComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponFireSignature, UAnimMontage*, AnimMontage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadStartSignature, UAnimMontage*, AnimMontage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadEndSignature);
 
@@ -22,28 +23,22 @@ public:
 
 	FOnWeaponReloadStartSignature OnWeaponReloadStart;
 	FOnWeaponReloadEndSignature OnWeaponReloadEnd;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
-	bool WeaponFiring = false;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FireLogic")
-	bool WeaponReloading = false;
+	FOnWeaponFireSignature OnWeaponFire;
 
 	UPROPERTY()
 	FWeaponInfo WeaponSettings;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
 	FAdditionalWeaponInfo WeaponInfo;
+	
+	FVector ShootEndLocation = FVector(0);
 
-	//flags
-	bool BlockFire = false;
-	//dispersion
+	// Dispersion
 	bool ShouldReduceDispersion = false;
 	float CurrentDispersion = 0.0f;
 	float CurrentDispersionMax = 1.0f;
 	float CurrentDispersionMin = 0.1f;
 	float CurrentDispersionRecoil = 1.0f;
 	float CurrentDispersionReduction = 1.0f;
-
-	FVector ShootEndLocation = FVector(0);
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponStateFire(bool bIsFire);
@@ -80,17 +75,39 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	float SizeVectorToChangeShootDirectionLogic = 250.0f;
 
+	FTimerHandle FXTimerHandle;
+
+	UFUNCTION()
+	void InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDir, float LifeTimeMesh, float ImpulseRandDispersion, float PowerImpulse, float CustomMass);
+
 	void FireTick(float DeltaTime);
 	void ReloadTick(float DeltaTime);
 	void DispersionTick(float DeltaTime);
+	void ClipDropTick(float DeltaTime);
+	void ShellDropTick(float DeltaTime);
 
 	void WeaponInit();
 
 	virtual void BeginPlay() override;
 
 private:
-	float FireTimer = 0.0f; //Timers flags
+	// Timers
+	float FireTimer = 0.0f;
 	float ReloadTimer = 0.0f;
+	
+	// Flags
+	bool WeaponFiring = false;
+	bool WeaponReloading = false;
+	bool WeaponAiming = false;
+	bool BlockFire = false;
+
+	// Timer Drop Magazine on reload
+	bool DropClipFlag = false;
+	float DropClipTimer = -1.0f;
+
+	// Shell flag
+	bool DropShellFlag = false;
+	float DropShellTimer = -1.0f;
 
 	bool CheckWeaponCanFire();
 

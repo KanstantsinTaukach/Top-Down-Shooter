@@ -100,7 +100,6 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ATDSCharacter::InputAxisX);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ATDSCharacter::InputAxisY);
@@ -392,6 +391,7 @@ void ATDSCharacter::InitWeapon(FName IDWeapon)
 
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
 					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
+					MyWeapon->OnWeaponFire.AddDynamic(this, &ATDSCharacter::WeaponFire);
 				}
 			}
 		}
@@ -440,12 +440,22 @@ void ATDSCharacter::WeaponReloadEnd()
 	WeaponReloadEnd_BP();
 }
 
+void ATDSCharacter::WeaponFire(UAnimMontage* AnimMontage)
+{
+	WeaponFire_BP(AnimMontage);
+}
+
 void ATDSCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* AnimMontage)
 {
 	//in BP
 }
 
 void ATDSCharacter::WeaponReloadEnd_BP_Implementation()
+{
+	//in BP
+}
+
+void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 {
 	//in BP
 }

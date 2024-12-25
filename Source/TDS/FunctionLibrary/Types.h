@@ -40,13 +40,20 @@ struct FProjectileInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
 	TSubclassOf<class ATDS_ProjectileDefault> Projectile = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	UStaticMesh* ProjectileStaticMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	FTransform ProjectileStaticMeshOffset = FTransform();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	UParticleSystem* ProjectileTrailFX = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
+	FTransform ProjectileTrailFXOffset = FTransform();
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
 	float ProjectileDamage = 20.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
 	float ProjectileLifeTime = 10.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings")
 	float ProjectileInitSpeed = 2500.0f;
 
@@ -55,27 +62,25 @@ struct FProjectileInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "!ExplosiveProjectile"))
 	TMap<TEnumAsByte<EPhysicalSurface>, UMaterialInterface*> HitDecals;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "!ExplosiveProjectile"))
 	USoundBase* HitSound = nullptr;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "!ExplosiveProjectile"))
 	TMap<TEnumAsByte<EPhysicalSurface>, UParticleSystem*> HitFXs;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	UMaterialInterface* ExplodeDecal;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	UParticleSystem* ExplodeFX = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	USoundBase* ExplodeSound = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	float ProjectileMaxRadiusDamage = 200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	float ProjectileMinRadiusDamage = 50.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	float ExplodeMaxDamage = 50.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	float ExplodeFalloffCoef = 1.0f;
 };
 
 USTRUCT(BlueprintType)

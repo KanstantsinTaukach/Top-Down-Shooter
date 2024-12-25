@@ -63,11 +63,15 @@ public:
 	void WeaponReloadStart(UAnimMontage* AnimMontage);
 	UFUNCTION()
 	void WeaponReloadEnd();
+	UFUNCTION()
+	void WeaponFire(UAnimMontage* AnimMontage);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponReloadStart_BP(UAnimMontage* AnimMontage);
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponReloadEnd_BP();
+	UFUNCTION(BlueprintNativeEvent)
+	void WeaponFire_BP(UAnimMontage* AnimMontage);
 
 protected:
 	float AxisX = 0.0f;
@@ -91,10 +95,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera", meta = (EditCondition = "DoSmoothScrolling"))
 	float SmoothCameraStep = 1.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float CameraHeightMin = 700.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float CameraHeightMax = 1200.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "10", ClampMax = "100"))

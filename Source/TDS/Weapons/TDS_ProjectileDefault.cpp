@@ -50,12 +50,37 @@ void  ATDS_ProjectileDefault::InitProjectile(FProjectileInfo InitParam)
 	BulletProjectileMovement->MaxSpeed = InitParam.ProjectileInitSpeed;
 	this->SetLifeSpan(InitParam.ProjectileLifeTime);
 
+	if (InitParam.ProjectileStaticMesh)
+	{
+		BulletMesh->SetStaticMesh(InitParam.ProjectileStaticMesh);
+		BulletMesh->SetRelativeTransform(InitParam.ProjectileStaticMeshOffset);
+	}
+	else
+	{
+		BulletMesh->DestroyComponent();
+	}
+
+	if (InitParam.ProjectileTrailFX)
+	{
+		BulletFX->SetTemplate(InitParam.ProjectileTrailFX);
+		BulletFX->SetRelativeTransform(InitParam.ProjectileTrailFXOffset);
+	}
+	else
+	{
+		BulletFX->DestroyComponent();
+	}
+
 	ProjectileSettings = InitParam;
 }
 
 void ATDS_ProjectileDefault::BeginPlay()
 {
 	Super::BeginPlay();
+
+	check(BulletCollisionSphere);
+	check(BulletMesh);
+	check(BulletFX);
+	check(BulletProjectileMovement);
 
 	BulletCollisionSphere->OnComponentHit.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereHit);
 	BulletCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereBeginOverlap);
@@ -91,11 +116,6 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 	UGameplayStatics::ApplyDamage(OtherActor, ProjectileSettings.ProjectileDamage, GetInstigatorController(), this, NULL); 
 	
 	ImpactProjectile();
-
-	//UGameplayStatics::ApplyRadialDamageWithFalloff()
-	//Apply damage cast to if char like bp? //OnAnyTakeDmage delegate
-	//UGameplayStatics::ApplyDamage(OtherActor, ProjectileSetting.ProjectileDamage, GetOwner()->GetInstigatorController(), GetOwner(), NULL);
-	//or custom damage by health component
 }
 
 void ATDS_ProjectileDefault::BulletCollisionSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
