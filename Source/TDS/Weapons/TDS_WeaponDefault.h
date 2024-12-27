@@ -75,8 +75,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	float SizeVectorToChangeShootDirectionLogic = 250.0f;
 
-	FTimerHandle FXTimerHandle;
-
 	UFUNCTION()
 	void InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDir, float LifeTimeMesh, float ImpulseRandDispersion, float PowerImpulse, float CustomMass);
 
@@ -94,6 +92,8 @@ private:
 	// Timers
 	float FireTimer = 0.0f;
 	float ReloadTimer = 0.0f;
+
+	FTimerHandle FXTimerHandle;
 	
 	// Flags
 	bool WeaponFiring = false;
@@ -118,4 +118,11 @@ private:
 	FVector GetFireEndLocation() const;
 	FVector ApplyDispersionToShoot(FVector DirectionShoot) const;
 	float GetCurrentDispersion() const;
+
+	void SpawnMuzzleEffects() const;
+	void SpawnTrailEffect();
+	void SpawnImpactEffects(const FHitResult& Hit);
+
+	void HandleProjectileHit(FProjectileInfo ProjectileInfo);
+	void HandleHitScan();
 };

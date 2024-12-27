@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/StaticMeshActor.h"
+#include "../FunctionLibrary/AnimUtils.h"
+#include "../FunctionLibrary/TDSUtils.h"
 #include "Particles/ParticleSystemComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
@@ -102,48 +104,32 @@ void ATDS_WeaponDefault::ReloadTick(float DeltaTime)
 
 void ATDS_WeaponDefault::InitReload()
 {
+	if (!GetWorld())
+	{
+		return;
+	}
+
 	if (!WeaponReloading)
 	{
 		WeaponReloading = true;
 
 		ReloadTimer = WeaponSettings.ReloadTime;
 
-		UAnimMontage* AnimToPlay = nullptr;
-		if (WeaponAiming)
-		{
-			AnimToPlay = WeaponSettings.AnimWeaponInfo.AnimCharReloadAim;
-		}
-		else
-		{
-			AnimToPlay = WeaponSettings.AnimWeaponInfo.AnimCharReload;
-		}
-
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
 
-		OnWeaponReloadStart.Broadcast(AnimToPlay);
+		auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharReloadAim, WeaponSettings.AnimWeaponInfo.AnimCharReload, WeaponAiming);
+		OnWeaponReloadStart.Broadcast(AnimCharacterToPlay);
 
-		UAnimMontage* AnimWeaponToPlay = nullptr;
-		if (WeaponAiming)
-		{
-			AnimWeaponToPlay = WeaponSettings.AnimWeaponInfo.AnimWeaponReloadAim;
-		}
-		else
-		{
-			AnimWeaponToPlay = WeaponSettings.AnimWeaponInfo.AnimWeaponReload;
-		}
-
-		if (WeaponSettings.AnimWeaponInfo.AnimWeaponReload && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
+		auto AnimWeaponToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimWeaponReloadAim, WeaponSettings.AnimWeaponInfo.AnimWeaponReload, WeaponAiming);
+		if (AnimWeaponToPlay && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
 		{
 			SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(AnimWeaponToPlay);
 		}
 
 		if (WeaponSettings.ClipDropMesh.DropMesh)
 		{
-			if (WeaponSettings.ClipDropMesh.DropMesh)
-			{
-				DropClipFlag = true;
-				DropClipTimer = WeaponSettings.ClipDropMesh.DropMeshTime;
-			}
+			DropClipFlag = true;
+			DropClipTimer = WeaponSettings.ClipDropMesh.DropMeshTime;
 		}
 	}
 }
@@ -155,7 +141,6 @@ void ATDS_WeaponDefault::FinishReload()
 
 	OnWeaponReloadEnd.Broadcast();
 }
-
 
 void ATDS_WeaponDefault::DispersionTick(float DeltaTime)
 {
@@ -192,7 +177,7 @@ void ATDS_WeaponDefault::ClipDropTick(float DeltaTime)
 {
 	if (DropClipFlag)
 	{
-		if (DropClipTimer < 0.0f)
+		if (DropClipTimer <= 0.0f)
 		{
 			DropClipFlag = false;
 			InitDropMesh(WeaponSettings.ClipDropMesh.DropMesh, //
@@ -214,7 +199,7 @@ void ATDS_WeaponDefault::ShellDropTick(float DeltaTime)
 {
 	if (DropShellFlag)
 	{
-		if (DropShellTimer < 0.0f)
+		if (DropShellTimer <= 0.0f)
 		{
 			DropShellFlag = false;
 			InitDropMesh(WeaponSettings.ShellBullets.DropMesh, //
@@ -272,25 +257,14 @@ FProjectileInfo ATDS_WeaponDefault::GetProjectile()
 
 void ATDS_WeaponDefault::Fire()
 {
-	if (!GetWorld())
+	if (!GetWorld() || !ShootLocation)
 	{
 		return;
 	}
 
-	UAnimMontage* AnimToPlay = nullptr;
-	if (WeaponAiming)
-	{
-		AnimToPlay = WeaponSettings.AnimWeaponInfo.AnimCharFireAim;
-	}
-	else
-	{
-		AnimToPlay = WeaponSettings.AnimWeaponInfo.AnimCharFire;
-	}
-
-	if (WeaponSettings.AnimWeaponInfo.AnimWeaponFire && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
-	{
-		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSettings.AnimWeaponInfo.AnimWeaponFire);
-	}
+	FireTimer = WeaponSettings.RateOfFire;
+	--WeaponInfo.Round;
+	ChangeDispersionByShot();
 
 	if (WeaponSettings.ShellBullets.DropMesh)
 	{
@@ -311,142 +285,31 @@ void ATDS_WeaponDefault::Fire()
 		}
 	}
 
-	OnWeaponFire.Broadcast(AnimToPlay);
+	auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharFireAim, WeaponSettings.AnimWeaponInfo.AnimCharFire, WeaponAiming);
+	OnWeaponFire.Broadcast(AnimCharacterToPlay);
 
-	FireTimer = WeaponSettings.RateOfFire;
-	--WeaponInfo.Round;
-	ChangeDispersionByShot();
-
-	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundFireWeapon, ShootLocation->GetComponentLocation());
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeapon, ShootLocation->GetComponentTransform());
-
-	if (WeaponSettings.EffectFireWeaponBack)
+	if (WeaponSettings.AnimWeaponInfo.AnimWeaponFire && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
 	{
-		FVector ForwardVec = ShootLocation->GetForwardVector();
-		FVector ReservedVec = -ForwardVec;
-		FRotator ReversedSpawnRotation = ReservedVec.Rotation();
-
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeaponBack, ShootLocation->GetComponentLocation() - ForwardVec * 120.f, ReversedSpawnRotation);
+		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSettings.AnimWeaponInfo.AnimWeaponFire);
 	}
 
-	int32 NumberProjectile = GetNumberProjectileByShot();
+	SpawnMuzzleEffects();
 
-	if (ShootLocation)
+	FProjectileInfo ProjectileInfo = GetProjectile();
+
+	if (ProjectileInfo.Projectile)
 	{
-		FVector SpawnLocation = ShootLocation->GetComponentLocation();
-		FRotator SpawnRotation = ShootLocation->GetComponentRotation();
-		FProjectileInfo ProjectileInfo;
-		ProjectileInfo = GetProjectile();
-
-		FVector EndLocation;
-
-		for (int8 i = 0; i < NumberProjectile; ++i)
-		{
-			EndLocation = GetFireEndLocation();
-
-			if (ProjectileInfo.Projectile)
-			{
-				//Projectile Init ballistic fire
-				FVector Direction = EndLocation - SpawnLocation;
-				Direction.Normalize();
-
-				FMatrix MyMatrix(Direction, FVector(0, 0, 0), FVector(0, 0, 0), FVector::ZeroVector);
-				SpawnRotation = MyMatrix.Rotator();
-
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				SpawnParams.Owner = GetOwner();
-				SpawnParams.Instigator = GetInstigator();
-
-				auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
-				if (MyProjectile)
-				{
-					MyProjectile->InitProjectile(WeaponSettings.ProjectileSettings);
-					UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::Fire - Projectile #%d"), i);
-					UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::initialSpeed of projectile is: %f"), WeaponSettings.ProjectileSettings.ProjectileInitSpeed);
-				}
-			}
-			else
-			{
-				FHitResult Hit;
-				TArray<AActor*> Actors;
-
-				UKismetSystemLibrary::LineTraceSingle(GetWorld(), SpawnLocation, EndLocation * WeaponSettings.DistanceTrace, ETraceTypeQuery::TraceTypeQuery4, false, Actors, EDrawDebugTrace::ForDuration, Hit, true, FLinearColor::Red, FLinearColor::Green, 5.0f);
-
-				if (ShowDebug)
-				{
-					DrawDebugLine(GetWorld(), SpawnLocation, EndLocation * WeaponSettings.DistanceTrace, FColor::Yellow, false, 5.0f);
-				}
-
-				if (WeaponSettings.ProjectileSettings.ProjectileTrailFX && !GetWorldTimerManager().IsTimerActive(FXTimerHandle))
-				{
-					UParticleSystemComponent* TrailFX = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.ProjectileTrailFX, ShootLocation->GetComponentTransform());
-
-					if (TrailFX)
-					{
-						FVector Start = ShootLocation->GetComponentLocation();
-						FVector End = Hit.Location;
-
-						TrailFX->SetWorldLocation(Start);
-
-						FVector Direction = (End - Start).GetSafeNormal();
-						float Speed = WeaponSettings.ProjectileSettings.ProjectileInitSpeed * 1.25f;
-
-						GetWorldTimerManager().SetTimer(FXTimerHandle, FTimerDelegate::CreateLambda([this, TrailFX, Direction, End, Speed, Hit]()
-							{
-								FVector NewLocation = TrailFX->GetComponentLocation() + Direction * Speed * GetWorld()->GetDeltaSeconds();
-								TrailFX->SetWorldLocation(NewLocation);
-
-								if ((NewLocation - End).SizeSquared() <= 100.0f)
-								{
-									TrailFX->Deactivate();
-									TrailFX->DestroyComponent();
-
-									GetWorldTimerManager().ClearTimer(FXTimerHandle);
-
-									if (Hit.GetActor() && Hit.PhysMaterial.IsValid())
-									{
-										EPhysicalSurface MySurfaceType = UGameplayStatics::GetSurfaceType(Hit);
-
-										if (WeaponSettings.ProjectileSettings.HitDecals.Contains(MySurfaceType))
-										{
-											UMaterialInterface* MyMaterial = WeaponSettings.ProjectileSettings.HitDecals[MySurfaceType];
-
-											if (MyMaterial && Hit.GetComponent())
-											{
-												UGameplayStatics::SpawnDecalAttached(MyMaterial, FVector(20.0f), Hit.GetComponent(), NAME_None, Hit.ImpactPoint, Hit.ImpactNormal.Rotation(), EAttachLocation::KeepRelativeOffset, 10.0F);
-											}
-										}
-
-										if (WeaponSettings.ProjectileSettings.HitFXs.Contains(MySurfaceType))
-										{
-											UParticleSystem* MyParticle = WeaponSettings.ProjectileSettings.HitFXs[MySurfaceType];
-
-											if (MyParticle && Hit.GetComponent())
-											{
-												UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MyParticle, FTransform(Hit.ImpactPoint));
-											}
-										}
-
-										if (WeaponSettings.ProjectileSettings.HitSound)
-										{
-											UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.HitSound, Hit.ImpactPoint);
-										}
-
-										UGameplayStatics::ApplyDamage(Hit.GetActor(), WeaponSettings.ProjectileSettings.ProjectileDamage, GetInstigatorController(), this, NULL);
-									}
-								}
-							}), 0.01f, true);
-					}
-				}
-			}
-		}
+		HandleProjectileHit(ProjectileInfo);
+	}
+	else
+	{
+		SpawnTrailEffect();
+		HandleHitScan();
 	}
 }
 
 void ATDS_WeaponDefault::UpdateStateWeapon(EMovementState InMovementState)
 {
-	// todo Dispersion
 	BlockFire = false;
 	switch (InMovementState)
 	{
@@ -524,8 +387,6 @@ FVector ATDS_WeaponDefault::GetFireEndLocation() const
 		DrawDebugLine(GetWorld(), ShootLocation->GetComponentLocation(), ShootEndLocation, FColor::Red, false, 10.0f, (uint8)'\000', 0.5f);
 		//direction projectile current fly
 		DrawDebugLine(GetWorld(), ShootLocation->GetComponentLocation(), EndLocation, FColor::Black, false, 10.0f, (uint8)'\000', 0.5f);
-
-		//DrawDebugSphere(GetWorld(), ShootLocation->GetComponentLocation() + ShootLocation->GetForwardVector()*SizeVectorToChangeShootDirectionLogic, 10.0f, 8, FColor::Red, false, 10.0f);
 	}
 
 	return EndLocation;
@@ -546,7 +407,6 @@ int32 ATDS_WeaponDefault::GetNumberProjectileByShot() const
 {
 	return WeaponSettings.NumberProjectilesByShot;
 }
-
 
 void ATDS_WeaponDefault::InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDir, float LifeTimeMesh, float ImpulseRandDispersion, float PowerImpulse, float CustomMass)
 {
@@ -607,4 +467,152 @@ void ATDS_WeaponDefault::InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, 
 			NewActor->GetStaticMeshComponent()->AddImpulse(FinalDir * PowerImpulse);
 		}
 	}
+}
+
+void ATDS_WeaponDefault::HandleProjectileHit(FProjectileInfo ProjectileInfo)
+{
+	FVector SpawnLocation = ShootLocation->GetComponentLocation();
+	FRotator SpawnRotation = ShootLocation->GetComponentRotation();
+	FVector EndLocation = GetFireEndLocation();
+	FVector Direction = EndLocation - SpawnLocation;
+	Direction.Normalize();
+
+	FMatrix MyMatrix(Direction, FVector(0, 0, 0), FVector(0, 0, 0), FVector::ZeroVector);
+	SpawnRotation = MyMatrix.Rotator();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.Instigator = GetInstigator();
+
+	auto* MyProjectile = Cast<ATDS_ProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
+	if (MyProjectile)
+	{
+		MyProjectile->InitProjectile(WeaponSettings.ProjectileSettings);
+	}
+}
+
+void ATDS_WeaponDefault::SpawnMuzzleEffects() const
+{
+	if (!GetWorld())
+	{
+		return;
+	}
+
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundFireWeapon, ShootLocation->GetComponentLocation());
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeapon, ShootLocation->GetComponentTransform());
+
+	if (WeaponSettings.EffectFireWeaponBack)
+	{
+		FVector ForwardVec = ShootLocation->GetForwardVector();
+		FVector ReservedVec = -ForwardVec;
+		FRotator ReversedSpawnRotation = ReservedVec.Rotation();
+
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeaponBack, ShootLocation->GetComponentLocation() - ForwardVec * 120.f, ReversedSpawnRotation);
+	}
+}
+
+void ATDS_WeaponDefault::SpawnTrailEffect()
+{
+	if (WeaponSettings.ProjectileSettings.ProjectileTrailFX && ShootLocation)
+	{
+		UParticleSystemComponent* TrailFX = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.ProjectileTrailFX, ShootLocation->GetComponentTransform());
+
+		if (TrailFX)
+		{
+			FVector TraceStart = ShootLocation->GetComponentLocation();
+			FVector TraceEnd = GetFireEndLocation() * WeaponSettings.DistanceTrace;
+
+			TArray<AActor*> Actors;
+			FHitResult Hit;
+
+			if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), TraceStart, TraceEnd, ETraceTypeQuery::TraceTypeQuery4, false, Actors, EDrawDebugTrace::None, Hit, true))
+			{
+				TraceEnd = Hit.Location;
+			}
+
+			TrailFX->SetWorldLocation(TraceStart);
+
+			float Distance = FVector::Dist(TraceStart, TraceEnd);
+			float Speed = Distance / 0.2;
+
+			FVector Direction = (TraceEnd - TraceStart).GetSafeNormal();
+
+			GetWorld()->GetTimerManager().SetTimer(FXTimerHandle, FTimerDelegate::CreateLambda([this, TrailFX, Direction, TraceEnd, Speed]()
+				{
+					FVector NewLocation = TrailFX->GetComponentLocation() + Direction * Speed * GetWorld()->GetDeltaSeconds();
+					TrailFX->SetWorldLocation(NewLocation);
+
+					if ((NewLocation - TraceEnd).SizeSquared() <= 100.0f)
+					{
+						TrailFX->Deactivate();
+						TrailFX->DestroyComponent();
+
+						GetWorld()->GetTimerManager().ClearTimer(FXTimerHandle);
+					}
+
+				}), 0.01f, true);
+		}
+	}
+}
+
+void ATDS_WeaponDefault::HandleHitScan()
+{
+	int32 ProjectilesNumber = GetNumberProjectileByShot();
+
+	FVector SpawnLocation = ShootLocation->GetComponentLocation();
+	FVector EndLocation;
+
+	for (int8 i = 0; i < ProjectilesNumber; ++i)
+	{
+		EndLocation = GetFireEndLocation();
+		FHitResult Hit;
+		TArray<AActor*> Actors;
+
+		UKismetSystemLibrary::LineTraceSingle(GetWorld(), SpawnLocation, EndLocation * WeaponSettings.DistanceTrace, ETraceTypeQuery::TraceTypeQuery4, false, Actors, EDrawDebugTrace::ForDuration, Hit, true, FLinearColor::Red, FLinearColor::Green, 5.0f);
+
+		if (ShowDebug)
+		{
+			DrawDebugLine(GetWorld(), SpawnLocation, EndLocation * WeaponSettings.DistanceTrace, FColor::Yellow, false, 5.0f);
+		}
+
+		GetWorldTimerManager().SetTimerForNextTick([this, Hit]()
+			{
+				FTimerHandle ImpactTimerHandle;
+				GetWorldTimerManager().SetTimer(ImpactTimerHandle, FTimerDelegate::CreateLambda([this, Hit]()
+					{
+						SpawnImpactEffects(Hit);
+					}), 0.2f, false);
+			});
+	}
+}
+
+void ATDS_WeaponDefault::SpawnImpactEffects(const FHitResult& Hit)
+{
+	if (Hit.GetActor() && Hit.PhysMaterial.IsValid())
+	{
+		EPhysicalSurface MySurfaceType = UGameplayStatics::GetSurfaceType(Hit);
+		if (WeaponSettings.ProjectileSettings.HitDecals.Contains(MySurfaceType))
+		{
+			UMaterialInterface* MyMaterial = WeaponSettings.ProjectileSettings.HitDecals[MySurfaceType];
+			if (MyMaterial && Hit.GetComponent())
+			{
+				UGameplayStatics::SpawnDecalAttached(MyMaterial, FVector(10.0f), Hit.GetComponent(), NAME_None, Hit.ImpactPoint, Hit.ImpactNormal.Rotation(), EAttachLocation::KeepWorldPosition, 10.0f);
+			}
+		}
+		if (WeaponSettings.ProjectileSettings.HitFXs.Contains(MySurfaceType))
+		{
+			UParticleSystem* MyParticle = WeaponSettings.ProjectileSettings.HitFXs[MySurfaceType];
+			if (MyParticle)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MyParticle, FTransform(Hit.ImpactNormal.Rotation(), Hit.ImpactPoint, FVector(1.0f)));
+			}
+		}
+		if (WeaponSettings.ProjectileSettings.HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.HitSound, Hit.ImpactPoint);
+		}
+	}
+
+	UGameplayStatics::ApplyDamage(Hit.GetActor(), WeaponSettings.ProjectileSettings.ProjectileDamage, GetInstigatorController(), this, NULL);
 }

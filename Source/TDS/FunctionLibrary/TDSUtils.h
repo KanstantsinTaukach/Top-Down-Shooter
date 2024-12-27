@@ -1,5 +1,4 @@
 // Top Down Shooter. All Rights Reserved
 
+#pragma once
 
-#include "Types.h"
-#include "../TDS.h"
