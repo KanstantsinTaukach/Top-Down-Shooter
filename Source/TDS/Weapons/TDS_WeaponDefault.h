@@ -89,6 +89,8 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	float TraceSpeed = 0.0f;
+
 	// Timers
 	float FireTimer = 0.0f;
 	float ReloadTimer = 0.0f;

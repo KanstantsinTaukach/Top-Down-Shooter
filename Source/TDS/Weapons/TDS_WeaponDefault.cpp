@@ -31,6 +31,8 @@ ATDS_WeaponDefault::ATDS_WeaponDefault()
 
 	ShootLocation = CreateDefaultSubobject<UArrowComponent>("ShootLocation");
 	ShootLocation->SetupAttachment(GetRootComponent());
+
+	TraceSpeed = 0.2f;
 }
 
 void ATDS_WeaponDefault::BeginPlay()
@@ -114,7 +116,10 @@ void ATDS_WeaponDefault::InitReload()
 
 		ReloadTimer = WeaponSettings.ReloadTime;
 
-		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
+		if (WeaponSettings.SoundReloadWeapon)
+		{
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
+		}
 
 		auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharReloadAim, WeaponSettings.AnimWeaponInfo.AnimCharReload, WeaponAiming);
 		OnWeaponReloadStart.Broadcast(AnimCharacterToPlay);
@@ -302,8 +307,15 @@ void ATDS_WeaponDefault::Fire()
 	}
 	else
 	{
-		SpawnTrailEffect();
-		HandleHitScan();
+		GetWorldTimerManager().SetTimerForNextTick([this]()
+			{
+				FTimerHandle DelayTimerHandle;
+				GetWorldTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda([this]()
+					{
+						SpawnTrailEffect();
+						HandleHitScan();
+					}), TraceSpeed, false);
+			});
 	}
 }
 
@@ -498,8 +510,15 @@ void ATDS_WeaponDefault::SpawnMuzzleEffects() const
 		return;
 	}
 
-	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundFireWeapon, ShootLocation->GetComponentLocation());
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeapon, ShootLocation->GetComponentTransform());
+	if (WeaponSettings.SoundFireWeapon)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundFireWeapon, ShootLocation->GetComponentLocation());
+	}
+
+	if (WeaponSettings.EffectFireWeapon)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.EffectFireWeapon, ShootLocation->GetComponentTransform());
+	}
 
 	if (WeaponSettings.EffectFireWeaponBack)
 	{
@@ -533,7 +552,7 @@ void ATDS_WeaponDefault::SpawnTrailEffect()
 			TrailFX->SetWorldLocation(TraceStart);
 
 			float Distance = FVector::Dist(TraceStart, TraceEnd);
-			float Speed = Distance / 0.2;
+			float Speed = Distance / TraceSpeed;
 
 			FVector Direction = (TraceEnd - TraceStart).GetSafeNormal();
 
@@ -581,7 +600,7 @@ void ATDS_WeaponDefault::HandleHitScan()
 				GetWorldTimerManager().SetTimer(ImpactTimerHandle, FTimerDelegate::CreateLambda([this, Hit]()
 					{
 						SpawnImpactEffects(Hit);
-					}), 0.2f, false);
+					}), TraceSpeed, false);
 			});
 	}
 }
