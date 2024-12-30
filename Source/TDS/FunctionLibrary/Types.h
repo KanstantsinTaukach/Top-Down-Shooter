@@ -15,6 +15,16 @@ enum class EMovementState : uint8
 	Sprint_State UMETA(DisplayName = "Sprint State")
 };
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	RifleType = 0 UMETA(DisplayName = "Rifle"),
+	ShotgunType UMETA(DisplayName = "Shotgun"),	
+	GrenadeLauncherType UMETA(DisplayName = "GrenadeLauncher"),
+	RocketLauncherType UMETA(DisplayName = "RocketLauncher"),
+	SniperRifleType UMETA(DisplayName = "SniperRifle")
+};
+
 USTRUCT(BlueprintType)
 struct FCharacterSpeed
 {
@@ -228,6 +238,35 @@ struct FAdditionalWeaponInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 	int32 Round = 10;
+};
+
+USTRUCT(BlueprintType)
+struct FWeaponSlot
+{
+	GENERATED_BODY()
+
+	int32 IndexSlot = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Slot")
+	FName NameItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Slot")
+	FAdditionalWeaponInfo AdditionalInfo;
+};
+
+USTRUCT(BlueprintType)
+struct FAmmoSlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
+	EWeaponType WeaponType = EWeaponType::RifleType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
+	int32 Count = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
+	int32 MaxCount = 100;
 };
 
 UCLASS()

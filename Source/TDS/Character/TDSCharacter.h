@@ -8,6 +8,7 @@
 #include "TDSCharacter.generated.h"
 
 class UTDSStaminaComponent;
+class UTDSInventoryComponent;
 class ATDS_WeaponDefault;
 
 UCLASS(Blueprintable)
@@ -62,20 +63,22 @@ public:
 	UFUNCTION()
 	void WeaponReloadStart(UAnimMontage* AnimMontage);
 	UFUNCTION()
-	void WeaponReloadEnd();
+	void WeaponReloadEnd(bool bIsSuccess);
 	UFUNCTION()
 	void WeaponFire(UAnimMontage* AnimMontage);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponReloadStart_BP(UAnimMontage* AnimMontage);
 	UFUNCTION(BlueprintNativeEvent)
-	void WeaponReloadEnd_BP();
+	void WeaponReloadEnd_BP(bool bIsSuccess);
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponFire_BP(UAnimMontage* AnimMontage);
 
 protected:
 	float AxisX = 0.0f;
 	float AxisY = 0.0f;
+
+	int32 CurrentIndexWeapon = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
@@ -107,6 +110,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSStaminaComponent* StaminaComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UTDSInventoryComponent* InventoryComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
 	FName InitWeaponName;
 
@@ -132,8 +138,11 @@ private:
 	
 	bool DoSlideUp = true;
 	float CurrentCameraDistance = 0;
-	void CameraScroll();
+
 	FTimerHandle CameraTimerHandle;
+
+	void CameraScroll();
+
 	UFUNCTION()
 	void CameraSlide(float Value);
 
@@ -144,13 +153,16 @@ private:
 	void CharacterUpdate();
 
 	UFUNCTION(BlueprintCallable)
-	void ChangeMovementState(EMovementState InMovementState);	
+	void ChangeMovementState(EMovementState InMovementState);
 
 	UFUNCTION(BlueprintCallable)
-	void InitWeapon(FName IDWeapon);
+	void InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo);
 
 	void OnStaminaEmpty();
 	void OnStaminaChanged(float Stamina);
 
 	void TryReloadWeapon();
+
+	void TrySwitchWeapon();
+	void TrySwitchPreviousWeapon();
 };

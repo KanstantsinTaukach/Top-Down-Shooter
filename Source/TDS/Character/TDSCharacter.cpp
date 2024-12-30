@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "../Components/TDSStaminaComponent.h"
+#include "../Components/TDSInventoryComponent.h"
 #include "../Weapons/TDS_WeaponDefault.h"
 #include "../Game/TDSGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -55,13 +56,17 @@ ATDSCharacter::ATDSCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	StaminaComponent = CreateDefaultSubobject<UTDSStaminaComponent>("StaminaComponent");
+
+	InventoryComponent = CreateDefaultSubobject<UTDSInventoryComponent>("InventoryComponent");
+	if (InventoryComponent)
+	{
+		InventoryComponent->OnSwitchWeapon.AddDynamic(this, &ATDSCharacter::InitWeapon);
+	}
 }
 
 void ATDSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	InitWeapon(InitWeaponName);
 
 	if (CursorMaterial)
 	{
@@ -103,16 +108,25 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ATDSCharacter::InputAxisX);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ATDSCharacter::InputAxisY);
+
 	PlayerInputComponent->BindAxis(TEXT("MouseWheel"), this, &ATDSCharacter::CameraSlide);
+
 	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Pressed, this, &ATDSCharacter::OnStartWalking);
 	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Released, this, &ATDSCharacter::OnStartRunning);
+
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ATDSCharacter::OnStartAiming);
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ATDSCharacter::OnStartRunning);
+
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ATDSCharacter::OnStartSprinting);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ATDSCharacter::OnStopSprinting);
+
 	PlayerInputComponent->BindAction(TEXT("FireEvent"), IE_Pressed, this, &ATDSCharacter::InputAttackPressed);
 	PlayerInputComponent->BindAction(TEXT("FireEvent"), IE_Released, this, &ATDSCharacter::InputAttackReleased);
+
 	PlayerInputComponent->BindAction(TEXT("ReloadEvent"), IE_Released, this, &ATDSCharacter::TryReloadWeapon);
+
+	PlayerInputComponent->BindAction(TEXT("SwitchNextWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchWeapon);
+	PlayerInputComponent->BindAction(TEXT("SwitchPreviousWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchPreviousWeapon);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -358,13 +372,19 @@ void ATDSCharacter::CameraScroll()
 	}
 }
 
-void ATDSCharacter::InitWeapon(FName IDWeapon)
+void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo)
 {
-	auto myGI = Cast<UTDSGameInstance>(GetGameInstance());
-	FWeaponInfo MyWeaponInfo;
-	if (myGI)
+	if (CurrentWeapon)
 	{
-		if (myGI->GetWeaponInfoByName(IDWeapon, MyWeaponInfo))
+		CurrentWeapon->Destroy();
+		CurrentWeapon = nullptr;
+	}
+
+	auto GameInstance = Cast<UTDSGameInstance>(GetGameInstance());
+	FWeaponInfo MyWeaponInfo;
+	if (GameInstance)
+	{
+		if (GameInstance->GetWeaponInfoByName(IdWeaponName, MyWeaponInfo))
 		{
 			if (MyWeaponInfo.WeaponClass)
 			{
@@ -385,9 +405,22 @@ void ATDSCharacter::InitWeapon(FName IDWeapon)
 					CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 
 					MyWeapon->WeaponSettings = MyWeaponInfo;
-					MyWeapon->WeaponInfo.Round = MyWeaponInfo.MaxRound;
+					MyWeapon->AdditionalWeaponInfo.Round = MyWeaponInfo.MaxRound;
 										
 					MyWeapon->UpdateStateWeapon(MovementState);
+
+
+
+
+					// Need to remove
+					if (InventoryComponent)
+					{
+						CurrentIndexWeapon = InventoryComponent->GetWeaponIndexSlotByName(IdWeaponName);
+					}
+
+
+
+
 
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
 					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
@@ -435,9 +468,9 @@ void ATDSCharacter::WeaponReloadStart(UAnimMontage* AnimMontage)
 	WeaponReloadStart_BP(AnimMontage);
 }
 
-void ATDSCharacter::WeaponReloadEnd()
+void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess)
 {
-	WeaponReloadEnd_BP();
+	WeaponReloadEnd_BP(bIsSuccess);
 }
 
 void ATDSCharacter::WeaponFire(UAnimMontage* AnimMontage)
@@ -450,7 +483,7 @@ void ATDSCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* AnimMontag
 	//in BP
 }
 
-void ATDSCharacter::WeaponReloadEnd_BP_Implementation()
+void ATDSCharacter::WeaponReloadEnd_BP_Implementation(bool bIsSuccess)
 {
 	//in BP
 }
@@ -458,4 +491,65 @@ void ATDSCharacter::WeaponReloadEnd_BP_Implementation()
 void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 {
 	//in BP
+}
+
+
+
+
+
+
+// in one func
+void ATDSCharacter::TrySwitchWeapon()
+{
+	if (InventoryComponent->WeaponSlots.Num() > 1)
+	{
+		//we have more than one weapon to switch
+		int8 OldIndex = CurrentIndexWeapon;
+		FAdditionalWeaponInfo OldInfo;
+		if (CurrentWeapon)
+		{
+			OldInfo = CurrentWeapon->AdditionalWeaponInfo;
+			if (CurrentWeapon->GetReloadState())
+			{
+				CurrentWeapon->CancelReload();
+			}
+		}
+
+		if (InventoryComponent)
+		{
+			//need tomer to switch with anim
+			//now we don't have success switch if we have one weapon
+			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon + 1, OldIndex, OldInfo))
+			{
+
+			}
+		}
+	}
+}
+
+// in one func
+void ATDSCharacter::TrySwitchPreviousWeapon()
+{
+	if (InventoryComponent->WeaponSlots.Num() > 1)
+	{
+		//we have more than one weapon to switch
+		int8 OldIndex = CurrentIndexWeapon;
+		FAdditionalWeaponInfo OldInfo;
+		if (CurrentWeapon)
+		{
+			OldInfo = CurrentWeapon->AdditionalWeaponInfo;
+			if (CurrentWeapon->GetReloadState())
+			{
+				CurrentWeapon->CancelReload();
+			}
+		}
+
+		if (InventoryComponent)
+		{
+			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon + 1, OldIndex, OldInfo))
+			{
+
+			}
+		}
+	}
 }

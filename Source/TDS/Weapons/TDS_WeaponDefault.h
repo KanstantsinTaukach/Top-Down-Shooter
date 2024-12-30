@@ -11,7 +11,7 @@ class UArrowComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponFireSignature, UAnimMontage*, AnimMontage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadStartSignature, UAnimMontage*, AnimMontage);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadEndSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadEndSignature, bool, bIsSuccess);
 
 UCLASS()
 class TDS_API ATDS_WeaponDefault : public AActor
@@ -28,7 +28,7 @@ public:
 	UPROPERTY()
 	FWeaponInfo WeaponSettings;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
-	FAdditionalWeaponInfo WeaponInfo;
+	FAdditionalWeaponInfo AdditionalWeaponInfo;
 	
 	FVector ShootEndLocation = FVector(0);
 
@@ -51,8 +51,11 @@ public:
 	void UpdateStateWeapon(EMovementState InMovementState);
 
 	void InitReload();
+	void CancelReload();
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
+
+	bool GetReloadState() const { return WeaponReloading; }
 
 	int32 GetNumberProjectileByShot() const;
 	

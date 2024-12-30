@@ -86,7 +86,7 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 
 	TArray<AActor*> IgnoredActor;
 
-	UGameplayStatics::ApplyRadialDamageWithFalloff(GetWorld(), ProjectileSettings.ExplodeMaxDamage, ProjectileSettings.ExplodeMaxDamage * 0.2f, GetActorLocation(), 1000.0f, 2000.0f, 5, NULL, IgnoredActor, nullptr, nullptr);
+	UGameplayStatics::ApplyRadialDamageWithFalloff(GetWorld(), ProjectileSettings.ExplodeMaxDamage, ProjectileSettings.ExplodeMaxDamage * 0.2f, GetActorLocation(), 1000.0f, 2000.0f, 5, UDamageType::StaticClass(), IgnoredActor, this, nullptr, ECC_Visibility);
 
 	this->Destroy();
 }

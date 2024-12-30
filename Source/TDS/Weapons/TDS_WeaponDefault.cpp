@@ -138,12 +138,24 @@ void ATDS_WeaponDefault::InitReload()
 	}
 }
 
+void ATDS_WeaponDefault::CancelReload()
+{
+	WeaponReloading = false;
+	if (SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
+	{
+		SkeletalMeshWeapon->GetAnimInstance()->StopAllMontages(0.15f);
+	}
+
+	OnWeaponReloadEnd.Broadcast(false);
+	DropClipFlag = false;
+}
+
 void ATDS_WeaponDefault::FinishReload()
 {
 	WeaponReloading = false;
-	WeaponInfo.Round = WeaponSettings.MaxRound;
+	AdditionalWeaponInfo.Round = WeaponSettings.MaxRound;
 
-	OnWeaponReloadEnd.Broadcast();
+	OnWeaponReloadEnd.Broadcast(true);
 }
 
 void ATDS_WeaponDefault::DispersionTick(float DeltaTime)
@@ -267,7 +279,7 @@ void ATDS_WeaponDefault::Fire()
 	}
 
 	FireTimer = WeaponSettings.RateOfFire;
-	--WeaponInfo.Round;
+	--AdditionalWeaponInfo.Round;
 	ChangeDispersionByShot();
 
 	if (WeaponSettings.ShellBullets.DropMesh)
@@ -362,7 +374,7 @@ void ATDS_WeaponDefault::ChangeDispersionByShot()
 
 int32 ATDS_WeaponDefault::GetWeaponRound()
 {
-	return WeaponInfo.Round;
+	return AdditionalWeaponInfo.Round;
 }
 
 FVector ATDS_WeaponDefault::GetFireEndLocation() const
