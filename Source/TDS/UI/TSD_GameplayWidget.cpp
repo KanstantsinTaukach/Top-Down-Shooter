@@ -40,3 +40,54 @@ float UTSD_GameplayWidget::GetReloadPercent() const
 
 	return Weapon->GetReloadPercent();
 }
+
+float UTSD_GameplayWidget::GetAmmoPercent() const
+{
+
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return 0.0f;
+	}
+
+	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
+	if (!Weapon)
+	{
+		return 0.0f;
+	}
+	return Weapon->GetProjectilesQuantityPercent();
+}
+
+bool UTSD_GameplayWidget::IsPlayerReloading() const
+{
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return 0.0f;
+	}
+
+	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
+	if (!Weapon)
+	{
+		return 0.0f;
+	}
+
+	return Weapon->GetReloadState();
+}
+
+bool UTSD_GameplayWidget::IsPlayerFiring() const
+{
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return 0.0f;
+	}
+
+	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
+	if (!Weapon)
+	{
+		return 0.0f;
+	}
+
+	return Weapon->GetFireState();
+}

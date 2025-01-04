@@ -20,6 +20,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<FAmmoSlot> AmmoSlots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	int32 MaximumSlotIndex = 0;
 	
 	FOnSwitchWeaponSignature OnSwitchWeapon;
 

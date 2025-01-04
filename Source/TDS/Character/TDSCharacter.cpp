@@ -125,7 +125,7 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction(TEXT("ReloadEvent"), IE_Released, this, &ATDSCharacter::TryReloadWeapon);
 
-	PlayerInputComponent->BindAction(TEXT("SwitchNextWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchWeapon);
+	PlayerInputComponent->BindAction(TEXT("SwitchNextWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchNextWeapon);
 	PlayerInputComponent->BindAction(TEXT("SwitchPreviousWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchPreviousWeapon);
 }
 
@@ -499,7 +499,7 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 
 
 // in one func
-void ATDSCharacter::TrySwitchWeapon()
+void ATDSCharacter::TrySwitchNextWeapon()
 {
 	if (InventoryComponent->WeaponSlots.Num() > 1)
 	{
@@ -546,7 +546,7 @@ void ATDSCharacter::TrySwitchPreviousWeapon()
 
 		if (InventoryComponent)
 		{
-			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon + 1, OldIndex, OldInfo))
+			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon - 1, OldIndex, OldInfo))
 			{
 
 			}

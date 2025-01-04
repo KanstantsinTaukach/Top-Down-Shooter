@@ -210,14 +210,12 @@ struct FWeaponInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
 	UParticleSystem* EffectFireWeaponBack = nullptr;
 
-	//if null use Trace logic (TSubclassOf<class ATDS_ProjectileDefault> Projectile = nullptr)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSettings")
 	FProjectileInfo ProjectileSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trace")
 	float DistanceTrace = 2000.0f;
 
-	//one decal on all?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitEffect")
 	UDecalComponent* DecalOnHit = nullptr;
 
@@ -229,6 +227,12 @@ struct FWeaponInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	FDropMeshInfo ShellBullets;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	float SwitchTimeToWeapon = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UTexture2D* WeaponIcon = nullptr;
 };
 
 USTRUCT(BlueprintType)
@@ -244,8 +248,6 @@ USTRUCT(BlueprintType)
 struct FWeaponSlot
 {
 	GENERATED_BODY()
-
-	int32 IndexSlot = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Slot")
 	FName NameItem;

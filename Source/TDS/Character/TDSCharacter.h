@@ -163,6 +163,6 @@ private:
 
 	void TryReloadWeapon();
 
-	void TrySwitchWeapon();
+	void TrySwitchNextWeapon();
 	void TrySwitchPreviousWeapon();
 };

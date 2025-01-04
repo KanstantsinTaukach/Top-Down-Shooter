@@ -20,6 +20,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	float GetReloadPercent() const;
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	float GetAmmoPercent() const;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool IsPlayerReloading() const;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool IsPlayerFiring() const;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* StaminaBar;

@@ -55,7 +55,11 @@ public:
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
 
+	float GetProjectilesQuantityPercent() const { return AdditionalWeaponInfo.Round / WeaponSettings.MaxRound; };
+
 	bool GetReloadState() const { return WeaponReloading; }
+
+	bool GetFireState() const { return WeaponFiring; }
 
 	int32 GetNumberProjectileByShot() const;
 	
