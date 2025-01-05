@@ -177,3 +177,26 @@ void UTDSInventoryComponent::SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditio
 		UE_LOG(TDSInventoryComponentLog, Warning, TEXT("UTDSInventoryComponent::SetAdditionalInfoWeapon - Uncorrect weapon index - %d"), IndexWeapon);
 	}
 }
+
+void UTDSInventoryComponent::ChangeAmmo(EWeaponType WeaponType, int32 AmmoToSubtract)
+{
+	bool bIsFind = false;
+	int8 i = 0;
+	while (i < AmmoSlots.Num() && !bIsFind)
+	{
+		if (AmmoSlots[i].WeaponType == WeaponType)
+		{
+			AmmoSlots[i].Count -= AmmoToSubtract;
+
+			if (AmmoSlots[i].Count > AmmoSlots[i].MaxCount)
+			{
+				AmmoSlots[i].Count = AmmoSlots[i].MaxCount;
+			}
+
+			OnAmmoChange.Broadcast(AmmoSlots[i].WeaponType, AmmoSlots[i].Count);
+
+			bIsFind = true;
+		}
+		++i;
+	}
+}

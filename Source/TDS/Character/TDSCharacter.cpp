@@ -405,11 +405,8 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 					CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 
 					MyWeapon->WeaponSettings = MyWeaponInfo;
-					MyWeapon->AdditionalWeaponInfo.Round = MyWeaponInfo.MaxRound;
-										
 					MyWeapon->UpdateStateWeapon(MovementState);
-
-
+					MyWeapon->AdditionalWeaponInfo = WeaponAdditionalInfo;
 
 
 					// Need to remove
@@ -425,6 +422,8 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
 					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
 					MyWeapon->OnWeaponFire.AddDynamic(this, &ATDSCharacter::WeaponFire);
+
+
 				}
 			}
 		}
@@ -468,8 +467,12 @@ void ATDSCharacter::WeaponReloadStart(UAnimMontage* AnimMontage)
 	WeaponReloadStart_BP(AnimMontage);
 }
 
-void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess)
+void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract)
 {
+	if (InventoryComponent && CurrentWeapon)
+	{
+		InventoryComponent->ChangeAmmo(CurrentWeapon->WeaponSettings.WeaponType, AmmoToSubtract);
+	}
 	WeaponReloadEnd_BP(bIsSuccess);
 }
 

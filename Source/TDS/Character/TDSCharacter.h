@@ -63,7 +63,7 @@ public:
 	UFUNCTION()
 	void WeaponReloadStart(UAnimMontage* AnimMontage);
 	UFUNCTION()
-	void WeaponReloadEnd(bool bIsSuccess);
+	void WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract);
 	UFUNCTION()
 	void WeaponFire(UAnimMontage* AnimMontage);
 
@@ -112,9 +112,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSInventoryComponent* InventoryComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
-	FName InitWeaponName;
 
 	UDecalComponent* CurrentCursor = nullptr;
 	ATDS_WeaponDefault* CurrentWeapon = nullptr;

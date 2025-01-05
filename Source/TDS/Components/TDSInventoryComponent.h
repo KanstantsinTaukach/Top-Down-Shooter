@@ -8,6 +8,7 @@
 #include "TDSInventoryComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchWeaponSignature, FName, WeaponIdName, FAdditionalWeaponInfo, WeaponAdditionalInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoChangeSignature, EWeaponType, AmmoType, int32, Count);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TDS_API UTDSInventoryComponent : public UActorComponent
@@ -26,11 +27,16 @@ public:
 	
 	FOnSwitchWeaponSignature OnSwitchWeapon;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnAmmoChangeSignature OnAmmoChange;
+
 	UTDSInventoryComponent();
 
 	bool SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo);
 
 	int32 GetWeaponIndexSlotByName(FName IdWeaponName);
+
+	void ChangeAmmo(EWeaponType WeaponType, int32 AmmoToSubtract);
 
 protected:
 	virtual void BeginPlay() override;

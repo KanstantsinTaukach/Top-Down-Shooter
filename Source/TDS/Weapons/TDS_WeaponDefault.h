@@ -11,7 +11,7 @@ class UArrowComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponFireSignature, UAnimMontage*, AnimMontage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadStartSignature, UAnimMontage*, AnimMontage);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadEndSignature, bool, bIsSuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponReloadEndSignature, bool, bIsSuccess, int32, AmmoLeft);
 
 UCLASS()
 class TDS_API ATDS_WeaponDefault : public AActor

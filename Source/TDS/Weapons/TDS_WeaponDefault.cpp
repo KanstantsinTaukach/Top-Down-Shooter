@@ -146,16 +146,19 @@ void ATDS_WeaponDefault::CancelReload()
 		SkeletalMeshWeapon->GetAnimInstance()->StopAllMontages(0.15f);
 	}
 
-	OnWeaponReloadEnd.Broadcast(false);
+	OnWeaponReloadEnd.Broadcast(false, 0);
 	DropClipFlag = false;
 }
 
 void ATDS_WeaponDefault::FinishReload()
 {
 	WeaponReloading = false;
+
+	int32 AmmoLeft = AdditionalWeaponInfo.Round;
+	int32 AmmoToSubtract = WeaponSettings.MaxRound - AmmoLeft;
 	AdditionalWeaponInfo.Round = WeaponSettings.MaxRound;
 
-	OnWeaponReloadEnd.Broadcast(true);
+	OnWeaponReloadEnd.Broadcast(true, AmmoToSubtract);
 }
 
 void ATDS_WeaponDefault::DispersionTick(float DeltaTime)
