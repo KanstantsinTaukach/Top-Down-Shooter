@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchWeaponSignature, FName, WeaponIdName, FAdditionalWeaponInfo, WeaponAdditionalInfo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoChangeSignature, EWeaponType, AmmoType, int32, Count);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponAdditionalInfoChangeSignature, int32, SlotIndex, FAdditionalWeaponInfo, AdditionalWeaponInfo);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TDS_API UTDSInventoryComponent : public UActorComponent
@@ -30,18 +31,23 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAmmoChangeSignature OnAmmoChange;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnWeaponAdditionalInfoChangeSignature OnWeaponAdditionalInfoChange;
+
 	UTDSInventoryComponent();
 
 	bool SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo);
 
 	int32 GetWeaponIndexSlotByName(FName IdWeaponName);
 
-	void ChangeAmmo(EWeaponType WeaponType, int32 AmmoToSubtract);
+	void AmmoSlotChangeValue(EWeaponType WeaponType, int32 AmmoToSubtract);
+
+	void SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditionalWeaponInfo NewInfo);
+
+	bool CheckAmmoForWeapon(EWeaponType WeaponType, int32 &AvailableAmmoForWeapon);
 
 protected:
 	virtual void BeginPlay() override;
 
 	FAdditionalWeaponInfo GetAdditionalInfoWeapon(int32 IndexWeapon);
-
-	void SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditionalWeaponInfo NewInfo);
 };

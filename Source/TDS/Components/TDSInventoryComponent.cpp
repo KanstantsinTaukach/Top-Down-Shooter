@@ -163,6 +163,8 @@ void UTDSInventoryComponent::SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditio
 			{
 				WeaponSlots[i].AdditionalInfo = NewInfo;
 				bIsFind = true;
+
+				OnWeaponAdditionalInfoChange.Broadcast(IndexWeapon, NewInfo);
 			}
 			++i;
 		}
@@ -178,7 +180,28 @@ void UTDSInventoryComponent::SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditio
 	}
 }
 
-void UTDSInventoryComponent::ChangeAmmo(EWeaponType WeaponType, int32 AmmoToSubtract)
+bool UTDSInventoryComponent::CheckAmmoForWeapon(EWeaponType WeaponType, int32& AvailableAmmoForWeapon)
+{
+	AvailableAmmoForWeapon = 0;
+	bool bIsFind = false;
+	int8 i = 0;
+	while (i < AmmoSlots.Num() && !bIsFind)
+	{
+		if (AmmoSlots[i].WeaponType == WeaponType)
+		{
+			if (AmmoSlots[i].Count > 0)
+			{
+				AvailableAmmoForWeapon = AmmoSlots[i].Count;
+				bIsFind = true;
+			}
+		}
+		++i;
+	}
+
+	return bIsFind;
+}
+
+void UTDSInventoryComponent::AmmoSlotChangeValue(EWeaponType WeaponType, int32 AmmoToSubtract)
 {
 	bool bIsFind = false;
 	int8 i = 0;
@@ -186,7 +209,7 @@ void UTDSInventoryComponent::ChangeAmmo(EWeaponType WeaponType, int32 AmmoToSubt
 	{
 		if (AmmoSlots[i].WeaponType == WeaponType)
 		{
-			AmmoSlots[i].Count -= AmmoToSubtract;
+			AmmoSlots[i].Count += AmmoToSubtract;
 
 			if (AmmoSlots[i].Count > AmmoSlots[i].MaxCount)
 			{

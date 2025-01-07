@@ -9,6 +9,7 @@
 #include "Engine/StaticMeshActor.h"
 #include "../FunctionLibrary/AnimUtils.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "../Components/TDSInventoryComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
 
@@ -80,7 +81,7 @@ void ATDS_WeaponDefault::FireTick(float DeltaTime)
 	}
 	else
 	{
-		if (!WeaponReloading)
+		if (!WeaponReloading && CheckWeaponCanReload())
 		{
 			UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::FireTick - %d bullets lost, RELOAD WEAPON"), GetWeaponRound());
 			InitReload();
@@ -154,11 +155,24 @@ void ATDS_WeaponDefault::FinishReload()
 {
 	WeaponReloading = false;
 
-	int32 AmmoLeft = AdditionalWeaponInfo.Round;
-	int32 AmmoToSubtract = WeaponSettings.MaxRound - AmmoLeft;
-	AdditionalWeaponInfo.Round = WeaponSettings.MaxRound;
+	int32 AvailableAmmo = GetAmmoForReload();
 
-	OnWeaponReloadEnd.Broadcast(true, AmmoToSubtract);
+	int32 AmmoNeedToReload = WeaponSettings.MaxRound - AdditionalWeaponInfo.Round;
+
+	int32 AmmoNeedToTakeFromInventory = 0;
+
+	if (AmmoNeedToReload > AvailableAmmo)
+	{
+		AdditionalWeaponInfo.Round += AvailableAmmo;
+		AmmoNeedToTakeFromInventory = AvailableAmmo;
+	}
+	else
+	{
+		AdditionalWeaponInfo.Round += AmmoNeedToReload;
+		AmmoNeedToTakeFromInventory = AmmoNeedToReload;
+	}
+
+	OnWeaponReloadEnd.Broadcast(true, -AmmoNeedToTakeFromInventory);
 }
 
 void ATDS_WeaponDefault::DispersionTick(float DeltaTime)
@@ -269,6 +283,45 @@ bool ATDS_WeaponDefault::CheckWeaponCanFire()
 	return !BlockFire;
 }
 
+bool ATDS_WeaponDefault::CheckWeaponCanReload()
+{
+	bool Result = true;
+
+	if (GetOwner())
+	{
+		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
+		if (InventoryComp)
+		{
+			int32 AvailableAmmoForWeapon = 0;
+			if (!InventoryComp->CheckAmmoForWeapon(WeaponSettings.WeaponType, AvailableAmmoForWeapon))
+			{
+				Result = false;
+			}
+		}
+	}
+
+	return Result;
+}
+
+int32 ATDS_WeaponDefault::GetAmmoForReload()
+{
+	int32 AvailableAmmoForWeapon = WeaponSettings.MaxRound;
+
+	if (GetOwner())
+	{
+		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
+		if (InventoryComp)
+		{
+			if (InventoryComp->CheckAmmoForWeapon(WeaponSettings.WeaponType, AvailableAmmoForWeapon))
+			{
+				return AvailableAmmoForWeapon;
+			}
+		}
+	}
+
+	return AvailableAmmoForWeapon;
+}
+
 FProjectileInfo ATDS_WeaponDefault::GetProjectile()
 {
 	return WeaponSettings.ProjectileSettings;
@@ -281,13 +334,16 @@ void ATDS_WeaponDefault::Fire()
 		return;
 	}
 
-	FireTimer = WeaponSettings.RateOfFire;
-	--AdditionalWeaponInfo.Round;
-	ChangeDispersionByShot();
+	auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharFireAim, WeaponSettings.AnimWeaponInfo.AnimCharFire, WeaponAiming);
+
+	if (WeaponSettings.AnimWeaponInfo.AnimWeaponFire && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
+	{
+		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSettings.AnimWeaponInfo.AnimWeaponFire);
+	}	
 
 	if (WeaponSettings.ShellBullets.DropMesh)
 	{
-		if (WeaponSettings.ShellBullets.DropMeshTime < 0.0f)
+		if (WeaponSettings.ShellBullets.DropMeshTime <= 0.0f)
 		{
 			InitDropMesh(WeaponSettings.ShellBullets.DropMesh, //
 				WeaponSettings.ShellBullets.DropMeshOffset, //
@@ -304,13 +360,11 @@ void ATDS_WeaponDefault::Fire()
 		}
 	}
 
-	auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharFireAim, WeaponSettings.AnimWeaponInfo.AnimCharFire, WeaponAiming);
-	OnWeaponFire.Broadcast(AnimCharacterToPlay);
-
-	if (WeaponSettings.AnimWeaponInfo.AnimWeaponFire && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
-	{
-		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSettings.AnimWeaponInfo.AnimWeaponFire);
-	}
+	FireTimer = WeaponSettings.RateOfFire;
+	--AdditionalWeaponInfo.Round;
+	ChangeDispersionByShot();
+	
+	OnWeaponFire.Broadcast(AnimCharacterToPlay);	
 
 	SpawnMuzzleEffects();
 

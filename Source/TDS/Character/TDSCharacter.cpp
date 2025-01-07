@@ -393,7 +393,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				SpawnParams.Owner = GetOwner();
+				SpawnParams.Owner = this;
 				SpawnParams.Instigator = GetInstigator();
 
 				auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
@@ -456,7 +456,7 @@ ATDS_WeaponDefault* ATDSCharacter::GetCurrentWeapon()
 
 void ATDSCharacter::TryReloadWeapon()
 {
-	if (CurrentWeapon && CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSettings.MaxRound)
+	if (CurrentWeapon && CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSettings.MaxRound && CurrentWeapon->CheckWeaponCanReload())
 	{
 		CurrentWeapon->InitReload();
 	}
@@ -471,13 +471,20 @@ void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract)
 {
 	if (InventoryComponent && CurrentWeapon)
 	{
-		InventoryComponent->ChangeAmmo(CurrentWeapon->WeaponSettings.WeaponType, AmmoToSubtract);
+		InventoryComponent->AmmoSlotChangeValue(CurrentWeapon->WeaponSettings.WeaponType, AmmoToSubtract);
+		InventoryComponent->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->AdditionalWeaponInfo);
 	}
+
 	WeaponReloadEnd_BP(bIsSuccess);
 }
 
 void ATDSCharacter::WeaponFire(UAnimMontage* AnimMontage)
 {
+	if (InventoryComponent && CurrentWeapon)
+	{
+		InventoryComponent->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->AdditionalWeaponInfo);
+	}
+
 	WeaponFire_BP(AnimMontage);
 }
 

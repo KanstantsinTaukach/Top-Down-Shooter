@@ -55,6 +55,13 @@ public:
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
 
+
+
+
+
+
+
+	/// delete
 	float GetProjectilesQuantityPercent() const { return AdditionalWeaponInfo.Round / WeaponSettings.MaxRound; };
 
 	bool GetReloadState() const { return WeaponReloading; }
@@ -64,7 +71,9 @@ public:
 	int32 GetNumberProjectileByShot() const;
 	
 	FProjectileInfo GetProjectile();
-	
+
+	bool CheckWeaponCanReload();
+		
 	virtual void Tick(float DeltaTime) override;
 
 protected:
@@ -134,4 +143,6 @@ private:
 
 	void HandleProjectileHit(FProjectileInfo ProjectileInfo);
 	void HandleHitScan();
+
+	int32 GetAmmoForReload();
 };
