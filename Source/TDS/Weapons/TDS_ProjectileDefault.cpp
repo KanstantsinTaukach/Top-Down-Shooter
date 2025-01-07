@@ -38,9 +38,6 @@ ATDS_ProjectileDefault::ATDS_ProjectileDefault()
 	BulletProjectileMovement->UpdatedComponent = RootComponent;
 	BulletProjectileMovement->InitialSpeed = ProjectileSettings.ProjectileInitSpeed;
 	BulletProjectileMovement->MaxSpeed = ProjectileSettings.ProjectileInitSpeed;
-
-	UE_LOG(TDSProjectileLog, Display, TEXT("ATDS_ProjectileDefault:ATDS_ProjectileDefault() - initialSpeed of projectile is: %f"), BulletProjectileMovement->InitialSpeed);
-
 	BulletProjectileMovement->bRotationFollowsVelocity = true;
 	BulletProjectileMovement->bShouldBounce = true;
 }
@@ -132,7 +129,6 @@ void ATDS_ProjectileDefault::BulletCollisionSphereEndOverlap(UPrimitiveComponent
 
 void ATDS_ProjectileDefault::ImpactProjectile()
 {
-	UE_LOG(TDSProjectileLog, Display, TEXT("ATDS_ProjectileDefault::ImpactProjectile() - initialSpeed of projectile is: %f"), BulletProjectileMovement->InitialSpeed);
 	this->Destroy();
 }
 

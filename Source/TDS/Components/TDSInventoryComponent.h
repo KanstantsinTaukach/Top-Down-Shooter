@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchWeaponSignature, FName, WeaponIdName, FAdditionalWeaponInfo, WeaponAdditionalInfo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoChangeSignature, EWeaponType, AmmoType, int32, Count);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponAdditionalInfoChangeSignature, int32, SlotIndex, FAdditionalWeaponInfo, AdditionalWeaponInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponAmmoEmptySignature, EWeaponType, WeaponType);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TDS_API UTDSInventoryComponent : public UActorComponent
@@ -33,6 +34,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnWeaponAdditionalInfoChangeSignature OnWeaponAdditionalInfoChange;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnWeaponAmmoEmptySignature OnWeaponAmmoEmpty;
 
 	UTDSInventoryComponent();
 

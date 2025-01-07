@@ -198,6 +198,10 @@ bool UTDSInventoryComponent::CheckAmmoForWeapon(EWeaponType WeaponType, int32& A
 		++i;
 	}
 
+	if (bIsFind == false)
+	{
+		OnWeaponAmmoEmpty.Broadcast(WeaponType);
+	}
 	return bIsFind;
 }
 

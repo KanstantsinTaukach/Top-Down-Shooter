@@ -61,30 +61,15 @@ void ATDS_WeaponDefault::Tick(float DeltaTime)
 
 void ATDS_WeaponDefault::FireTick(float DeltaTime)
 {
-	if (GetWeaponRound() > 0)
+	if (WeaponFiring && GetWeaponRound() > 0 && !WeaponReloading)
 	{
-		if (WeaponFiring)
+		if (FireTimer < 0.0f)
 		{
-			if (FireTimer < 0.0f)
-			{
-				if (!WeaponReloading)
-				{
-					Fire();
-					UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::FireTick - %d bullets lost"), GetWeaponRound());
-				}
-			}
-			else
-			{
-				FireTimer -= DeltaTime;
-			}
+			Fire();
 		}
-	}
-	else
-	{
-		if (!WeaponReloading && CheckWeaponCanReload())
+		else
 		{
-			UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::FireTick - %d bullets lost, RELOAD WEAPON"), GetWeaponRound());
-			InitReload();
+			FireTimer -= DeltaTime;
 		}
 	}
 }
@@ -289,6 +274,8 @@ bool ATDS_WeaponDefault::CheckWeaponCanReload()
 
 	if (GetOwner())
 	{
+		UE_LOG(TDSWeaponDefaultLog, Error, TEXT("ATDS_WeaponDefault::CheckWeaponCanFire - OwnerName - %s"), *GetOwner()->GetName());
+
 		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
 		if (InventoryComp)
 		{
@@ -309,6 +296,8 @@ int32 ATDS_WeaponDefault::GetAmmoForReload()
 
 	if (GetOwner())
 	{
+		UE_LOG(TDSWeaponDefaultLog, Error, TEXT("ATDS_WeaponDefault::GetAmmoForReload - OwnerName - %s"), *GetOwner()->GetName());
+
 		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
 		if (InventoryComp)
 		{
@@ -385,6 +374,14 @@ void ATDS_WeaponDefault::Fire()
 						HandleHitScan();
 					}), TraceSpeed, false);
 			});
+	}
+
+	if (GetWeaponRound() <= 0 && !WeaponReloading)
+	{
+		if (CheckWeaponCanReload())
+		{
+			InitReload();
+		}
 	}
 }
 
