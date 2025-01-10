@@ -73,7 +73,7 @@ public:
 	FProjectileInfo GetProjectile();
 
 	bool CheckWeaponCanReload();
-		
+	
 	virtual void Tick(float DeltaTime) override;
 
 protected:
@@ -92,7 +92,7 @@ protected:
 	float SizeVectorToChangeShootDirectionLogic = 250.0f;
 
 	UFUNCTION()
-	void InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDir, float LifeTimeMesh, float ImpulseRandDispersion, float PowerImpulse, float CustomMass);
+	void InitDropMesh(const FDropMeshInfo& DropMeshinfo);
 
 	void FireTick(float DeltaTime);
 	void ReloadTick(float DeltaTime);

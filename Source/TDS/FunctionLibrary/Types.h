@@ -252,10 +252,10 @@ struct FWeaponSlot
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
 	FName NameItem;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
 	FAdditionalWeaponInfo AdditionalInfo;
 };
 

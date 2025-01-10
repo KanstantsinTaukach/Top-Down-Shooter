@@ -408,22 +408,22 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 					MyWeapon->UpdateStateWeapon(MovementState);
 					MyWeapon->AdditionalWeaponInfo = WeaponAdditionalInfo;
 
-
 					// Need to remove
 					if (InventoryComponent)
 					{
 						CurrentIndexWeapon = InventoryComponent->GetWeaponIndexSlotByName(IdWeaponName);
 					}
 
-
-
-
-
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
 					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
 					MyWeapon->OnWeaponFire.AddDynamic(this, &ATDSCharacter::WeaponFire);
 
+					if (CurrentWeapon->GetWeaponRound() <= 0 && CurrentWeapon->CheckWeaponCanReload())
+					{
+						CurrentWeapon->InitReload();
+					}
 
+					//InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeapon->SetWeaponSettings.WeaponType)
 				}
 			}
 		}

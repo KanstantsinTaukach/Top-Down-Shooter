@@ -87,6 +87,8 @@ bool UTDSInventoryComponent::SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldI
 	{
 		SetAdditionalInfoWeapon(OldIndex, OldInfo);
 		OnSwitchWeapon.Broadcast(NewIdWeapon, NewAdditionalInfo);
+
+		//OnWeaponAmmoAvailable.Broadcast()
 	}
 
 	return bIsSuccess;

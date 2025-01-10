@@ -198,13 +198,7 @@ void ATDS_WeaponDefault::ClipDropTick(float DeltaTime)
 		if (DropClipTimer <= 0.0f)
 		{
 			DropClipFlag = false;
-			InitDropMesh(WeaponSettings.ClipDropMesh.DropMesh, //
-				WeaponSettings.ClipDropMesh.DropMeshOffset, //
-				WeaponSettings.ClipDropMesh.DropMeshImpulseDir, //
-				WeaponSettings.ClipDropMesh.DropMeshLifeTime, //
-				WeaponSettings.ClipDropMesh.ImpulseRandomDispersion, //
-				WeaponSettings.ClipDropMesh.PowerImpulse, //
-				WeaponSettings.ClipDropMesh.CustomMass);
+			InitDropMesh(WeaponSettings.ClipDropMesh);
 		}
 		else
 		{
@@ -220,13 +214,7 @@ void ATDS_WeaponDefault::ShellDropTick(float DeltaTime)
 		if (DropShellTimer <= 0.0f)
 		{
 			DropShellFlag = false;
-			InitDropMesh(WeaponSettings.ShellBullets.DropMesh, //
-				WeaponSettings.ShellBullets.DropMeshOffset, //
-				WeaponSettings.ShellBullets.DropMeshImpulseDir, //
-				WeaponSettings.ShellBullets.DropMeshLifeTime, //
-				WeaponSettings.ShellBullets.ImpulseRandomDispersion, //
-				WeaponSettings.ShellBullets.PowerImpulse, //
-				WeaponSettings.ShellBullets.CustomMass);
+			InitDropMesh(WeaponSettings.ShellBullets);
 		}
 		else
 		{
@@ -274,8 +262,6 @@ bool ATDS_WeaponDefault::CheckWeaponCanReload()
 
 	if (GetOwner())
 	{
-		UE_LOG(TDSWeaponDefaultLog, Error, TEXT("ATDS_WeaponDefault::CheckWeaponCanFire - OwnerName - %s"), *GetOwner()->GetName());
-
 		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
 		if (InventoryComp)
 		{
@@ -296,8 +282,6 @@ int32 ATDS_WeaponDefault::GetAmmoForReload()
 
 	if (GetOwner())
 	{
-		UE_LOG(TDSWeaponDefaultLog, Error, TEXT("ATDS_WeaponDefault::GetAmmoForReload - OwnerName - %s"), *GetOwner()->GetName());
-
 		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
 		if (InventoryComp)
 		{
@@ -334,13 +318,7 @@ void ATDS_WeaponDefault::Fire()
 	{
 		if (WeaponSettings.ShellBullets.DropMeshTime <= 0.0f)
 		{
-			InitDropMesh(WeaponSettings.ShellBullets.DropMesh, //
-				WeaponSettings.ShellBullets.DropMeshOffset, //
-				WeaponSettings.ShellBullets.DropMeshImpulseDir, //
-				WeaponSettings.ShellBullets.DropMeshLifeTime, //
-				WeaponSettings.ShellBullets.ImpulseRandomDispersion, //
-				WeaponSettings.ShellBullets.PowerImpulse, //
-				WeaponSettings.ShellBullets.CustomMass);
+			InitDropMesh(WeaponSettings.ShellBullets);
 		}
 		else
 		{
@@ -485,64 +463,70 @@ int32 ATDS_WeaponDefault::GetNumberProjectileByShot() const
 	return WeaponSettings.NumberProjectilesByShot;
 }
 
-void ATDS_WeaponDefault::InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDir, float LifeTimeMesh, float ImpulseRandDispersion, float PowerImpulse, float CustomMass)
+void ATDS_WeaponDefault::InitDropMesh(const FDropMeshInfo & DropMeshInfo)
 {
-	if (!GetWorld() || !DropMesh)
+	if (!GetWorld() || !DropMeshInfo.DropMesh)
 	{
 		return;
 	}
 
-	FVector LocalDir = this->GetActorForwardVector() * Offset.GetLocation().X + this->GetActorRightVector() * Offset.GetLocation().Y + this->GetActorUpVector() * Offset.GetLocation().Z;
+	float CorrectionX = DropMeshInfo.DropMeshOffset.GetLocation().X;
+	float CorrectionY = DropMeshInfo.DropMeshOffset.GetLocation().Y;
+	float CorrectionZ = DropMeshInfo.DropMeshOffset.GetLocation().Z;
+
+	FVector LocalDir = this->GetActorForwardVector() * CorrectionX + this->GetActorRightVector() * CorrectionY + this->GetActorUpVector() * CorrectionZ;
 
 	FTransform Transform;
 	Transform.SetLocation(GetActorLocation() + LocalDir);
-	Transform.SetScale3D(Offset.GetScale3D());
-	Transform.SetRotation((GetActorRotation() + Offset.Rotator()).Quaternion());
+	Transform.SetScale3D(DropMeshInfo.DropMeshOffset.GetScale3D());
+	Transform.SetRotation((GetActorRotation() + DropMeshInfo.DropMeshOffset.Rotator()).Quaternion());
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	Params.Owner = this;
 
-	AStaticMeshActor* NewActor = nullptr;
-	NewActor = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), Transform, Params);
+	AStaticMeshActor* DropMeshActor = nullptr;
+	DropMeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(Transform.GetLocation(), Transform.GetRotation().Rotator(), Params);
+	DropMeshActor->SetActorTickEnabled(false);
 
-	if (NewActor && NewActor->GetStaticMeshComponent())
+	if (!DropMeshActor)
 	{
-		NewActor->GetStaticMeshComponent()->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
-		NewActor->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		UE_LOG(TDSWeaponDefaultLog, Display, TEXT("ATDS_WeaponDefault::InitDropMesh: Failed to spawn NewActor"));
+	}
 
-		NewActor->SetActorTickEnabled(false);
-		NewActor->SetLifeSpan(LifeTimeMesh);
+	UStaticMeshComponent* MeshComponent = DropMeshActor->GetStaticMeshComponent();
 
-		NewActor->GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
-		NewActor->GetStaticMeshComponent()->SetSimulatePhysics(true);
-		NewActor->GetStaticMeshComponent()->SetStaticMesh(DropMesh);
+	if (MeshComponent)
+	{
+		MeshComponent->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		MeshComponent->Mobility = EComponentMobility::Movable;
+		MeshComponent->SetSimulatePhysics(true);
+		MeshComponent->SetStaticMesh(DropMeshInfo.DropMesh);
 
-		NewActor->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel11, ECollisionResponse::ECR_Ignore);
-		NewActor->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel12, ECollisionResponse::ECR_Ignore);
-		NewActor->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
-		NewActor->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECollisionResponse::ECR_Block);
-		NewActor->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECollisionResponse::ECR_Block);
-		NewActor->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_PhysicsBody, ECollisionResponse::ECR_Block);
+		MeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+		MeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+		MeshComponent->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		MeshComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECollisionResponse::ECR_Block);
+		MeshComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECollisionResponse::ECR_Block);
+		MeshComponent->SetCollisionResponseToChannel(ECC_PhysicsBody, ECollisionResponse::ECR_Block);
 
-		if (CustomMass > 0.0f)
+		if (DropMeshInfo.CustomMass > 0.0f)
 		{
-			NewActor->GetStaticMeshComponent()->SetMassOverrideInKg(NAME_None, CustomMass, true);
+			MeshComponent->SetMassOverrideInKg(NAME_None, DropMeshInfo.CustomMass);
 		}
 
-		if (!DropImpulseDir.IsNearlyZero())
-		{
-			LocalDir += DropImpulseDir;
+		FVector ImpulseDirection = DropMeshInfo.DropMeshImpulseDir.GetSafeNormal();
+		FVector RandomDispersion = FVector(
+			FMath::RandRange(-DropMeshInfo.ImpulseRandomDispersion, DropMeshInfo.ImpulseRandomDispersion),
+			FMath::RandRange(-DropMeshInfo.ImpulseRandomDispersion, DropMeshInfo.ImpulseRandomDispersion),
+			FMath::RandRange(-DropMeshInfo.ImpulseRandomDispersion, DropMeshInfo.ImpulseRandomDispersion)
+		);
+		FVector Impulse = (ImpulseDirection + RandomDispersion).GetSafeNormal() * DropMeshInfo.PowerImpulse;
 
-			FVector FinalDir;
+		MeshComponent->AddImpulse(Impulse);
 
-			if (!FMath::IsNearlyZero(ImpulseRandDispersion))
-			{
-				FinalDir += UKismetMathLibrary::RandomUnitVectorInConeInDegrees(LocalDir, ImpulseRandDispersion);
-			}
-
-			NewActor->GetStaticMeshComponent()->AddImpulse(FinalDir * PowerImpulse);
-		}
+		DropMeshActor->SetLifeSpan(DropMeshInfo.DropMeshLifeTime);
 	}
 }
 
