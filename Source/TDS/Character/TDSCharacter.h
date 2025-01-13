@@ -39,12 +39,6 @@ private:
 	class USpringArmComponent* CameraBoom;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
-	UMaterialInterface* CursorMaterial = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
-	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
-
 	UFUNCTION(BlueprintCallable)
 	UDecalComponent* GetCursorToWorld();
 
@@ -112,6 +106,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSInventoryComponent* InventoryComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
+	UMaterialInterface* CursorMaterial = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
+	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
 
 	UDecalComponent* CurrentCursor = nullptr;
 	ATDS_WeaponDefault* CurrentWeapon = nullptr;

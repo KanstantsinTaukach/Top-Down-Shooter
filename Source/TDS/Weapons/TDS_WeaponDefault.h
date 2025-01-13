@@ -25,13 +25,6 @@ public:
 	FOnWeaponReloadEndSignature OnWeaponReloadEnd;
 	FOnWeaponFireSignature OnWeaponFire;
 
-	UPROPERTY()
-	FWeaponInfo WeaponSettings;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
-	FAdditionalWeaponInfo AdditionalWeaponInfo;
-	
-	FVector ShootEndLocation = FVector(0);
-
 	// Dispersion
 	bool ShouldReduceDispersion = false;
 	float CurrentDispersion = 0.0f;
@@ -55,12 +48,6 @@ public:
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
 
-
-
-
-
-
-
 	/// delete
 	float GetProjectilesQuantityPercent() const { return AdditionalWeaponInfo.Round / WeaponSettings.MaxRound; };
 
@@ -73,6 +60,15 @@ public:
 	FProjectileInfo GetProjectile();
 
 	bool CheckWeaponCanReload();
+
+	const FWeaponInfo& GetWeaponInfo() const { return WeaponSettings; };
+	void SetWeaponInfo(FWeaponInfo NewWeaponInfo) { WeaponSettings = NewWeaponInfo; };
+
+	const FAdditionalWeaponInfo& GetAdditionWeaponInfo() const { return AdditionalWeaponInfo; };
+	void SetAdditionWeaponInfo(FAdditionalWeaponInfo NewAdditionWeaponInfo) { AdditionalWeaponInfo = NewAdditionWeaponInfo; };
+
+	const FVector& GetShootEndLocation() const { return ShootEndLocation; };
+	void SetShootEndLocation(FVector NewShootEndLocation) { ShootEndLocation = NewShootEndLocation; };
 	
 	virtual void Tick(float DeltaTime) override;
 
@@ -90,6 +86,13 @@ protected:
 	bool ShowDebug = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	float SizeVectorToChangeShootDirectionLogic = 250.0f;
+
+	UPROPERTY()
+	FWeaponInfo WeaponSettings;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
+	FAdditionalWeaponInfo AdditionalWeaponInfo;
+
+	FVector ShootEndLocation = FVector(0);
 
 	UFUNCTION()
 	void InitDropMesh(const FDropMeshInfo& DropMeshinfo);

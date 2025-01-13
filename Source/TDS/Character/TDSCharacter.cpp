@@ -254,7 +254,7 @@ void ATDSCharacter::MovementTick(float DeltaSeconds)
 				default: break;
 				}
 
-				CurrentWeapon->ShootEndLocation = ResultHit.Location + Displacement;
+				CurrentWeapon->SetShootEndLocation(ResultHit.Location + Displacement);
 			}	
 		}
 	}
@@ -404,9 +404,9 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 					CurrentWeapon = MyWeapon;
 					CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 
-					MyWeapon->WeaponSettings = MyWeaponInfo;
+					MyWeapon->SetWeaponInfo(MyWeaponInfo);
 					MyWeapon->UpdateStateWeapon(MovementState);
-					MyWeapon->AdditionalWeaponInfo = WeaponAdditionalInfo;
+					MyWeapon->SetAdditionWeaponInfo(WeaponAdditionalInfo);
 
 					// Need to remove
 					if (InventoryComponent)
@@ -456,7 +456,7 @@ ATDS_WeaponDefault* ATDSCharacter::GetCurrentWeapon()
 
 void ATDSCharacter::TryReloadWeapon()
 {
-	if (CurrentWeapon && CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSettings.MaxRound && CurrentWeapon->CheckWeaponCanReload())
+	if (CurrentWeapon && CurrentWeapon->GetWeaponRound() < CurrentWeapon->GetWeaponInfo().MaxRound && CurrentWeapon->CheckWeaponCanReload())
 	{
 		CurrentWeapon->InitReload();
 	}
@@ -471,8 +471,8 @@ void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract)
 {
 	if (InventoryComponent && CurrentWeapon)
 	{
-		InventoryComponent->AmmoSlotChangeValue(CurrentWeapon->WeaponSettings.WeaponType, AmmoToSubtract);
-		InventoryComponent->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->AdditionalWeaponInfo);
+		InventoryComponent->AmmoSlotChangeValue(CurrentWeapon->GetWeaponInfo().WeaponType, AmmoToSubtract);
+		InventoryComponent->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->GetAdditionWeaponInfo());
 	}
 
 	WeaponReloadEnd_BP(bIsSuccess);
@@ -482,7 +482,7 @@ void ATDSCharacter::WeaponFire(UAnimMontage* AnimMontage)
 {
 	if (InventoryComponent && CurrentWeapon)
 	{
-		InventoryComponent->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->AdditionalWeaponInfo);
+		InventoryComponent->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->GetAdditionWeaponInfo());
 	}
 
 	WeaponFire_BP(AnimMontage);
@@ -511,14 +511,14 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 // in one func
 void ATDSCharacter::TrySwitchNextWeapon()
 {
-	if (InventoryComponent->WeaponSlots.Num() > 1)
+	if (InventoryComponent->GetWeaponSlots().Num() > 1)
 	{
 		//we have more than one weapon to switch
 		int8 OldIndex = CurrentIndexWeapon;
 		FAdditionalWeaponInfo OldInfo;
 		if (CurrentWeapon)
 		{
-			OldInfo = CurrentWeapon->AdditionalWeaponInfo;
+			OldInfo = CurrentWeapon->GetAdditionWeaponInfo();
 			if (CurrentWeapon->GetReloadState())
 			{
 				CurrentWeapon->CancelReload();
@@ -540,14 +540,14 @@ void ATDSCharacter::TrySwitchNextWeapon()
 // in one func
 void ATDSCharacter::TrySwitchPreviousWeapon()
 {
-	if (InventoryComponent->WeaponSlots.Num() > 1)
+	if (InventoryComponent->GetWeaponSlots().Num() > 1)
 	{
 		//we have more than one weapon to switch
 		int8 OldIndex = CurrentIndexWeapon;
 		FAdditionalWeaponInfo OldInfo;
 		if (CurrentWeapon)
 		{
-			OldInfo = CurrentWeapon->AdditionalWeaponInfo;
+			OldInfo = CurrentWeapon->GetAdditionWeaponInfo();
 			if (CurrentWeapon->GetReloadState())
 			{
 				CurrentWeapon->CancelReload();

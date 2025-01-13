@@ -17,17 +17,17 @@ class TDS_API UTDSInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:
-
-
-
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<FWeaponSlot> WeaponSlots;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TArray<FAmmoSlot> AmmoSlots;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	int32 MaximumSlotIndex = 0;
 
-
-
+public:
 	FOnSwitchWeaponSignature OnSwitchWeapon;
 
 	UPROPERTY(BlueprintAssignable)
@@ -39,7 +39,11 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnWeaponAmmoEmptySignature OnWeaponAmmoEmpty;
 
+	const TArray<FWeaponSlot>& GetWeaponSlots() const { return WeaponSlots; };
+
 	UTDSInventoryComponent();
+
+	virtual void BeginPlay() override;
 
 	bool SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo);
 
@@ -50,17 +54,6 @@ public:
 	void SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditionalWeaponInfo NewInfo);
 
 	bool CheckAmmoForWeapon(EWeaponType WeaponType, int32 &AvailableAmmoForWeapon);
-
-protected:
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<FAmmoSlot> AmmoSlots;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	int32 MaximumSlotIndex = 0;
-
-	virtual void BeginPlay() override;
 
 	FAdditionalWeaponInfo GetAdditionalInfoWeapon(int32 IndexWeapon);
 };

@@ -268,10 +268,10 @@ struct FAmmoSlot
 	EWeaponType WeaponType = EWeaponType::RifleType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
-	int32 Count = 100;
+	int32 Bullets = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
-	int32 MaxCount = 100;
+	int32 MaxBullets = 100;
 };
 
 UCLASS()

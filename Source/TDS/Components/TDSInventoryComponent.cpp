@@ -191,9 +191,9 @@ bool UTDSInventoryComponent::CheckAmmoForWeapon(EWeaponType WeaponType, int32& A
 	{
 		if (AmmoSlots[i].WeaponType == WeaponType)
 		{
-			if (AmmoSlots[i].Count > 0)
+			if (AmmoSlots[i].Bullets > 0)
 			{
-				AvailableAmmoForWeapon = AmmoSlots[i].Count;
+				AvailableAmmoForWeapon = AmmoSlots[i].Bullets;
 				bIsFind = true;
 			}
 		}
@@ -215,14 +215,14 @@ void UTDSInventoryComponent::AmmoSlotChangeValue(EWeaponType WeaponType, int32 A
 	{
 		if (AmmoSlots[i].WeaponType == WeaponType)
 		{
-			AmmoSlots[i].Count += AmmoToSubtract;
+			AmmoSlots[i].Bullets += AmmoToSubtract;
 
-			if (AmmoSlots[i].Count > AmmoSlots[i].MaxCount)
+			if (AmmoSlots[i].Bullets > AmmoSlots[i].MaxBullets)
 			{
-				AmmoSlots[i].Count = AmmoSlots[i].MaxCount;
+				AmmoSlots[i].Bullets = AmmoSlots[i].MaxBullets;
 			}
 
-			OnAmmoChange.Broadcast(AmmoSlots[i].WeaponType, AmmoSlots[i].Count);
+			OnAmmoChange.Broadcast(AmmoSlots[i].WeaponType, AmmoSlots[i].Bullets);
 
 			bIsFind = true;
 		}
