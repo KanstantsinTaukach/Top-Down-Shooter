@@ -153,7 +153,7 @@ private:
 	void ChangeMovementState(EMovementState InMovementState);
 
 	UFUNCTION(BlueprintCallable)
-	void InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo);
+	void InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon);
 
 	void OnStaminaEmpty();
 	void OnStaminaChanged(float Stamina);

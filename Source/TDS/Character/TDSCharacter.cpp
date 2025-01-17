@@ -280,7 +280,6 @@ void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
 	MovementState = InMovementState;
 	CharacterUpdate();
 
-	//Weapon state update
 	ATDS_WeaponDefault* MyWeapon = GetCurrentWeapon();
 	if (MyWeapon)
 	{
@@ -372,7 +371,7 @@ void ATDSCharacter::CameraScroll()
 	}
 }
 
-void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo)
+void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon)
 {
 	if (CurrentWeapon)
 	{
@@ -411,7 +410,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 					// Need to remove
 					if (InventoryComponent)
 					{
-						CurrentIndexWeapon = InventoryComponent->GetWeaponIndexSlotByName(IdWeaponName);
+						CurrentIndexWeapon = NewCurrentIndexWeapon;
 					}
 
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
@@ -527,9 +526,9 @@ void ATDSCharacter::TrySwitchNextWeapon()
 
 		if (InventoryComponent)
 		{
-			//need tomer to switch with anim
+			//need timer to switch with anim
 			//now we don't have success switch if we have one weapon
-			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon + 1, OldIndex, OldInfo))
+			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon + 1, OldIndex, OldInfo, true))
 			{
 
 			}
@@ -556,7 +555,7 @@ void ATDSCharacter::TrySwitchPreviousWeapon()
 
 		if (InventoryComponent)
 		{
-			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon - 1, OldIndex, OldInfo))
+			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon - 1, OldIndex, OldInfo, false))
 			{
 
 			}
