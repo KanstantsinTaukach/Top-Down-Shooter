@@ -542,9 +542,26 @@ bool UTDSInventoryComponent::CheckCanTakeWeapon(int32& FreeSlot)
 	return bIsFreeSlot;
 }
 
-void UTDSInventoryComponent::SwitchWeaponToInventory()
+bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar)
 {
+	bool Result = false;
+	if (WeaponSlots.IsValidIndex(IndexSlot) && DropWeaponFromInventory(IndexSlot))
+	{
+		WeaponSlots[IndexSlot] = NewWeapon;
 
+		SwitchWeaponToIndex(CurrentIndexWeaponChar, -1, NewWeapon.AdditionalInfo, true);
+
+		OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
+
+		Result = true;
+	}
+
+	return Result;
+}
+
+bool UTDSInventoryComponent::DropWeaponFromInventory(int32 IndexSlotToDrop)
+{
+	return true;
 }
 
 bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)

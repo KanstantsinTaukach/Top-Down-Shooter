@@ -58,7 +58,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool TryGetWeaponToInventory(FWeaponSlot NewWeapon);
 
-	void SwitchWeaponToInventory();
+	UFUNCTION(BlueprintCallable)
+	bool SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar);
+
+	UFUNCTION(BlueprintCallable)
+	bool DropWeaponFromInventory(int32 IndexSlotToDrop);
 
 	const TArray<FWeaponSlot>& GetWeaponSlots() const { return WeaponSlots; };
 
