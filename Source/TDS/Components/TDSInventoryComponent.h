@@ -59,15 +59,16 @@ public:
 	bool TryGetWeaponToInventory(FWeaponSlot NewWeapon);
 
 	UFUNCTION(BlueprintCallable)
-	bool SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar);
+	bool SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar, FDropItem& DropItemInfo);
 
 	UFUNCTION(BlueprintCallable)
-	bool DropWeaponFromInventory(int32 IndexSlotToDrop);
+	bool GetDropItemInfoFromInventory(int32 IndexSlotToDrop, FDropItem & DropItemInfo);
 
 	const TArray<FWeaponSlot>& GetWeaponSlots() const { return WeaponSlots; };
 
 	bool SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo, bool bIsForward);
 
+	FName GetWeaponNameBySlotIndex(int32 IndexSlot);
 	int32 GetWeaponIndexSlotByName(FName IdWeaponName);
 
 	void SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditionalWeaponInfo NewInfo);

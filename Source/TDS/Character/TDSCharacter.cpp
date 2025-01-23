@@ -407,11 +407,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 					MyWeapon->UpdateStateWeapon(MovementState);
 					MyWeapon->SetAdditionWeaponInfo(WeaponAdditionalInfo);
 
-					// Need to remove
-					if (InventoryComponent)
-					{
-						CurrentIndexWeapon = NewCurrentIndexWeapon;
-					}
+					CurrentIndexWeapon = NewCurrentIndexWeapon;
 
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
 					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
@@ -422,7 +418,10 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 						CurrentWeapon->InitReload();
 					}
 
-					//InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeapon->SetWeaponSettings.WeaponType)
+					if (InventoryComponent)
+					{
+						//InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeapon->SetWeaponSettings.WeaponType);
+					}
 				}
 			}
 		}

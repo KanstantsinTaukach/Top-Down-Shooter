@@ -404,6 +404,17 @@ FAdditionalWeaponInfo UTDSInventoryComponent::GetAdditionalInfoWeapon(int32 Inde
 	return result;
 }
 
+FName UTDSInventoryComponent::GetWeaponNameBySlotIndex(int32 IndexSlot)
+{
+	FName Result;
+
+	if (WeaponSlots.IsValidIndex(IndexSlot))
+	{
+		Result = WeaponSlots[IndexSlot].NameItem;
+	}
+
+	return Result;
+}
 
 
 //// need refactoring
@@ -542,10 +553,10 @@ bool UTDSInventoryComponent::CheckCanTakeWeapon(int32& FreeSlot)
 	return bIsFreeSlot;
 }
 
-bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar)
+bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar, FDropItem& DropItemInfo)
 {
 	bool Result = false;
-	if (WeaponSlots.IsValidIndex(IndexSlot) && DropWeaponFromInventory(IndexSlot))
+	if (WeaponSlots.IsValidIndex(IndexSlot) && GetDropItemInfoFromInventory(IndexSlot, DropItemInfo))
 	{
 		WeaponSlots[IndexSlot] = NewWeapon;
 
@@ -559,9 +570,20 @@ bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int3
 	return Result;
 }
 
-bool UTDSInventoryComponent::DropWeaponFromInventory(int32 IndexSlotToDrop)
+bool UTDSInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlotToDrop, FDropItem& DropItemInfo)
 {
-	return true;
+	bool Result = false;
+
+	FName DropItemName = GetWeaponNameBySlotIndex(IndexSlotToDrop);
+
+	UTDSGameInstance* MyGameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
+	if (MyGameInstance)
+	{
+		Result = MyGameInstance->GetDropItemInfoByName(DropItemName, DropItemInfo);
+		DropItemInfo.WeaponSlotInfo.AdditionalInfo = WeaponSlots[IndexSlotToDrop].AdditionalInfo;
+	}
+
+	return Result;
 }
 
 bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)

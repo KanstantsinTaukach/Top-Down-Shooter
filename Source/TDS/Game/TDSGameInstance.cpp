@@ -29,21 +29,22 @@ bool UTDSGameInstance::GetWeaponInfoByName(FName WeaponName, FWeaponInfo& Weapon
 bool UTDSGameInstance::GetDropItemInfoByName(FName ItemName, FDropItem& DropItemInfo)
 {
 	bool bIsFind = false;
-	FDropItem* DropItemInfoRow;
 
 	if (DropItemInfoTable)
 	{
+		FDropItem* DropItemInfoRow;
 		TArray<FName>RowNames = DropItemInfoTable->GetRowNames();
 
 		int8 i = 0;
 		while (i < RowNames.Num() && !bIsFind)
 		{
-			DropItemInfoRow = DropItemInfoTable->FindRow<FDropItem>(RowNames[i], "", false);
+			DropItemInfoRow = DropItemInfoTable->FindRow<FDropItem>(RowNames[i], "");
 			if (DropItemInfoRow->WeaponSlotInfo.NameItem == ItemName)
 			{
 				bIsFind = true;
 				DropItemInfo = *DropItemInfoRow;
 			}
+			++i;
 		}
 	}
 	else

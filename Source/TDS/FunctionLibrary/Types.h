@@ -244,7 +244,7 @@ struct FAdditionalWeaponInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-	int32 Round = 10;
+	int32 Round = 0;
 };
 
 USTRUCT(BlueprintType)
