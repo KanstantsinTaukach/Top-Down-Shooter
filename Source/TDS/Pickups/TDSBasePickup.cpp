@@ -24,13 +24,6 @@ ATDSBasePickup::ATDSBasePickup()
 	PickupSkeletalMesh->SetupAttachment(RootComponent);
 }
 
-void ATDSBasePickup::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	AddActorLocalRotation(FRotator(0.0f, RotationYaw * DeltaTime, 0.0f));
-}
-
 void ATDSBasePickup::BeginPlay()
 {
 	Super::BeginPlay();
@@ -44,6 +37,22 @@ void ATDSBasePickup::BeginPlay()
 	GenerateRotationYaw();
 }
 
+void ATDSBasePickup::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	AddActorLocalRotation(FRotator(0.0f, RotationYaw * DeltaTime, 0.0f));
+
+	for (const auto OverlapPawn : OverlappingPawns)
+	{
+		if (GivePickupTo(OverlapPawn))
+		{
+			PickupSuccess();
+			break;
+		}
+	}
+}
+
 void ATDSBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
@@ -53,6 +62,18 @@ void ATDSBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		PickupSuccess();
 	}
+	else if (Pawn)
+	{
+		OverlappingPawns.Add(Pawn);
+	}
+}
+
+void ATDSBasePickup::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+
+	const auto Pawn = Cast<APawn>(OtherActor);
+	OverlappingPawns.Remove(Pawn);
 }
 
 bool ATDSBasePickup::GivePickupTo(APawn* PlayerPawn)

@@ -27,9 +27,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Pickup")
 	USkeletalMeshComponent* PickupSkeletalMesh = nullptr;
+
+	UPROPERTY()
+	TArray<APawn*> OverlappingPawns;
 	
 	virtual void BeginPlay();
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
 private:
 	float RotationYaw = 0.0f;

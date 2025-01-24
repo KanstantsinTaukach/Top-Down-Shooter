@@ -7,7 +7,7 @@
 DEFINE_LOG_CATEGORY_STATIC(ATDSAmmoPickupLog, All, All);
 
 bool ATDSAmmoPickup::GivePickupTo(APawn* PlayerPawn)
-{
+{	
 	if (!PlayerPawn)
 	{
 		return false;
@@ -15,12 +15,13 @@ bool ATDSAmmoPickup::GivePickupTo(APawn* PlayerPawn)
 
 	const auto InventoryComponent = Cast<UTDSInventoryComponent>(PlayerPawn->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
 
-	if (InventoryComponent->CheckCanTakeAmmo(WeaponType))
+	bool Result = InventoryComponent->CheckCanTakeAmmo(WeaponType);
+	if (Result)
 	{
 		InventoryComponent->AmmoSlotChangeValue(WeaponType, BulletsAmount);
 	}
 
 	UE_LOG(ATDSAmmoPickupLog, Display, TEXT("ATDSAmmoPickup::NotifyActorBeginOverlap - Pickup was taken"));
 
-	return true;
+	return Result;
 }
