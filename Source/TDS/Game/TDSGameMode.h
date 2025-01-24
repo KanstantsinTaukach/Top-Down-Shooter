@@ -21,6 +21,3 @@ private:
 	UPROPERTY()
 	ATDS_HUD* HUD;
 };
-
-
-
