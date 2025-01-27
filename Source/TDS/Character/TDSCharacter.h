@@ -10,6 +10,7 @@
 class UTDSStaminaComponent;
 class UTDSInventoryComponent;
 class ATDS_WeaponDefault;
+class ATDSWeaponPickup;
 
 UCLASS(Blueprintable)
 class ATDSCharacter : public ACharacter
@@ -49,24 +50,35 @@ public:
 	float GetMovementDirection() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-	bool IsSprinting() const;	
+	bool IsSprinting() const;
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCharEvent(bool bIsFiring);
 
 	UFUNCTION()
 	void WeaponReloadStart(UAnimMontage* AnimMontage);
-	UFUNCTION()
-	void WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract);
-	UFUNCTION()
-	void WeaponFire(UAnimMontage* AnimMontage);
-
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponReloadStart_BP(UAnimMontage* AnimMontage);
+
+	UFUNCTION()
+	void WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract);
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponReloadEnd_BP(bool bIsSuccess);
+
+	UFUNCTION()
+	void WeaponFire(UAnimMontage* AnimMontage);
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponFire_BP(UAnimMontage* AnimMontage);
+
+	UFUNCTION()
+	void StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup);
+	UFUNCTION(BlueprintNativeEvent)
+	void StartSwitchWeapon_BP(ATDSWeaponPickup* WeaponPickup);
+
+	UFUNCTION()
+	void EndSwitchWeapon();
+	UFUNCTION(BlueprintNativeEvent)
+	void EndSwitchWeapon_BP();
 
 protected:
 	float AxisX = 0.0f;

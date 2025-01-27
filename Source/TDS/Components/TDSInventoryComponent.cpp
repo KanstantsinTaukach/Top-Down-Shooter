@@ -536,23 +536,6 @@ bool UTDSInventoryComponent::CheckCanTakeAmmo(EWeaponType WeaponType)
 	return Result;
 }
 
-bool UTDSInventoryComponent::CheckCanTakeWeapon(int32& FreeSlot)
-{
-	bool bIsFreeSlot = false;
-	int8 i = 0;
-	while (i < WeaponSlots.Num() && !bIsFreeSlot)
-	{
-		if (WeaponSlots[i].NameItem.IsNone())
-		{
-			bIsFreeSlot = true;
-			FreeSlot = i;
-		}
-		++i;
-	}
-
-	return bIsFreeSlot;
-}
-
 bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar, FDropItem& DropItemInfo)
 {
 	bool Result = false;
@@ -588,15 +571,16 @@ bool UTDSInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlotToDrop,
 
 bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 {
-	int32 IndexSlot = -1;
-	if (CheckCanTakeWeapon(IndexSlot))
+	int8 i = 0;
+	while (i < WeaponSlots.Num())
 	{
-		if (WeaponSlots.IsValidIndex(IndexSlot))
+		if (WeaponSlots[i].NameItem.IsNone() && WeaponSlots.IsValidIndex(i))
 		{
-			WeaponSlots[IndexSlot] = NewWeapon;
-			OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
+			WeaponSlots[i] = NewWeapon;
+			OnUpdateWeaponSlots.Broadcast(i, NewWeapon);
 			return true;
 		}
+		++i;
 	}
 
 	return false;

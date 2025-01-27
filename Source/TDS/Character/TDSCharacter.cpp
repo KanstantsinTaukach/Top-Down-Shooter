@@ -10,6 +10,7 @@
 #include "../Components/TDSInventoryComponent.h"
 #include "../Weapons/TDS_WeaponDefault.h"
 #include "../Game/TDSGameInstance.h"
+#include "../Pickups/TDSWeaponPickup.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -465,6 +466,11 @@ void ATDSCharacter::WeaponReloadStart(UAnimMontage* AnimMontage)
 	WeaponReloadStart_BP(AnimMontage);
 }
 
+void ATDSCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* AnimMontage)
+{
+	//in BP
+}
+
 void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract)
 {
 	if (InventoryComponent && CurrentWeapon)
@@ -474,6 +480,11 @@ void ATDSCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoToSubtract)
 	}
 
 	WeaponReloadEnd_BP(bIsSuccess);
+}
+
+void ATDSCharacter::WeaponReloadEnd_BP_Implementation(bool bIsSuccess)
+{
+	//in BP
 }
 
 void ATDSCharacter::WeaponFire(UAnimMontage* AnimMontage)
@@ -486,17 +497,27 @@ void ATDSCharacter::WeaponFire(UAnimMontage* AnimMontage)
 	WeaponFire_BP(AnimMontage);
 }
 
-void ATDSCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* AnimMontage)
-{
-	//in BP
-}
-
-void ATDSCharacter::WeaponReloadEnd_BP_Implementation(bool bIsSuccess)
-{
-	//in BP
-}
-
 void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
+{
+	//in BP
+}
+
+void ATDSCharacter::StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup)
+{
+	StartSwitchWeapon_BP(WeaponPickup);
+}
+
+void ATDSCharacter::StartSwitchWeapon_BP_Implementation(ATDSWeaponPickup* WeaponPickup)
+{
+	//in BP
+}
+
+void ATDSCharacter::EndSwitchWeapon()
+{
+	EndSwitchWeapon_BP();
+}
+
+void ATDSCharacter::EndSwitchWeapon_BP_Implementation()
 {
 	//in BP
 }

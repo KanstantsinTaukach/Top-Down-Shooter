@@ -18,9 +18,6 @@ class TDS_API UTDSInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-private:
-	bool CheckCanTakeWeapon(int32& FreeSlot);
-
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<FWeaponSlot> WeaponSlots;

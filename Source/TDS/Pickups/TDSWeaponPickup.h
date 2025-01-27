@@ -4,11 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "TDSBasePickup.h"
+#include "../FunctionLibrary/Types.h"
 #include "TDSWeaponPickup.generated.h"
 
 UCLASS()
 class TDS_API ATDSWeaponPickup : public ATDSBasePickup
 {
 	GENERATED_BODY()
-	
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void ChangePickupValue(FWeaponSlot NewWeaponSlot);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+	FWeaponSlot WeaponSlot;
+
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+
+private:
+	virtual bool GivePickupTo(APawn* PlayerPawn) override;	
 };

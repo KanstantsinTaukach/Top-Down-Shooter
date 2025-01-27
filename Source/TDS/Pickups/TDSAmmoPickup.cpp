@@ -14,14 +14,16 @@ bool ATDSAmmoPickup::GivePickupTo(APawn* PlayerPawn)
 	}
 
 	const auto InventoryComponent = Cast<UTDSInventoryComponent>(PlayerPawn->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
+	if (!InventoryComponent)
+	{
+		return false;
+	}
 
 	bool Result = InventoryComponent->CheckCanTakeAmmo(WeaponType);
 	if (Result)
 	{
 		InventoryComponent->AmmoSlotChangeValue(WeaponType, BulletsAmount);
 	}
-
-	UE_LOG(ATDSAmmoPickupLog, Display, TEXT("ATDSAmmoPickup::NotifyActorBeginOverlap - Pickup was taken"));
 
 	return Result;
 }
