@@ -2,6 +2,8 @@
 
 #include "TDSBasePickup.h"
 #include "Components/SphereComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 ATDSBasePickup::ATDSBasePickup()
 {
@@ -21,7 +23,7 @@ ATDSBasePickup::ATDSBasePickup()
 	PickupSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 	PickupSkeletalMesh->SetGenerateOverlapEvents(false);
 	PickupSkeletalMesh->SetCollisionProfileName("NoCollision");
-	PickupSkeletalMesh->SetupAttachment(RootComponent);
+	PickupSkeletalMesh->SetupAttachment(RootComponent);	
 }
 
 void ATDSBasePickup::BeginPlay()
@@ -86,6 +88,11 @@ void ATDSBasePickup::PickupSuccess()
 	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		
 	Destroy();
+
+	if (NiagaraComponent)
+	{
+		NiagaraComponent->DestroyComponent();
+	}
 }
 
 void ATDSBasePickup::InitSelf()
@@ -99,6 +106,8 @@ void ATDSBasePickup::InitSelf()
 	{
 		PickupStaticMesh->DestroyComponent(true);
 	}
+
+	NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupVFX, GetActorLocation());
 }
 
 void ATDSBasePickup::GenerateRotationYaw()

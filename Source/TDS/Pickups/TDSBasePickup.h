@@ -7,6 +7,8 @@
 #include "TDSBasePickup.generated.h"
 
 class USphereComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class TDS_API ATDSBasePickup : public AActor
@@ -19,6 +21,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
+	UNiagaraComponent* NiagaraComponent;
+
 	UPROPERTY(VisibleAnywhere, Category = "Pickup")
 	USphereComponent* CollisionComponent = nullptr;
 
@@ -27,6 +31,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Pickup")
 	USkeletalMeshComponent* PickupSkeletalMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "VFX")
+	UNiagaraSystem* PickupVFX;
 
 	UPROPERTY()
 	TArray<APawn*> OverlappingPawns;
