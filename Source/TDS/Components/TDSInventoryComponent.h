@@ -18,15 +18,6 @@ class TDS_API UTDSInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<FWeaponSlot> WeaponSlots;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<FAmmoSlot> AmmoSlots;
-
-	int32 MaximumSlotIndex = 0;
-
 public:
 	UTDSInventoryComponent();
 
@@ -73,4 +64,24 @@ public:
 	bool CheckAmmoForWeapon(EWeaponType WeaponType, int32 &AvailableAmmoForWeapon);
 
 	FAdditionalWeaponInfo GetAdditionalInfoWeapon(int32 IndexWeapon);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TArray<FWeaponSlot> WeaponSlots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TArray<FAmmoSlot> AmmoSlots;
+
+	int32 MaximumSlotIndex = 0;
+
+private:
+	int32 NormalizeIndex(int32 Index) const;
+	bool TrySwitchToWeapon(int32 Index, int32 OldIndex);
+	bool HasAmmoForWeapon(FName WeaponName) const;
+	bool FindNextWeapon(int32 StartIndex, int32 OldIndex);
+	bool FindPreviousWeapon(int32 StartIndex, int32 OldIndex);
+
+	int32 CurrentWeaponIndex = -1;
+	FName CurrentWeaponId;
+	FAdditionalWeaponInfo CurrentAdditionalInfo;
 };

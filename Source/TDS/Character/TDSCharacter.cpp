@@ -75,6 +75,7 @@ void ATDSCharacter::BeginPlay()
 	}
 
 	check(StaminaComponent);
+	check(InventoryComponent);
 
 	OnStaminaChanged(StaminaComponent->GetStamina());
 	
@@ -504,22 +505,10 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 
 void ATDSCharacter::StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup)
 {
-	StartSwitchWeapon_BP(WeaponPickup);
-}
-
-void ATDSCharacter::StartSwitchWeapon_BP_Implementation(ATDSWeaponPickup* WeaponPickup)
-{
-	//in BP
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
-	EndSwitchWeapon_BP();
-}
-
-void ATDSCharacter::EndSwitchWeapon_BP_Implementation()
-{
-	//in BP
 }
 
 

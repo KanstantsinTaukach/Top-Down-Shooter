@@ -72,13 +72,9 @@ public:
 
 	UFUNCTION()
 	void StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup);
-	UFUNCTION(BlueprintNativeEvent)
-	void StartSwitchWeapon_BP(ATDSWeaponPickup* WeaponPickup);
 
 	UFUNCTION()
 	void EndSwitchWeapon();
-	UFUNCTION(BlueprintNativeEvent)
-	void EndSwitchWeapon_BP();
 
 protected:
 	float AxisX = 0.0f;
