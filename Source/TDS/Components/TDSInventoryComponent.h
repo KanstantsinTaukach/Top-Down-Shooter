@@ -52,6 +52,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetDropItemInfoFromInventory(int32 IndexSlotToDrop, FDropItem & DropItemInfo);
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool PlayerHasWeapon() const { return HasThisWeapon; };
+
 	const TArray<FWeaponSlot>& GetWeaponSlots() const { return WeaponSlots; };
 
 	bool SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo, bool bIsForward);
@@ -84,4 +87,6 @@ private:
 	int32 CurrentWeaponIndex = -1;
 	FName CurrentWeaponId;
 	FAdditionalWeaponInfo CurrentAdditionalInfo;
+
+	bool HasThisWeapon = false;
 };

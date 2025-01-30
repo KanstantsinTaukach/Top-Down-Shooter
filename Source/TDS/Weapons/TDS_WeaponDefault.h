@@ -39,6 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetWeaponRound();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
+	void DropWeaponBP();
+
 	void Fire();
 
 	void UpdateStateWeapon(EMovementState InMovementState);

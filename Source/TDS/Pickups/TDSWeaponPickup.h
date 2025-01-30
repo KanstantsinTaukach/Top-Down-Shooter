@@ -22,6 +22,8 @@ protected:
 
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
+	virtual void BeginPlay();
+
 private:
 	virtual bool GivePickupTo(APawn* PlayerPawn) override;	
 };

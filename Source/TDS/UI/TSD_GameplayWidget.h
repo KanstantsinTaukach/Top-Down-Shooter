@@ -29,6 +29,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	bool IsPlayerFiring() const;
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool PlayerWantsToChangeWeapon() const;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool PlayerHasThisWeapon() const;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* StaminaBar;

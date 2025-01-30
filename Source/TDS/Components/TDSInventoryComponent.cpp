@@ -359,6 +359,15 @@ bool UTDSInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlotToDrop,
 
 bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 {
+	for (int j = 0; j < WeaponSlots.Num(); ++j)
+	{
+		if (WeaponSlots[j].NameItem == NewWeapon.NameItem)
+		{
+			HasThisWeapon = true;
+			return false;
+		}
+	}
+
 	int8 i = 0;
 	while (i < WeaponSlots.Num())
 	{

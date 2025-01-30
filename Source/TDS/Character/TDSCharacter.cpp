@@ -129,6 +129,8 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction(TEXT("SwitchNextWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchNextWeapon);
 	PlayerInputComponent->BindAction(TEXT("SwitchPreviousWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchPreviousWeapon);
+
+	PlayerInputComponent->BindAction(TEXT("DropWeapon"), IE_Pressed, this, &ATDSCharacter::DropWeapon);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -505,10 +507,12 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 
 void ATDSCharacter::StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup)
 {
+	WantToChangeWeapon = true;
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
+	WantToChangeWeapon = false;
 }
 
 
@@ -569,5 +573,22 @@ void ATDSCharacter::TrySwitchPreviousWeapon()
 
 			}
 		}
+	}
+}
+
+void ATDSCharacter::DropWeapon()
+{
+	if (CurrentWeapon) 
+	{
+		if (CurrentWeapon->GetReloadState())
+		{
+			CurrentWeapon->CancelReload();
+		}
+
+		CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		CurrentWeapon->SetOwner(nullptr);
+		CurrentWeapon->DropWeaponBP();
+
+
 	}
 }

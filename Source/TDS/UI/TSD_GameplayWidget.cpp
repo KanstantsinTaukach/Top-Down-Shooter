@@ -4,6 +4,7 @@
 #include "TSD_GameplayWidget.h"
 #include "Components/ProgressBar.h"
 #include "../Components/TDSStaminaComponent.h"
+#include "../Components/TDSInventoryComponent.h"
 #include "../Character/TDSCharacter.h"
 #include "../Weapons/TDS_WeaponDefault.h"
 
@@ -63,13 +64,13 @@ bool UTSD_GameplayWidget::IsPlayerReloading() const
 	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
 	if (!PlayerCharacter)
 	{
-		return 0.0f;
+		return false;
 	}
 
 	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
 	if (!Weapon)
 	{
-		return 0.0f;
+		return false;
 	}
 
 	return Weapon->GetReloadState();
@@ -80,14 +81,59 @@ bool UTSD_GameplayWidget::IsPlayerFiring() const
 	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
 	if (!PlayerCharacter)
 	{
-		return 0.0f;
+		return false;
 	}
 
 	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
 	if (!Weapon)
 	{
-		return 0.0f;
+		return false;
 	}
 
 	return Weapon->GetFireState();
+}
+
+bool UTSD_GameplayWidget::PlayerWantsToChangeWeapon() const
+{
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return false;
+	}
+
+	const auto Component = PlayerCharacter->GetComponentByClass(UTDSInventoryComponent::StaticClass());
+	const auto InventoryComponent = Cast<UTDSInventoryComponent>(Component);
+	if (!InventoryComponent)
+	{
+		return false;
+	}
+	if (!InventoryComponent->PlayerHasWeapon())
+	{
+		return PlayerCharacter->PlayerWantsToChangeWeapon();
+	}
+
+	return false;
+}
+
+bool UTSD_GameplayWidget::PlayerHasThisWeapon() const
+{
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return false;
+	}
+
+	const auto Component = PlayerCharacter->GetComponentByClass(UTDSInventoryComponent::StaticClass());
+	const auto InventoryComponent = Cast<UTDSInventoryComponent>(Component);
+	if (!InventoryComponent)
+	{
+		return false;
+	}
+
+	if (!PlayerCharacter->PlayerWantsToChangeWeapon())
+	{
+		return InventoryComponent->PlayerHasWeapon();
+	}
+
+	return false;
 }

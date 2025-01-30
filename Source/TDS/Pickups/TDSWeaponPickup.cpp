@@ -4,6 +4,22 @@
 #include "TDSWeaponPickup.h"
 #include "../Components/TDSInventoryComponent.h"
 #include "../Character/TDSCharacter.h"
+#include "../Game/TDSGameInstance.h"
+
+void ATDSWeaponPickup::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UTDSGameInstance* MyGameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
+
+	if (MyGameInstance)
+	{
+		FWeaponInfo WeaponInfo;
+		MyGameInstance->GetWeaponInfoByName(WeaponSlot.NameItem, WeaponInfo);
+		
+		WeaponSlot.AdditionalInfo.Round = WeaponInfo.MaxRound;
+	}
+}
 
 bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 {
@@ -13,8 +29,12 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	}
 
 	const auto InventoryComponent = Cast<UTDSInventoryComponent>(PlayerPawn->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
+	if (!InventoryComponent)
+	{
+		return false;
+	}
 		
-	if (InventoryComponent && InventoryComponent->TryGetWeaponToInventory(WeaponSlot))
+	if (InventoryComponent->TryGetWeaponToInventory(WeaponSlot))
 	{
 		return true;
 	}
@@ -39,3 +59,4 @@ void ATDSWeaponPickup::ChangePickupValue(FWeaponSlot NewWeaponSlot)
 	WeaponSlot.NameItem = NewWeaponSlot.NameItem;
 	WeaponSlot.AdditionalInfo = NewWeaponSlot.AdditionalInfo;
 }
+

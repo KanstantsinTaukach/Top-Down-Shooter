@@ -10,6 +10,7 @@
 #include "../FunctionLibrary/AnimUtils.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "../Components/TDSInventoryComponent.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
 
