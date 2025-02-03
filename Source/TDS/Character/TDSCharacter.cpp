@@ -512,7 +512,7 @@ void ATDSCharacter::StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup)
 
 void ATDSCharacter::EndSwitchWeapon()
 {
-	WantToChangeWeapon = false;
+	//WantToChangeWeapon = false;
 }
 
 

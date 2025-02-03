@@ -22,7 +22,8 @@ enum class EWeaponType : uint8
 	ShotgunType UMETA(DisplayName = "Shotgun"),	
 	GrenadeLauncherType UMETA(DisplayName = "GrenadeLauncher"),
 	RocketLauncherType UMETA(DisplayName = "RocketLauncher"),
-	SniperRifleType UMETA(DisplayName = "SniperRifle")
+	SniperRifleType UMETA(DisplayName = "SniperRifle"),
+	None UMETA(DisplayName = "None")
 };
 
 USTRUCT(BlueprintType)
@@ -256,6 +257,9 @@ struct FWeaponSlot
 	FName NameItem;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
+	EWeaponType WeaponType = EWeaponType::RifleType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
 	FAdditionalWeaponInfo AdditionalInfo;
 };
 
@@ -264,13 +268,13 @@ struct FAmmoSlot
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo Slot")
 	EWeaponType WeaponType = EWeaponType::RifleType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo Slot")
 	int32 Bullets = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo Slot")
 	int32 MaxBullets = 100;
 };
 
