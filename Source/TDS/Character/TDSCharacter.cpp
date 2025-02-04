@@ -424,7 +424,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 
 					if (InventoryComponent)
 					{
-						//InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeapon->SetWeaponSettings.WeaponType);
+						InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeaponInfo.WeaponType);
 					}
 				}
 			}
