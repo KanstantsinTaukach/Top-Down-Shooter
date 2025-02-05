@@ -42,23 +42,6 @@ float UTSD_GameplayWidget::GetReloadPercent() const
 	return Weapon->GetReloadPercent();
 }
 
-float UTSD_GameplayWidget::GetAmmoPercent() const
-{
-
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return 0.0f;
-	}
-
-	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
-	if (!Weapon)
-	{
-		return 0.0f;
-	}
-	return Weapon->GetProjectilesQuantityPercent();
-}
-
 bool UTSD_GameplayWidget::IsPlayerReloading() const
 {
 	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
@@ -76,23 +59,6 @@ bool UTSD_GameplayWidget::IsPlayerReloading() const
 	return Weapon->GetReloadState();
 }
 
-bool UTSD_GameplayWidget::IsPlayerFiring() const
-{
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return false;
-	}
-
-	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
-	if (!Weapon)
-	{
-		return false;
-	}
-
-	return Weapon->GetFireState();
-}
-
 bool UTSD_GameplayWidget::PlayerWantsToChangeWeapon() const
 {
 	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
@@ -107,33 +73,6 @@ bool UTSD_GameplayWidget::PlayerWantsToChangeWeapon() const
 	{
 		return false;
 	}
-	if (!InventoryComponent->PlayerHasWeapon())
-	{
-		return PlayerCharacter->PlayerWantsToChangeWeapon();
-	}
 
-	return false;
-}
-
-bool UTSD_GameplayWidget::PlayerHasThisWeapon() const
-{
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return false;
-	}
-
-	const auto Component = PlayerCharacter->GetComponentByClass(UTDSInventoryComponent::StaticClass());
-	const auto InventoryComponent = Cast<UTDSInventoryComponent>(Component);
-	if (!InventoryComponent)
-	{
-		return false;
-	}
-
-	if (!PlayerCharacter->PlayerWantsToChangeWeapon())
-	{
-		return InventoryComponent->PlayerHasWeapon();
-	}
-
-	return false;
+	return (PlayerCharacter->PlayerWantsToChangeWeapon());
 }

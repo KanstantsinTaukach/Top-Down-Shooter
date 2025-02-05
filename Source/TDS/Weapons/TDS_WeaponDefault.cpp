@@ -583,46 +583,54 @@ void ATDS_WeaponDefault::SpawnMuzzleEffects() const
 
 void ATDS_WeaponDefault::SpawnTrailEffect()
 {
-	if (WeaponSettings.ProjectileSettings.ProjectileTrailFX && ShootLocation)
+	if (!WeaponSettings.ProjectileSettings.ProjectileTrailFX || !ShootLocation)
 	{
-		UParticleSystemComponent* TrailFX = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.ProjectileTrailFX, ShootLocation->GetComponentTransform());
-
-		if (TrailFX)
-		{
-			FVector TraceStart = ShootLocation->GetComponentLocation();
-			FVector TraceEnd = GetFireEndLocation() * WeaponSettings.DistanceTrace;
-
-			TArray<AActor*> Actors;
-			FHitResult Hit;
-
-			if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), TraceStart, TraceEnd, ETraceTypeQuery::TraceTypeQuery4, false, Actors, EDrawDebugTrace::None, Hit, true))
-			{
-				TraceEnd = Hit.Location;
-			}
-
-			TrailFX->SetWorldLocation(TraceStart);
-
-			float Distance = FVector::Dist(TraceStart, TraceEnd);
-			float Speed = Distance / TraceSpeed;
-
-			FVector Direction = (TraceEnd - TraceStart).GetSafeNormal();
-
-			GetWorld()->GetTimerManager().SetTimer(FXTimerHandle, FTimerDelegate::CreateLambda([this, TrailFX, Direction, TraceEnd, Speed]()
-				{
-					FVector NewLocation = TrailFX->GetComponentLocation() + Direction * Speed * GetWorld()->GetDeltaSeconds();
-					TrailFX->SetWorldLocation(NewLocation);
-
-					if ((NewLocation - TraceEnd).SizeSquared() <= 100.0f)
-					{
-						TrailFX->Deactivate();
-						TrailFX->DestroyComponent();
-
-						GetWorld()->GetTimerManager().ClearTimer(FXTimerHandle);
-					}
-
-				}), 0.01f, true);
-		}
+		UE_LOG(TDSWeaponDefaultLog, Warning, TEXT("ATDS_WeaponDefault::SpawnTrailEffect: Missing TrailFX of ShootLocation"));
+		return;
 	}
+
+	UParticleSystemComponent* TrailFX = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.ProjectileTrailFX, ShootLocation->GetComponentTransform());
+
+	if (!TrailFX)
+	{
+		UE_LOG(TDSWeaponDefaultLog, Warning, TEXT("ATDS_WeaponDefault::Failed to spawn TrailFX"));
+		return;
+	}
+
+	FVector TraceStart = ShootLocation->GetComponentLocation();
+	FVector TraceEnd = GetFireEndLocation() * WeaponSettings.DistanceTrace;
+
+	TArray<AActor*> ActorsToIgnore;
+	FHitResult Hit;
+
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), TraceStart, TraceEnd, ETraceTypeQuery::TraceTypeQuery4, false, ActorsToIgnore, EDrawDebugTrace::None, Hit, true))
+	{
+		TraceEnd = Hit.Location;
+	}
+
+	TrailFX->SetWorldLocation(TraceStart);
+
+	FVector Direction = (TraceEnd - TraceStart).GetSafeNormal();
+	float Distance = FVector::Dist(TraceStart, TraceEnd);
+	float Speed = TraceSpeed > 0.0f ? TraceSpeed : 0.5f;
+	float TravelTime = Distance / TraceSpeed;
+	
+	GetWorld()->GetTimerManager().SetTimer(FXTimerHandle, FTimerDelegate::CreateLambda([this, TrailFX, Direction, TraceEnd, TravelTime]()
+	{
+		float DeltaTime = GetWorld()->GetDeltaSeconds();
+		FVector NewLocation = TrailFX->GetComponentLocation() + Direction * TravelTime * DeltaTime;
+
+		TrailFX->SetWorldLocation(NewLocation);
+			
+		if (FVector::DistSquared(NewLocation, TraceEnd) <= FMath::Square(10.0f))
+		{
+			TrailFX->Deactivate();
+			TrailFX->DestroyComponent();
+
+			GetWorld()->GetTimerManager().ClearTimer(FXTimerHandle);
+		}
+
+	}), 0.01f, true);
 }
 
 void ATDS_WeaponDefault::HandleHitScan()

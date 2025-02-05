@@ -53,10 +53,3 @@ void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
 
 	Player->EndSwitchWeapon();
 }
-
-void ATDSWeaponPickup::ChangePickupValue(FWeaponSlot NewWeaponSlot)
-{
-	WeaponSlot.NameItem = NewWeaponSlot.NameItem;
-	WeaponSlot.AdditionalInfo = NewWeaponSlot.AdditionalInfo;
-}
-

@@ -127,6 +127,8 @@ protected:
 	UDecalComponent* CurrentCursor = nullptr;
 	ATDS_WeaponDefault* CurrentWeapon = nullptr;
 
+	ATDSWeaponPickup* PickupWeaponToDrop = nullptr;
+
 	virtual void BeginPlay() override;
 
 private:

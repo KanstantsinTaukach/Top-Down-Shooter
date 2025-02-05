@@ -51,13 +51,10 @@ public:
 	bool TryGetWeaponToInventory(FWeaponSlot NewWeapon);
 
 	UFUNCTION(BlueprintCallable)
-	bool SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar, FDropItem& DropItemInfo);
+	bool SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, FDropItem& DropItemInfo);
 
 	UFUNCTION(BlueprintCallable)
 	bool GetDropItemInfoFromInventory(int32 IndexSlotToDrop, FDropItem & DropItemInfo);
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool PlayerHasWeapon() const { return HasThisWeapon; };
 
 	const TArray<FWeaponSlot>& GetWeaponSlots() const { return WeaponSlots; };
 
@@ -91,6 +88,4 @@ private:
 	int32 CurrentWeaponIndex = -1;
 	FName CurrentWeaponId;
 	FAdditionalWeaponInfo CurrentAdditionalInfo;
-
-	bool HasThisWeapon = false;
 };

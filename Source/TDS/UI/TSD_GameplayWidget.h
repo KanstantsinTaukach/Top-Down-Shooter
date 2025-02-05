@@ -21,19 +21,10 @@ public:
 	float GetReloadPercent() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	float GetAmmoPercent() const;
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
 	bool IsPlayerReloading() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool IsPlayerFiring() const;
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
 	bool PlayerWantsToChangeWeapon() const;
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool PlayerHasThisWeapon() const;
 
 protected:
 	UPROPERTY(meta = (BindWidget))

@@ -13,8 +13,7 @@ class TDS_API ATDSWeaponPickup : public ATDSBasePickup
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void ChangePickupValue(FWeaponSlot NewWeaponSlot);
+	FWeaponSlot GetWeaponslot() const { return WeaponSlot; };
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")

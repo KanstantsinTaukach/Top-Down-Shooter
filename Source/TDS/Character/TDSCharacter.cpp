@@ -508,11 +508,12 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 void ATDSCharacter::StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup)
 {
 	WantToChangeWeapon = true;
+	PickupWeaponToDrop = WeaponPickup;
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
-	//WantToChangeWeapon = false;
+	WantToChangeWeapon = false;
 }
 
 
@@ -584,11 +585,24 @@ void ATDSCharacter::DropWeapon()
 		{
 			CurrentWeapon->CancelReload();
 		}
-
-		CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		CurrentWeapon->SetOwner(nullptr);
-		CurrentWeapon->DropWeaponBP();
-
-
+		
+		if (InventoryComponent)
+		{
+			const auto Slots = InventoryComponent->GetWeaponSlots();
+			const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+			FName WeaponName;
+			for (const auto Slot : Slots)
+			{
+				if (MyWeaponInfo.WeaponType == Slot.WeaponType)
+				{
+					WeaponName = Slot.NameItem;
+				}
+			}
+			
+			const auto Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
+			const auto MyWeaponSlot = PickupWeaponToDrop->GetWeaponslot();
+			FDropItem MyDropItem;
+			InventoryComponent->SwitchWeaponToInventory(MyWeaponSlot, Index, MyDropItem);
+		}
 	}
 }

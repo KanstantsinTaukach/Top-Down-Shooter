@@ -324,14 +324,14 @@ bool UTDSInventoryComponent::CheckCanTakeAmmo(EWeaponType WeaponType)
 	return Result;
 }
 
-bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, int32 CurrentIndexWeaponChar, FDropItem& DropItemInfo)
+bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, FDropItem& DropItemInfo)
 {
 	bool Result = false;
 	if (WeaponSlots.IsValidIndex(IndexSlot) && GetDropItemInfoFromInventory(IndexSlot, DropItemInfo))
 	{
 		WeaponSlots[IndexSlot] = NewWeapon;
 
-		SwitchWeaponToIndex(CurrentIndexWeaponChar, -1, NewWeapon.AdditionalInfo, true);
+		SwitchWeaponToIndex(IndexSlot, -1, NewWeapon.AdditionalInfo, true);
 
 		OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
 
@@ -363,7 +363,6 @@ bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 	{
 		if (WeaponSlots[j].NameItem == NewWeapon.NameItem)
 		{
-			HasThisWeapon = true;
 			return false;
 		}
 	}

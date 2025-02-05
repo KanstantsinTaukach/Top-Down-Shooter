@@ -39,9 +39,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetWeaponRound();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
-	void DropWeaponBP();
-
 	void Fire();
 
 	void UpdateStateWeapon(EMovementState InMovementState);
@@ -51,12 +48,7 @@ public:
 
 	float GetReloadPercent() const { return ReloadTimer / WeaponSettings.ReloadTime; };
 
-	/// delete
-	float GetProjectilesQuantityPercent() const { return AdditionalWeaponInfo.Round / WeaponSettings.MaxRound; };
-
 	bool GetReloadState() const { return WeaponReloading; }
-
-	bool GetFireState() const { return WeaponFiring; }
 
 	int32 GetNumberProjectileByShot() const;
 	
@@ -124,7 +116,6 @@ private:
 	bool WeaponReloading = false;
 	bool WeaponAiming = false;
 	bool BlockFire = false;
-
 	// Timer Drop Magazine on reload
 	bool DropClipFlag = false;
 	float DropClipTimer = -1.0f;

@@ -20,6 +20,5 @@ protected:
 	EWeaponType WeaponType = EWeaponType::RifleType;
 
 private:
-	virtual bool GivePickupTo(APawn* PlayerPawn) override;
-	
+	virtual bool GivePickupTo(APawn* PlayerPawn) override;	
 };
