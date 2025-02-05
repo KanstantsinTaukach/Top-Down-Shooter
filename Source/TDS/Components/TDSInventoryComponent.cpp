@@ -324,39 +324,6 @@ bool UTDSInventoryComponent::CheckCanTakeAmmo(EWeaponType WeaponType)
 	return Result;
 }
 
-bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, FDropItem& DropItemInfo)
-{
-	bool Result = false;
-	if (WeaponSlots.IsValidIndex(IndexSlot) && GetDropItemInfoFromInventory(IndexSlot, DropItemInfo))
-	{
-		WeaponSlots[IndexSlot] = NewWeapon;
-
-		SwitchWeaponToIndex(IndexSlot, -1, NewWeapon.AdditionalInfo, true);
-
-		OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
-
-		Result = true;
-	}
-
-	return Result;
-}
-
-bool UTDSInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlotToDrop, FDropItem& DropItemInfo)
-{
-	bool Result = false;
-
-	FName DropItemName = GetWeaponNameBySlotIndex(IndexSlotToDrop);
-
-	UTDSGameInstance* MyGameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
-	if (MyGameInstance)
-	{
-		Result = MyGameInstance->GetDropItemInfoByName(DropItemName, DropItemInfo);
-		DropItemInfo.WeaponSlotInfo.AdditionalInfo = WeaponSlots[IndexSlotToDrop].AdditionalInfo;
-	}
-
-	return Result;
-}
-
 bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 {
 	for (int j = 0; j < WeaponSlots.Num(); ++j)
@@ -380,4 +347,45 @@ bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 	}
 
 	return false;
+}
+
+bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, FDropItem& DropItemInfo)
+{
+	for (int i = 0; i < WeaponSlots.Num(); ++i)
+	{
+		if (WeaponSlots[i].NameItem == NewWeapon.NameItem)
+		{
+			UE_LOG(TDSInventoryComponentLog, Display, TEXT("UTDSInventoryComponent::SwitchWeaponToInventory - You already have this weapon"));
+			return false;
+		}
+	}
+
+	if (WeaponSlots.IsValidIndex(IndexSlot) && GetDropItemInfoFromInventory(IndexSlot, DropItemInfo))
+	{
+		WeaponSlots[IndexSlot] = NewWeapon;
+
+		SwitchWeaponToIndex(IndexSlot, IndexSlot, NewWeapon.AdditionalInfo, true);
+
+		OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool UTDSInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlotToDrop, FDropItem& DropItemInfo)
+{
+	bool Result = false;
+
+	FName DropItemName = GetWeaponNameBySlotIndex(IndexSlotToDrop);
+
+	UTDSGameInstance* MyGameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
+	if (MyGameInstance)
+	{
+		Result = MyGameInstance->GetDropItemInfoByName(DropItemName, DropItemInfo);
+		DropItemInfo.WeaponSlotInfo.AdditionalInfo = WeaponSlots[IndexSlotToDrop].AdditionalInfo;
+	}
+
+	return Result;
 }

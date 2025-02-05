@@ -41,10 +41,26 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	else
 	{
 		const auto Player = Cast<ATDSCharacter>(InventoryComponent->GetOwner());
-		Player->StartSwitchWeapon(this);
+		Player->StartSwitchWeapon(WeaponSlot);
+
+		if (Player->PlayerWantsToChangeWeapon())
+		{
+			return true;
+		}
 	}
 	
 	return false;
+}
+
+void ATDSWeaponPickup::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	const auto Pawn = Cast<APawn>(OtherActor);
+	if (GivePickupTo(Pawn))
+	{
+		ATDSBasePickup::PickupSuccess();
+	}
 }
 
 void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)

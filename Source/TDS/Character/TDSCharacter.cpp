@@ -505,21 +505,15 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 	//in BP
 }
 
-void ATDSCharacter::StartSwitchWeapon(ATDSWeaponPickup* WeaponPickup)
+void ATDSCharacter::StartSwitchWeapon(FWeaponSlot PickupWeaponSlot)
 {
-	WantToChangeWeapon = true;
-	PickupWeaponToDrop = WeaponPickup;
+	PickupWeapon = PickupWeaponSlot;
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
 	WantToChangeWeapon = false;
 }
-
-
-
-
-
 
 // in one func
 void ATDSCharacter::TrySwitchNextWeapon()
@@ -588,10 +582,10 @@ void ATDSCharacter::DropWeapon()
 		
 		if (InventoryComponent)
 		{
-			const auto Slots = InventoryComponent->GetWeaponSlots();
-			const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+			auto Slots = InventoryComponent->GetWeaponSlots();
+			auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
 			FName WeaponName;
-			for (const auto Slot : Slots)
+			for (auto Slot : Slots)
 			{
 				if (MyWeaponInfo.WeaponType == Slot.WeaponType)
 				{
@@ -599,10 +593,16 @@ void ATDSCharacter::DropWeapon()
 				}
 			}
 			
-			const auto Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
-			const auto MyWeaponSlot = PickupWeaponToDrop->GetWeaponslot();
+			int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
 			FDropItem MyDropItem;
-			InventoryComponent->SwitchWeaponToInventory(MyWeaponSlot, Index, MyDropItem);
+			if (InventoryComponent->SwitchWeaponToInventory(PickupWeapon, Index, MyDropItem))
+			{
+				WantToChangeWeapon = true;
+			}
+			else
+			{
+				WantToChangeWeapon = false;
+			}
 		}
 	}
 }

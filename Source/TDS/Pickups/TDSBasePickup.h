@@ -18,6 +18,8 @@ class TDS_API ATDSBasePickup : public AActor
 public:
 	ATDSBasePickup();
 
+	void PickupSuccess();
+
 	virtual void Tick(float DeltaTime) override;
 
 protected:
@@ -34,11 +36,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "VFX")
 	UNiagaraSystem* PickupVFX;
-
-	UPROPERTY()
-	TArray<APawn*> OverlappingPawns;
 	
 	virtual void BeginPlay();
+
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
@@ -48,8 +48,6 @@ private:
 	virtual bool GivePickupTo(APawn* PlayerPawn);
 
 	void InitSelf();
-
-	void PickupSuccess();
 
 	void GenerateRotationYaw();
 };
