@@ -52,9 +52,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool IsSprinting() const;
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool PlayerWantsToChangeWeapon() const { return WantToChangeWeapon; };
-
 	UFUNCTION(BlueprintCallable)
 	void AttackCharEvent(bool bIsFiring);
 
@@ -132,7 +129,7 @@ protected:
 private:
 	FWeaponSlot WeaponSlotToSwitch;
 	ATDSWeaponPickup* PickupWeaponToDestroy;
-
+	
 	void InputAxisX(float Value);
 	void InputAxisY(float Value);
 
@@ -149,8 +146,6 @@ private:
 	
 	bool DoSlideUp = true;
 	float CurrentCameraDistance = 0;
-
-	bool WantToChangeWeapon = false;
 
 	FTimerHandle CameraTimerHandle;
 

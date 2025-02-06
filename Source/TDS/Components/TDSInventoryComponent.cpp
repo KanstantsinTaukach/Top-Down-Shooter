@@ -330,9 +330,12 @@ bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 	{
 		if (WeaponSlots[j].NameItem == NewWeapon.NameItem)
 		{
+			WeaponExistsInInventory = true;
 			return false;
 		}
 	}
+
+	WeaponExistsInInventory = false;
 
 	int8 i = 0;
 	while (i < WeaponSlots.Num())
@@ -355,10 +358,13 @@ bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int3
 	{
 		if (WeaponSlots[i].NameItem == NewWeapon.NameItem)
 		{
+			WeaponExistsInInventory = true;
 			UE_LOG(TDSInventoryComponentLog, Display, TEXT("UTDSInventoryComponent::SwitchWeaponToInventory - Weapon already exists in inventory"));
 			return false;
 		}
 	}
+
+	WeaponExistsInInventory = false;
 
 	if (WeaponSlots.IsValidIndex(IndexSlot) && GetDropItemInfoFromInventory(IndexSlot, DropItemInfo))
 	{

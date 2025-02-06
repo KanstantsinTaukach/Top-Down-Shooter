@@ -509,50 +509,48 @@ void ATDSCharacter::StartSwitchWeapon(FWeaponSlot PickupWeaponSlot, ATDSWeaponPi
 {
 	WeaponSlotToSwitch = PickupWeaponSlot;
 	PickupWeaponToDestroy = PickupActor;
+
+	InventoryComponent->SetIsNewPickupWeaponAllowed(true);
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
-	WantToChangeWeapon = false;
-	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon"));
+	InventoryComponent->SetIsWeaponExistsInInventory(false);
+	InventoryComponent->SetIsNewPickupWeaponAllowed(false);
 }
 
 void ATDSCharacter::DropWeapon()
 {
-	if (CurrentWeapon)
+	if (!CurrentWeapon)
 	{
-		if (CurrentWeapon->GetReloadState())
+		return;
+	}
+
+	if (CurrentWeapon->GetReloadState())
+	{
+		CurrentWeapon->CancelReload();
+	}
+
+	if (InventoryComponent)
+	{
+		auto Slots = InventoryComponent->GetWeaponSlots();
+		auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+		FName WeaponName;
+		for (auto Slot : Slots)
 		{
-			CurrentWeapon->CancelReload();
+			if (MyWeaponInfo.WeaponType == Slot.WeaponType)
+			{
+				WeaponName = Slot.NameItem;
+			}
 		}
-
-		if (InventoryComponent)
+		
+		int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
+		FDropItem MyDropItem;
+		if (InventoryComponent->SwitchWeaponToInventory(WeaponSlotToSwitch, Index, MyDropItem))
 		{
-			auto Slots = InventoryComponent->GetWeaponSlots();
-			auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
-			FName WeaponName;
-			for (auto Slot : Slots)
+			if (PickupWeaponToDestroy)
 			{
-				if (MyWeaponInfo.WeaponType == Slot.WeaponType)
-				{
-					WeaponName = Slot.NameItem;
-				}
-			}
-
-			int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
-			FDropItem MyDropItem;
-			if (InventoryComponent->SwitchWeaponToInventory(WeaponSlotToSwitch, Index, MyDropItem))
-			{
-				WantToChangeWeapon = true;
-
-				if (PickupWeaponToDestroy)
-				{
-					PickupWeaponToDestroy->PickupSuccess();
-				}
-			}
-			else
-			{
-				WantToChangeWeapon = false;
+				PickupWeaponToDestroy->PickupSuccess();
 			}
 		}
 	}

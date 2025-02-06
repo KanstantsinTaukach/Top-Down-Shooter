@@ -65,6 +65,14 @@ public:
 
 	FAdditionalWeaponInfo GetAdditionalInfoWeapon(int32 IndexWeapon);
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool IsWeaponExistsInInventory() const { return WeaponExistsInInventory; };
+	void SetIsWeaponExistsInInventory(bool Exists) { WeaponExistsInInventory = Exists; };
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool GetIsNewPickupWeaponAllowed() const { return IsNewPickupWeaponAllowed; };
+	void SetIsNewPickupWeaponAllowed(bool Exists) { IsNewPickupWeaponAllowed = Exists; };
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<FWeaponSlot> WeaponSlots;
@@ -73,6 +81,9 @@ protected:
 	TArray<FAmmoSlot> AmmoSlots;
 
 	int32 MaximumSlotIndex = 0;
+
+	bool WeaponExistsInInventory = false;
+	bool IsNewPickupWeaponAllowed = false;
 
 private:
 	int32 NormalizeIndex(int32 Index) const;

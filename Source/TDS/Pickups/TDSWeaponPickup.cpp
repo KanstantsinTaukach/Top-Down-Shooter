@@ -44,12 +44,11 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	{
 		const auto Player = Cast<ATDSCharacter>(InventoryComponent->GetOwner());
 		Player->StartSwitchWeapon(WeaponSlot, this);
+	}
 
-		if (Player->PlayerWantsToChangeWeapon())
-		{
-			UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::GivePickupTo - Player wants to change weapon"));
-			return true;
-		}
+	if(InventoryComponent->IsWeaponExistsInInventory())
+	{
+		InventoryComponent->SetIsNewPickupWeaponAllowed(false);
 	}
 
 	UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::GivePickupTo - Pickup failed!"));
@@ -59,6 +58,5 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	const auto Player = Cast<ATDSCharacter>(OtherActor);
-
 	Player->EndSwitchWeapon();
 }

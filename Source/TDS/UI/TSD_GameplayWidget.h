@@ -24,7 +24,10 @@ public:
 	bool IsPlayerReloading() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool PlayerWantsToChangeWeapon() const;
+	bool CheckPlayerCanDropWeapon() const;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool CheckPlayerHasWeapon() const;
 
 protected:
 	UPROPERTY(meta = (BindWidget))

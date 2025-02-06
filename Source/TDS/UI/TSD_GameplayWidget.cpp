@@ -59,7 +59,7 @@ bool UTSD_GameplayWidget::IsPlayerReloading() const
 	return Weapon->GetReloadState();
 }
 
-bool UTSD_GameplayWidget::PlayerWantsToChangeWeapon() const
+bool UTSD_GameplayWidget::CheckPlayerCanDropWeapon() const
 {
 	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
 	if (!PlayerCharacter)
@@ -74,5 +74,23 @@ bool UTSD_GameplayWidget::PlayerWantsToChangeWeapon() const
 		return false;
 	}
 
-	return (PlayerCharacter->PlayerWantsToChangeWeapon());
+	return InventoryComponent->GetIsNewPickupWeaponAllowed();
+}
+
+bool UTSD_GameplayWidget::CheckPlayerHasWeapon() const
+{
+	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
+	if (!PlayerCharacter)
+	{
+		return false;
+	}
+
+	const auto Component = PlayerCharacter->GetComponentByClass(UTDSInventoryComponent::StaticClass());
+	const auto InventoryComponent = Cast<UTDSInventoryComponent>(Component);
+	if (!InventoryComponent)
+	{
+		return false;
+	}
+
+	return InventoryComponent->IsWeaponExistsInInventory();
 }
