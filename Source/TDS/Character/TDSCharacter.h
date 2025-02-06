@@ -10,6 +10,7 @@
 class UTDSStaminaComponent;
 class UTDSInventoryComponent;
 class ATDS_WeaponDefault;
+class ATDSWeaponPickup;
 
 UCLASS(Blueprintable)
 class ATDSCharacter : public ACharacter
@@ -73,7 +74,7 @@ public:
 	void WeaponFire_BP(UAnimMontage* AnimMontage);
 
 	UFUNCTION()
-	void StartSwitchWeapon(FWeaponSlot PickupWeaponSlot);
+	void StartSwitchWeapon(FWeaponSlot PickupWeaponSlot, ATDSWeaponPickup* PickupActor);
 
 	UFUNCTION()
 	void EndSwitchWeapon();
@@ -126,11 +127,12 @@ protected:
 	UDecalComponent* CurrentCursor = nullptr;
 	ATDS_WeaponDefault* CurrentWeapon = nullptr;
 
-	FWeaponSlot PickupWeapon;
-
 	virtual void BeginPlay() override;
 
 private:
+	FWeaponSlot WeaponSlotToSwitch;
+	ATDSWeaponPickup* PickupWeaponToDestroy;
+
 	void InputAxisX(float Value);
 	void InputAxisY(float Value);
 

@@ -5,6 +5,8 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
+DEFINE_LOG_CATEGORY_STATIC(TDSBasePickupLog, All, All);
+
 ATDSBasePickup::ATDSBasePickup()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -50,6 +52,12 @@ void ATDSBasePickup::Tick(float DeltaTime)
 void ATDSBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
+
+	const auto Pawn = Cast<APawn>(OtherActor);
+	if (GivePickupTo(Pawn))
+	{
+		PickupSuccess();
+	}
 }
 
 void ATDSBasePickup::NotifyActorEndOverlap(AActor* OtherActor)
@@ -65,13 +73,14 @@ bool ATDSBasePickup::GivePickupTo(APawn* PlayerPawn)
 void ATDSBasePickup::PickupSuccess()
 {
 	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		
-	Destroy();
 
 	if (NiagaraComponent)
 	{
 		NiagaraComponent->DestroyComponent();
 	}
+
+	Destroy();
+	UE_LOG(TDSBasePickupLog, Display, TEXT("ATDSBasePickup::PickupSuccess - Pickup success!"));
 }
 
 void ATDSBasePickup::InitSelf()

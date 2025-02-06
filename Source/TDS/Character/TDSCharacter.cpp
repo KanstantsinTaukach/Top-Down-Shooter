@@ -61,7 +61,7 @@ ATDSCharacter::ATDSCharacter()
 	InventoryComponent = CreateDefaultSubobject<UTDSInventoryComponent>("InventoryComponent");
 	if (InventoryComponent)
 	{
-		InventoryComponent->OnSwitchWeapon.AddDynamic(this, &ATDSCharacter::InitWeapon);
+		InventoryComponent->OnSwitchWeapon.AddUObject(this, &ATDSCharacter::InitWeapon);
 	}
 }
 
@@ -505,14 +505,57 @@ void ATDSCharacter::WeaponFire_BP_Implementation(UAnimMontage* AnimMontage)
 	//in BP
 }
 
-void ATDSCharacter::StartSwitchWeapon(FWeaponSlot PickupWeaponSlot)
+void ATDSCharacter::StartSwitchWeapon(FWeaponSlot PickupWeaponSlot, ATDSWeaponPickup* PickupActor)
 {
-	PickupWeapon = PickupWeaponSlot;
+	WeaponSlotToSwitch = PickupWeaponSlot;
+	PickupWeaponToDestroy = PickupActor;
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
 	WantToChangeWeapon = false;
+	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon"));
+}
+
+void ATDSCharacter::DropWeapon()
+{
+	if (CurrentWeapon)
+	{
+		if (CurrentWeapon->GetReloadState())
+		{
+			CurrentWeapon->CancelReload();
+		}
+
+		if (InventoryComponent)
+		{
+			auto Slots = InventoryComponent->GetWeaponSlots();
+			auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+			FName WeaponName;
+			for (auto Slot : Slots)
+			{
+				if (MyWeaponInfo.WeaponType == Slot.WeaponType)
+				{
+					WeaponName = Slot.NameItem;
+				}
+			}
+
+			int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
+			FDropItem MyDropItem;
+			if (InventoryComponent->SwitchWeaponToInventory(WeaponSlotToSwitch, Index, MyDropItem))
+			{
+				WantToChangeWeapon = true;
+
+				if (PickupWeaponToDestroy)
+				{
+					PickupWeaponToDestroy->PickupSuccess();
+				}
+			}
+			else
+			{
+				WantToChangeWeapon = false;
+			}
+		}
+	}
 }
 
 // in one func
@@ -566,42 +609,6 @@ void ATDSCharacter::TrySwitchPreviousWeapon()
 			if (InventoryComponent->SwitchWeaponToIndex(CurrentIndexWeapon - 1, OldIndex, OldInfo, false))
 			{
 
-			}
-		}
-	}
-}
-
-void ATDSCharacter::DropWeapon()
-{
-	if (CurrentWeapon) 
-	{
-		if (CurrentWeapon->GetReloadState())
-		{
-			CurrentWeapon->CancelReload();
-		}
-		
-		if (InventoryComponent)
-		{
-			auto Slots = InventoryComponent->GetWeaponSlots();
-			auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
-			FName WeaponName;
-			for (auto Slot : Slots)
-			{
-				if (MyWeaponInfo.WeaponType == Slot.WeaponType)
-				{
-					WeaponName = Slot.NameItem;
-				}
-			}
-			
-			int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
-			FDropItem MyDropItem;
-			if (InventoryComponent->SwitchWeaponToInventory(PickupWeapon, Index, MyDropItem))
-			{
-				WantToChangeWeapon = true;
-			}
-			else
-			{
-				WantToChangeWeapon = false;
 			}
 		}
 	}

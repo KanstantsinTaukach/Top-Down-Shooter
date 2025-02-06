@@ -25,11 +25,7 @@ void ATDSAmmoPickup::NotifyActorBeginOverlap(AActor* OtherActor)
 	Super::NotifyActorBeginOverlap(OtherActor);
 
 	const auto Pawn = Cast<APawn>(OtherActor);
-	if (GivePickupTo(Pawn))
-	{
-		ATDSBasePickup::PickupSuccess();
-	}
-	else if (Pawn)
+	if (Pawn)
 	{
 		OverlappingPawns.Add(Pawn);
 	}

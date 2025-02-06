@@ -355,7 +355,7 @@ bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int3
 	{
 		if (WeaponSlots[i].NameItem == NewWeapon.NameItem)
 		{
-			UE_LOG(TDSInventoryComponentLog, Display, TEXT("UTDSInventoryComponent::SwitchWeaponToInventory - You already have this weapon"));
+			UE_LOG(TDSInventoryComponentLog, Display, TEXT("UTDSInventoryComponent::SwitchWeaponToInventory - Weapon already exists in inventory"));
 			return false;
 		}
 	}
@@ -367,10 +367,12 @@ bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int3
 		SwitchWeaponToIndex(IndexSlot, IndexSlot, NewWeapon.AdditionalInfo, true);
 
 		OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
+		UE_LOG(TDSInventoryComponentLog, Display, TEXT("UTDSInventoryComponent::SwitchWeaponToInventory - Weapon switched successfully"));
 
 		return true;
 	}
 
+	UE_LOG(TDSInventoryComponentLog, Error, TEXT("UTDSInventoryComponent::SwitchWeaponToInventory - Invalid slot or falied to get drop item"));
 	return false;
 }
 

@@ -6,6 +6,8 @@
 #include "../Character/TDSCharacter.h"
 #include "../Game/TDSGameInstance.h"
 
+DEFINE_LOG_CATEGORY_STATIC(TDSWeaponPickupLog, All, All);
+
 void ATDSWeaponPickup::BeginPlay()
 {
 	Super::BeginPlay();
@@ -41,26 +43,17 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	else
 	{
 		const auto Player = Cast<ATDSCharacter>(InventoryComponent->GetOwner());
-		Player->StartSwitchWeapon(WeaponSlot);
+		Player->StartSwitchWeapon(WeaponSlot, this);
 
 		if (Player->PlayerWantsToChangeWeapon())
 		{
+			UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::GivePickupTo - Player wants to change weapon"));
 			return true;
 		}
 	}
-	
+
+	UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::GivePickupTo - Pickup failed!"));
 	return false;
-}
-
-void ATDSWeaponPickup::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-
-	const auto Pawn = Cast<APawn>(OtherActor);
-	if (GivePickupTo(Pawn))
-	{
-		ATDSBasePickup::PickupSuccess();
-	}
 }
 
 void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
