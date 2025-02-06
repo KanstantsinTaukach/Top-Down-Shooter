@@ -79,7 +79,7 @@ struct FProjectileInfo
 	TMap<TEnumAsByte<EPhysicalSurface>, UParticleSystem*> HitFXs;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
-	UMaterialInterface* ExplodeDecal;
+	UMaterialInterface* ExplodeDecal = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	UParticleSystem* ExplodeFX = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))

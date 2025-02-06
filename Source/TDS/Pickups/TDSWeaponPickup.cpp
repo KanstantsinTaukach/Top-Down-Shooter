@@ -46,7 +46,7 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 		Player->StartSwitchWeapon(WeaponSlot, this);
 	}
 
-	if(InventoryComponent->IsWeaponExistsInInventory())
+	if (InventoryComponent->IsWeaponExistsInInventory())
 	{
 		InventoryComponent->SetIsNewPickupWeaponAllowed(false);
 	}

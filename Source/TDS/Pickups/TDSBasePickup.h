@@ -36,6 +36,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "VFX")
 	UNiagaraSystem* PickupVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "Sound")
+	USoundBase* PickupSound = nullptr;
 	
 	virtual void BeginPlay();
 

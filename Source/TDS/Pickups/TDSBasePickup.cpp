@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSBasePickupLog, All, All);
 
@@ -72,6 +73,11 @@ bool ATDSBasePickup::GivePickupTo(APawn* PlayerPawn)
 
 void ATDSBasePickup::PickupSuccess()
 {
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation());
+	}
+
 	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	if (NiagaraComponent)
