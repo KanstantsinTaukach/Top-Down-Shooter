@@ -515,13 +515,14 @@ void ATDSCharacter::StartSwitchWeapon(FWeaponSlot PickupWeaponSlot, ATDSWeaponPi
 
 void ATDSCharacter::EndSwitchWeapon()
 {
+	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon: EndSwitchWeapon called"));
 	InventoryComponent->SetIsWeaponExistsInInventory(false);
 	InventoryComponent->SetIsNewPickupWeaponAllowed(false);
 }
 
 void ATDSCharacter::DropWeapon()
 {
-	if (!CurrentWeapon)
+	if (!GetWorld() || !CurrentWeapon)
 	{
 		return;
 	}
@@ -541,6 +542,7 @@ void ATDSCharacter::DropWeapon()
 			if (MyWeaponInfo.WeaponType == Slot.WeaponType)
 			{
 				WeaponName = Slot.NameItem;
+				break;
 			}
 		}
 		
@@ -552,6 +554,27 @@ void ATDSCharacter::DropWeapon()
 			{
 				PickupWeaponToDestroy->PickupSuccess();
 			}
+		}		
+
+		FTransform Transform;
+		Transform.SetLocation(GetActorLocation() + FVector(10.0f, 10.0f, 0.0f));
+		Transform.SetRotation(FQuat::Identity);
+		Transform.SetScale3D(FVector(1.0f));
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		SpawnParams.Owner = nullptr;
+
+		ATDSWeaponPickup* DropWeapon = GetWorld()->SpawnActor<ATDSWeaponPickup>(ATDSWeaponPickup::StaticClass(), Transform, SpawnParams);
+
+		if (DropWeapon)
+		{
+			UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::DropWeapon: DropWeapon Spawned: %s"), *DropWeapon->GetName());
+			DropWeapon->InitPickup(MyDropItem);
+		}
+		else
+		{
+			UE_LOG(TDSCharacterLog, Error, TEXT("ATDSCharacter::DropWeapon: DropWeapon not spawned"));
 		}
 	}
 }

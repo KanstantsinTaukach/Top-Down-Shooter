@@ -13,9 +13,14 @@ class TDS_API ATDSAmmoPickup : public ATDSBasePickup
 	GENERATED_BODY()
 
 public:
+	ATDSAmmoPickup();
+
 	virtual void Tick(float DeltaTime) override;
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = "Pickup")
+	UStaticMeshComponent* PickupStaticMesh = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup", meta = (ClampMin = "1.0", ClampMax = "30.0"))
 	int32 BulletsAmount = 5;
 
@@ -27,6 +32,8 @@ protected:
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+
+	virtual void BeginPlay() override;
 
 private:
 	virtual bool GivePickupTo(APawn* PlayerPawn) override;	

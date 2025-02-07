@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../FunctionLibrary/Types.h"
 #include "TDSBasePickup.generated.h"
 
 class USphereComponent;
@@ -28,12 +29,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Pickup")
 	USphereComponent* CollisionComponent = nullptr;
 
-	UPROPERTY(VisibleAnywhere, Category = "Pickup")
-	UStaticMeshComponent* PickupStaticMesh = nullptr;
-
-	UPROPERTY(VisibleAnywhere, Category = "Pickup")
-	USkeletalMeshComponent* PickupSkeletalMesh = nullptr;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "VFX")
 	UNiagaraSystem* PickupVFX;
 
@@ -50,7 +45,7 @@ private:
 
 	virtual bool GivePickupTo(APawn* PlayerPawn);
 
-	void InitSelf();
-
 	void GenerateRotationYaw();
+
+	void SpawnPickupVFX();
 };

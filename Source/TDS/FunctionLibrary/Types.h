@@ -4,6 +4,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine/DataTable.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Types.generated.h"
 
 UENUM(BlueprintType)
@@ -284,13 +285,13 @@ struct FDropItem : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Item")
-	UStaticMesh* WeaponStaticMesh = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Item")
 	USkeletalMesh* WeaponSkeletalMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Item")
 	FWeaponSlot WeaponSlotInfo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "Drop Item")
+	UNiagaraSystem* WeaponPickupVFX = nullptr;
 };
 
 UCLASS()

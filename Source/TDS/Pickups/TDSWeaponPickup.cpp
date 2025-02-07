@@ -8,12 +8,21 @@
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponPickupLog, All, All);
 
+ATDSWeaponPickup::ATDSWeaponPickup()
+{
+	PickupSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
+	PickupSkeletalMesh->SetGenerateOverlapEvents(false);
+	PickupSkeletalMesh->SetCollisionProfileName("NoCollision");
+	PickupSkeletalMesh->SetupAttachment(RootComponent);
+}
+
 void ATDSWeaponPickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UTDSGameInstance* MyGameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
+	check(PickupSkeletalMesh);
 
+	UTDSGameInstance* MyGameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
 	if (MyGameInstance)
 	{
 		FWeaponInfo WeaponInfo;
@@ -59,4 +68,29 @@ void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	const auto Player = Cast<ATDSCharacter>(OtherActor);
 	Player->EndSwitchWeapon();
+}
+
+void ATDSWeaponPickup::InitPickup(const FDropItem& DropItemInfo)
+{
+	if (PickupSkeletalMesh && DropItemInfo.WeaponSkeletalMesh)
+	{
+		PickupSkeletalMesh->SetSkeletalMesh(DropItemInfo.WeaponSkeletalMesh);
+		UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::InitPickup - WeaponSkeletalMesh set: %s"), *DropItemInfo.WeaponSkeletalMesh->GetName());
+		
+		if (PickupSkeletalMesh->SkeletalMesh == nullptr)
+		{
+			UE_LOG(TDSWeaponPickupLog, Warning, TEXT("ATDSWeaponPickup::InitPickup - Failed to set SkeletalMesh on PickupSkeletalMesh"));
+		}
+	}
+	else
+	{
+		UE_LOG(TDSWeaponPickupLog, Warning, TEXT("ATDSWeaponPickup::InitPickup - WeaponSkeletalMesh is NULL"));
+	}
+
+	if (DropItemInfo.WeaponPickupVFX)
+	{
+		PickupVFX = DropItemInfo.WeaponPickupVFX;
+		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupVFX, GetActorLocation());
+	}
+	WeaponSlot = DropItemInfo.WeaponSlotInfo;
 }

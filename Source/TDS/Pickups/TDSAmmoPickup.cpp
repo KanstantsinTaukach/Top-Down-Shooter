@@ -6,6 +6,14 @@
 
 DEFINE_LOG_CATEGORY_STATIC(ATDSAmmoPickupLog, All, All);
 
+ATDSAmmoPickup::ATDSAmmoPickup()
+{
+	PickupStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("AmmoStaticMesh");
+	PickupStaticMesh->SetGenerateOverlapEvents(false);
+	PickupStaticMesh->SetCollisionProfileName("NoCollision");
+	PickupStaticMesh->SetupAttachment(RootComponent);
+}
+
 void ATDSAmmoPickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -18,6 +26,13 @@ void ATDSAmmoPickup::Tick(float DeltaTime)
 			break;
 		}
 	}
+}
+
+void ATDSAmmoPickup::BeginPlay()
+{
+	Super::BeginPlay();
+
+	check(PickupStaticMesh);
 }
 
 void ATDSAmmoPickup::NotifyActorBeginOverlap(AActor* OtherActor)

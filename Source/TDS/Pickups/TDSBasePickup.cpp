@@ -18,16 +18,6 @@ ATDSBasePickup::ATDSBasePickup()
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	SetRootComponent(CollisionComponent);
-
-	PickupStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("AmmoStaticMesh");
-	PickupStaticMesh->SetGenerateOverlapEvents(false);
-	PickupStaticMesh->SetCollisionProfileName("NoCollision");
-	PickupStaticMesh->SetupAttachment(RootComponent);
-
-	PickupSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
-	PickupSkeletalMesh->SetGenerateOverlapEvents(false);
-	PickupSkeletalMesh->SetCollisionProfileName("NoCollision");
-	PickupSkeletalMesh->SetupAttachment(RootComponent);	
 }
 
 void ATDSBasePickup::BeginPlay()
@@ -35,11 +25,8 @@ void ATDSBasePickup::BeginPlay()
 	Super::BeginPlay();
 
 	check(CollisionComponent);
-	check(PickupStaticMesh);
-	check(PickupSkeletalMesh);
 
-	InitSelf();
-
+	SpawnPickupVFX();
 	GenerateRotationYaw();
 }
 
@@ -89,23 +76,16 @@ void ATDSBasePickup::PickupSuccess()
 	UE_LOG(TDSBasePickupLog, Display, TEXT("ATDSBasePickup::PickupSuccess - Pickup success!"));
 }
 
-void ATDSBasePickup::InitSelf()
-{
-	if (PickupSkeletalMesh && !PickupSkeletalMesh->SkeletalMesh)
-	{
-		PickupSkeletalMesh->DestroyComponent(true);
-	}
-
-	if (PickupStaticMesh && !PickupStaticMesh->GetStaticMesh())
-	{
-		PickupStaticMesh->DestroyComponent(true);
-	}
-
-	NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupVFX, GetActorLocation());
-}
-
 void ATDSBasePickup::GenerateRotationYaw()
 {
 	const auto Direction = FMath::RandBool() ? 1.0f : -1.0f;
 	RotationYaw = FMath::RandRange(25.0f, 50.0f) * Direction;
+}
+
+void ATDSBasePickup::SpawnPickupVFX()
+{
+	if (PickupVFX)
+	{
+		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupVFX, GetActorLocation());
+	}
 }
