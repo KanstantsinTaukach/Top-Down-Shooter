@@ -26,13 +26,13 @@ public:
 protected:
 	UNiagaraComponent* NiagaraComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Pickup")
+	UPROPERTY(EditDefaultsOnly, Category = "Pickup")
 	USphereComponent* CollisionComponent = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "VFX")
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category = "VFX")
 	UNiagaraSystem* PickupVFX;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "Sound")
+	UPROPERTY(EditAnywhere, BlueprintreadWrite, Category = "Sound")
 	USoundBase* PickupSound = nullptr;
 	
 	virtual void BeginPlay();

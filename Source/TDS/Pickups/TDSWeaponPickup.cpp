@@ -44,6 +44,11 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	{
 		return false;
 	}
+
+	if (InventoryComponent->IsWeaponExistsInInventory())
+	{
+		InventoryComponent->SetIsNewPickupWeaponAllowed(false);
+	}
 		
 	if (InventoryComponent->TryGetWeaponToInventory(WeaponSlot))
 	{
@@ -55,27 +60,23 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 		Player->StartSwitchWeapon(WeaponSlot, this);
 	}
 
-	if (InventoryComponent->IsWeaponExistsInInventory())
-	{
-		InventoryComponent->SetIsNewPickupWeaponAllowed(false);
-	}
-
-	UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::GivePickupTo - Pickup failed!"));
 	return false;
 }
 
 void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorEndOverlap(OtherActor);
+
 	const auto Player = Cast<ATDSCharacter>(OtherActor);
 	Player->EndSwitchWeapon();
 }
 
 void ATDSWeaponPickup::InitPickup(const FDropItem& DropItemInfo)
 {
-	if (PickupSkeletalMesh && DropItemInfo.WeaponSkeletalMesh)
+	if (PickupSkeletalMesh && DropItemInfo.WeaponDropSkeletalMesh)
 	{
-		PickupSkeletalMesh->SetSkeletalMesh(DropItemInfo.WeaponSkeletalMesh);
-		UE_LOG(TDSWeaponPickupLog, Display, TEXT("ATDSWeaponPickup::InitPickup - WeaponSkeletalMesh set: %s"), *DropItemInfo.WeaponSkeletalMesh->GetName());
+		PickupSkeletalMesh->SetSkeletalMesh(DropItemInfo.WeaponDropSkeletalMesh);
+		PickupSkeletalMesh->SetRelativeTransform(DropItemInfo.WeaponDropMeshOffset);
 		
 		if (PickupSkeletalMesh->SkeletalMesh == nullptr)
 		{
@@ -87,10 +88,16 @@ void ATDSWeaponPickup::InitPickup(const FDropItem& DropItemInfo)
 		UE_LOG(TDSWeaponPickupLog, Warning, TEXT("ATDSWeaponPickup::InitPickup - WeaponSkeletalMesh is NULL"));
 	}
 
-	if (DropItemInfo.WeaponPickupVFX)
+	if (DropItemInfo.WeaponDropVFX)
 	{
-		PickupVFX = DropItemInfo.WeaponPickupVFX;
+		PickupVFX = DropItemInfo.WeaponDropVFX;
 		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupVFX, GetActorLocation());
 	}
-	WeaponSlot = DropItemInfo.WeaponSlotInfo;
+
+	if (DropItemInfo.WeaponDropSound)
+	{
+		PickupSound = DropItemInfo.WeaponDropSound;
+	}
+
+	WeaponSlot = DropItemInfo.WeaponDropSlot;
 }

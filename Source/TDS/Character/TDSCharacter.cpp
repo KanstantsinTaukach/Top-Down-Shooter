@@ -534,8 +534,8 @@ void ATDSCharacter::DropWeapon()
 
 	if (InventoryComponent)
 	{
-		auto Slots = InventoryComponent->GetWeaponSlots();
-		auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+		const auto Slots = InventoryComponent->GetWeaponSlots();
+		const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
 		FName WeaponName;
 		for (auto Slot : Slots)
 		{
@@ -546,7 +546,7 @@ void ATDSCharacter::DropWeapon()
 			}
 		}
 		
-		int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
+		const int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
 		FDropItem MyDropItem;
 		if (InventoryComponent->SwitchWeaponToInventory(WeaponSlotToSwitch, Index, MyDropItem))
 		{
@@ -554,10 +554,10 @@ void ATDSCharacter::DropWeapon()
 			{
 				PickupWeaponToDestroy->PickupSuccess();
 			}
-		}		
+		}	
 
 		FTransform Transform;
-		Transform.SetLocation(GetActorLocation() + FVector(10.0f, 10.0f, 0.0f));
+		Transform.SetLocation(GetActorLocation() + FVector(0.0f, 100.0f, -45.0f));
 		Transform.SetRotation(FQuat::Identity);
 		Transform.SetScale3D(FVector(1.0f));
 

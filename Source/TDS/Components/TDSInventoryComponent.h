@@ -92,7 +92,9 @@ private:
 	bool FindNextWeapon(int32 StartIndex, int32 OldIndex);
 	bool FindPreviousWeapon(int32 StartIndex, int32 OldIndex);
 
+	// this class fields needed for the SwitchWeaponToInventory() function
 	int32 CurrentWeaponIndex = -1;
 	FName CurrentWeaponId;
 	FAdditionalWeaponInfo CurrentAdditionalInfo;
+	//
 };

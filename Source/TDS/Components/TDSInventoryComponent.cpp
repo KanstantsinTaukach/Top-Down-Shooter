@@ -392,7 +392,7 @@ bool UTDSInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlotToDrop,
 	if (MyGameInstance)
 	{
 		Result = MyGameInstance->GetDropItemInfoByName(DropItemName, DropItemInfo);
-		DropItemInfo.WeaponSlotInfo.AdditionalInfo = WeaponSlots[IndexSlotToDrop].AdditionalInfo;
+		DropItemInfo.WeaponDropSlot.AdditionalInfo = WeaponSlots[IndexSlotToDrop].AdditionalInfo;
 	}
 
 	return Result;

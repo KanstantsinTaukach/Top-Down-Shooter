@@ -186,57 +186,57 @@ struct FWeaponInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Class")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Class")
 	TSubclassOf<class ATDS_WeaponDefault> WeaponClass = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State")
 	float RateOfFire = 0.1f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State")
 	float ReloadTime = 2.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State")
 	int32 MaxRound = 10;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State")
 	int32 NumberProjectilesByShot = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dispersion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Dispersion")
 	FWeaponDispersion DispersionWeapon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
 	USoundBase* SoundFireWeapon = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
 	USoundBase* SoundReloadWeapon = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FX")
 	UParticleSystem* EffectFireWeapon = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FX")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FX")
 	UParticleSystem* EffectFireWeaponBack = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSettings")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WeaponSettings")
 	FProjectileInfo ProjectileSettings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trace")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Trace")
 	float DistanceTrace = 2000.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitEffect")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HitEffect")
 	UDecalComponent* DecalOnHit = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
 	FAnimationWeaponInfo AnimWeaponInfo;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mesh")
 	FDropMeshInfo ClipDropMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mesh")
 	FDropMeshInfo ShellBullets;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	float SwitchTimeToWeapon = 1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	UTexture2D* WeaponIcon = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	EWeaponType WeaponType = EWeaponType::RifleType;
 };
 
@@ -245,7 +245,7 @@ struct FAdditionalWeaponInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponStats")
 	int32 Round = 0;
 };
 
@@ -254,13 +254,13 @@ struct FWeaponSlot
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WeaponSlot")
 	FName NameItem;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WeaponSlot")
 	EWeaponType WeaponType = EWeaponType::RifleType;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WeaponSlot")
 	FAdditionalWeaponInfo AdditionalInfo;
 };
 
@@ -269,13 +269,13 @@ struct FAmmoSlot
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AmmoSlot")
 	EWeaponType WeaponType = EWeaponType::RifleType;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AmmoSlot")
 	int32 Bullets = 100;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo Slot")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AmmoSlot")
 	int32 MaxBullets = 100;
 };
 
@@ -284,14 +284,20 @@ struct FDropItem : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Item")
-	USkeletalMesh* WeaponSkeletalMesh = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DropItem")
+	USkeletalMesh* WeaponDropSkeletalMesh = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Item")
-	FWeaponSlot WeaponSlotInfo;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DropItem")
+	FWeaponSlot WeaponDropSlot;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "Drop Item")
-	UNiagaraSystem* WeaponPickupVFX = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintreadWrite, Category = "DropItem")
+	UNiagaraSystem* WeaponDropVFX = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DropItem")
+	FTransform WeaponDropMeshOffset = FTransform();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DropItem")
+	USoundBase* WeaponDropSound = nullptr;
 };
 
 UCLASS()

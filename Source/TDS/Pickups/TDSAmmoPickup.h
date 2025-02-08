@@ -18,7 +18,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	UPROPERTY(VisibleAnywhere, Category = "Pickup")
+	UPROPERTY(EditDefaultsOnly, Category = "Pickup")
 	UStaticMeshComponent* PickupStaticMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup", meta = (ClampMin = "1.0", ClampMax = "30.0"))

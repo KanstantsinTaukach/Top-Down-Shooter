@@ -39,7 +39,7 @@ bool UTDSGameInstance::GetDropItemInfoByName(FName ItemName, FDropItem& DropItem
 		while (i < RowNames.Num() && !bIsFind)
 		{
 			DropItemInfoRow = DropItemInfoTable->FindRow<FDropItem>(RowNames[i], "");
-			if (DropItemInfoRow->WeaponSlotInfo.NameItem == ItemName)
+			if (DropItemInfoRow->WeaponDropSlot.NameItem == ItemName)
 			{
 				bIsFind = true;
 				DropItemInfo = *DropItemInfoRow;
