@@ -109,8 +109,13 @@ private:
 	float FireTimer = 0.0f;
 	float ReloadTimer = 0.0f;
 
+	// Variables used to control and update the movement of a projectile trail effect
 	FTimerHandle FXTimerHandle;
-	
+	UParticleSystemComponent* ActiveTrailFX = nullptr;
+	FVector ActiveTrailDirection;
+	FVector ActiveTrailEnd;
+	float ActiveTrailTravelTime = 0.0f;
+
 	// Flags
 	bool WeaponFiring = false;
 	bool WeaponReloading = false;
@@ -136,6 +141,7 @@ private:
 
 	void SpawnMuzzleEffects() const;
 	void SpawnTrailEffect();
+	void UpdateTrailEffect();
 	void SpawnImpactEffects(const FHitResult& Hit);
 
 	void HandleProjectileHit(FProjectileInfo ProjectileInfo);

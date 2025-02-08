@@ -422,7 +422,20 @@ FVector ATDS_WeaponDefault::GetFireEndLocation() const
 
 		if (ShowDebug)
 		{
-			DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), -(ShootLocation->GetComponentLocation() - ShootEndLocation), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+			DrawDebugCone
+			(
+				GetWorld(), 
+				ShootLocation->GetComponentLocation(), 
+				-(ShootLocation->GetComponentLocation() - ShootEndLocation), 
+				WeaponSettings.DistanceTrace, 
+				GetCurrentDispersion() * PI / 180.0f,
+				GetCurrentDispersion() * PI / 180.0f, 
+				32, FColor::Emerald, 
+				false, 
+				0.1f, 
+				(uint8)'\000',
+				1.0f
+			);
 		}
 	}
 	else
@@ -431,7 +444,21 @@ FVector ATDS_WeaponDefault::GetFireEndLocation() const
 
 		if (ShowDebug)
 		{
-			DrawDebugCone(GetWorld(), ShootLocation->GetComponentLocation(), ShootLocation->GetForwardVector(), WeaponSettings.DistanceTrace, GetCurrentDispersion() * PI / 180.0f, GetCurrentDispersion() * PI / 180.0f, 32, FColor::Emerald, false, 0.1f, (uint8)'\000', 1.0f);
+			DrawDebugCone
+			(
+				GetWorld(), 
+				ShootLocation->GetComponentLocation(), 
+				ShootLocation->GetForwardVector(), 
+				WeaponSettings.DistanceTrace, 
+				GetCurrentDispersion() * PI / 180.0f, 
+				GetCurrentDispersion() * PI / 180.0f,
+				32, 
+				FColor::Emerald, 
+				false,
+				0.1f, 
+				(uint8)'\000', 
+				1.0f
+			);
 		}
 	}
 
@@ -614,23 +641,35 @@ void ATDS_WeaponDefault::SpawnTrailEffect()
 	float Distance = FVector::Dist(TraceStart, TraceEnd);
 	float Speed = TraceSpeed > 0.0f ? TraceSpeed : 0.5f;
 	float TravelTime = Distance / TraceSpeed;
+
+	ActiveTrailFX = TrailFX;
+	ActiveTrailDirection = Direction;
+	ActiveTrailEnd = TraceEnd;
+	ActiveTrailTravelTime = TravelTime;
 	
-	GetWorld()->GetTimerManager().SetTimer(FXTimerHandle, FTimerDelegate::CreateLambda([this, TrailFX, Direction, TraceEnd, TravelTime]()
+	GetWorld()->GetTimerManager().SetTimer(FXTimerHandle, this, &ATDS_WeaponDefault::UpdateTrailEffect, 0.01f, true);
+}
+
+void ATDS_WeaponDefault::UpdateTrailEffect()
+{
+	if (!ActiveTrailFX)
 	{
-		float DeltaTime = GetWorld()->GetDeltaSeconds();
-		FVector NewLocation = TrailFX->GetComponentLocation() + Direction * TravelTime * DeltaTime;
+		return;
+	}
 
-		TrailFX->SetWorldLocation(NewLocation);
-			
-		if (FVector::DistSquared(NewLocation, TraceEnd) <= FMath::Square(10.0f))
-		{
-			TrailFX->Deactivate();
-			TrailFX->DestroyComponent();
+	float DeltaTime = GetWorld()->GetDeltaSeconds();
+	FVector NewLocation = ActiveTrailFX->GetComponentLocation() + ActiveTrailDirection * ActiveTrailTravelTime * DeltaTime;
 
-			GetWorld()->GetTimerManager().ClearTimer(FXTimerHandle);
-		}
+	ActiveTrailFX->SetWorldLocation(NewLocation);
 
-	}), 0.01f, true);
+	if (FVector::DistSquared(NewLocation, ActiveTrailEnd) <= FMath::Square(10.0f))
+	{
+		ActiveTrailFX->Deactivate();
+		ActiveTrailFX->DestroyComponent();
+
+		GetWorld()->GetTimerManager().ClearTimer(FXTimerHandle);
+		ActiveTrailFX = nullptr;
+	}
 }
 
 void ATDS_WeaponDefault::HandleHitScan()
