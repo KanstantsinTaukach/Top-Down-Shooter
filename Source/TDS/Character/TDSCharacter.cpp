@@ -102,6 +102,11 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 	}
 	
 	MovementTick(DeltaSeconds);
+
+	if (PickupWeaponToDestroy != nullptr)
+	{
+		IsActorReadyToDropWeapon = PickupWeaponToDestroy->GetIsPlayerOnOverlap();
+	}
 }
 
 void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -522,7 +527,7 @@ void ATDSCharacter::EndSwitchWeapon()
 
 void ATDSCharacter::DropWeapon()
 {
-	if (!GetWorld() || !CurrentWeapon)
+	if (!GetWorld() || !CurrentWeapon || !IsActorReadyToDropWeapon)
 	{
 		return;
 	}
@@ -555,29 +560,29 @@ void ATDSCharacter::DropWeapon()
 				PickupWeaponToDestroy->PickupSuccess();
 			}
 		}	
+			
+			FTransform Transform;
+			Transform.SetLocation(GetActorLocation() + FVector(0.0f, 100.0f, -45.0f));
+			Transform.SetRotation(FQuat::Identity);
+			Transform.SetScale3D(FVector(1.0f));
 
-		FTransform Transform;
-		Transform.SetLocation(GetActorLocation() + FVector(0.0f, 100.0f, -45.0f));
-		Transform.SetRotation(FQuat::Identity);
-		Transform.SetScale3D(FVector(1.0f));
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+			SpawnParams.Owner = nullptr;
 
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		SpawnParams.Owner = nullptr;
+			ATDSWeaponPickup* DropWeapon = GetWorld()->SpawnActor<ATDSWeaponPickup>(ATDSWeaponPickup::StaticClass(), Transform, SpawnParams);
 
-		ATDSWeaponPickup* DropWeapon = GetWorld()->SpawnActor<ATDSWeaponPickup>(ATDSWeaponPickup::StaticClass(), Transform, SpawnParams);
-
-		if (DropWeapon)
-		{
-			UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::DropWeapon: DropWeapon Spawned: %s"), *DropWeapon->GetName());
-			DropWeapon->InitPickup(MyDropItem);
-		}
-		else
-		{
-			UE_LOG(TDSCharacterLog, Error, TEXT("ATDSCharacter::DropWeapon: DropWeapon not spawned"));
+			if (DropWeapon)
+			{
+				UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::DropWeapon: DropWeapon Spawned: %s"), *DropWeapon->GetName());
+				DropWeapon->InitPickup(MyDropItem);
+			}
+			else
+			{
+				UE_LOG(TDSCharacterLog, Error, TEXT("ATDSCharacter::DropWeapon: DropWeapon not spawned"));
+			}
 		}
 	}
-}
 
 // in one func
 void ATDSCharacter::TrySwitchNextWeapon()

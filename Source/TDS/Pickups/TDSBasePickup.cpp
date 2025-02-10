@@ -41,8 +41,10 @@ void ATDSBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
+	IsPlayerOnOverlap = true;
+
 	const auto Pawn = Cast<APawn>(OtherActor);
-	if (GivePickupTo(Pawn))
+	if (GivePickupTo(Pawn) && IsPlayerOnOverlap)
 	{
 		PickupSuccess();
 	}
@@ -51,6 +53,8 @@ void ATDSBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 void ATDSBasePickup::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
+
+	IsPlayerOnOverlap = false;
 }
 
 bool ATDSBasePickup::GivePickupTo(APawn* PlayerPawn)

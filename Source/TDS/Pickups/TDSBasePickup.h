@@ -21,10 +21,14 @@ public:
 
 	void PickupSuccess();
 
+	bool GetIsPlayerOnOverlap() const { return IsPlayerOnOverlap; };
+
 	virtual void Tick(float DeltaTime) override;
 
 protected:
 	UNiagaraComponent* NiagaraComponent;
+
+	bool IsPlayerOnOverlap = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Pickup")
 	USphereComponent* CollisionComponent = nullptr;
@@ -40,12 +44,12 @@ protected:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
+	void SpawnPickupVFX();
+
 private:
 	float RotationYaw = 0.0f;
 
 	virtual bool GivePickupTo(APawn* PlayerPawn);
 
 	void GenerateRotationYaw();
-
-	void SpawnPickupVFX();
 };

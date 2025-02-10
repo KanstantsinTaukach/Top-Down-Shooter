@@ -82,6 +82,8 @@ protected:
 
 	int32 CurrentIndexWeapon = 0;
 
+	bool IsActorReadyToDropWeapon = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
 
@@ -127,8 +129,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	// Variables used to get and drop pickups
 	FWeaponSlot WeaponSlotToSwitch;
 	ATDSWeaponPickup* PickupWeaponToDestroy;
+	//
 	
 	void InputAxisX(float Value);
 	void InputAxisY(float Value);

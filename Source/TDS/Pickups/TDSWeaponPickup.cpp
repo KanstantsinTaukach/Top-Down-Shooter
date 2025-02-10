@@ -49,6 +49,11 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	{
 		InventoryComponent->SetIsNewPickupWeaponAllowed(false);
 	}
+
+	if (InventoryComponent->GetIsNewPickupWeaponAllowed())
+	{
+		InventoryComponent->SetIsWeaponExistsInInventory(false);
+	}
 		
 	if (InventoryComponent->TryGetWeaponToInventory(WeaponSlot))
 	{
@@ -68,8 +73,8 @@ void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
 	Super::NotifyActorEndOverlap(OtherActor);
 
 	const auto Player = Cast<ATDSCharacter>(OtherActor);
-	Player->EndSwitchWeapon();
-}
+		Player->EndSwitchWeapon();
+	}
 
 void ATDSWeaponPickup::InitPickup(const FDropItem& DropItemInfo)
 {
@@ -91,7 +96,7 @@ void ATDSWeaponPickup::InitPickup(const FDropItem& DropItemInfo)
 	if (DropItemInfo.WeaponDropVFX)
 	{
 		PickupVFX = DropItemInfo.WeaponDropVFX;
-		NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PickupVFX, GetActorLocation());
+		SpawnPickupVFX();
 	}
 
 	if (DropItemInfo.WeaponDropSound)

@@ -96,6 +96,7 @@ bool UTDSInventoryComponent::TrySwitchToWeapon(int32 Index, int32 OldIndex)
 		return false;
 	}
 
+	//if (HasAmmoForWeapon(Slot.NameItem))
 	if (Slot.AdditionalInfo.Round > 0 || HasAmmoForWeapon(Slot.NameItem))
 	{
 		CurrentWeaponIndex = Index;
@@ -123,6 +124,7 @@ bool UTDSInventoryComponent::HasAmmoForWeapon(FName WeaponName) const
 
 	for (const FAmmoSlot& AmmoSlot : AmmoSlots)
 	{
+		//if (AmmoSlot.WeaponType == WeaponInfo.WeaponType)
 		if (AmmoSlot.WeaponType == WeaponInfo.WeaponType && AmmoSlot.Bullets > 0)
 		{
 			return true;
