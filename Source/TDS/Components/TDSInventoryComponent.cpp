@@ -328,6 +328,8 @@ bool UTDSInventoryComponent::CheckCanTakeAmmo(EWeaponType WeaponType)
 
 bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 {
+	WeaponExistsInInventory = false;
+
 	for (int j = 0; j < WeaponSlots.Num(); ++j)
 	{
 		if (WeaponSlots[j].NameItem == NewWeapon.NameItem)
@@ -337,10 +339,7 @@ bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 		}
 	}
 
-	WeaponExistsInInventory = false;
-
-	int8 i = 0;
-	while (i < WeaponSlots.Num())
+	for (int32 i = 0; i < WeaponSlots.Num(); ++i)
 	{
 		if (WeaponSlots[i].NameItem.IsNone() && WeaponSlots.IsValidIndex(i))
 		{
@@ -348,7 +347,6 @@ bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 			OnUpdateWeaponSlots.Broadcast(i, NewWeapon);
 			return true;
 		}
-		++i;
 	}
 
 	return false;
@@ -356,6 +354,8 @@ bool UTDSInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 
 bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 IndexSlot, FDropItem& DropItemInfo)
 {
+	WeaponExistsInInventory = false;
+
 	for (int i = 0; i < WeaponSlots.Num(); ++i)
 	{
 		if (WeaponSlots[i].NameItem == NewWeapon.NameItem)
@@ -366,10 +366,10 @@ bool UTDSInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int3
 		}
 	}
 
-	WeaponExistsInInventory = false;
-
 	if (WeaponSlots.IsValidIndex(IndexSlot) && GetDropItemInfoFromInventory(IndexSlot, DropItemInfo))
 	{
+		IsNewPickupWeaponAllowed = true;
+
 		WeaponSlots[IndexSlot] = NewWeapon;
 
 		SwitchWeaponToIndex(IndexSlot, IndexSlot, NewWeapon.AdditionalInfo, true);

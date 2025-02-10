@@ -21,14 +21,14 @@ public:
 
 	void PickupSuccess();
 
-	bool GetIsPlayerOnOverlap() const { return IsPlayerOnOverlap; };
+	bool GetIsPlayerInOverlap() const { return IsPlayerInOverlap; };
 
 	virtual void Tick(float DeltaTime) override;
 
 protected:
 	UNiagaraComponent* NiagaraComponent;
 
-	bool IsPlayerOnOverlap = false;
+	bool IsPlayerInOverlap = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Pickup")
 	USphereComponent* CollisionComponent = nullptr;

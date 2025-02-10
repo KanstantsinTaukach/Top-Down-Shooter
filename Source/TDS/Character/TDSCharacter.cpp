@@ -105,7 +105,7 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 
 	if (PickupWeaponToDestroy != nullptr)
 	{
-		IsActorReadyToDropWeapon = PickupWeaponToDestroy->GetIsPlayerOnOverlap();
+		IsActorReadyToDropWeapon = PickupWeaponToDestroy->GetIsPlayerInOverlap();
 	}
 }
 
@@ -515,14 +515,25 @@ void ATDSCharacter::StartSwitchWeapon(FWeaponSlot PickupWeaponSlot, ATDSWeaponPi
 	WeaponSlotToSwitch = PickupWeaponSlot;
 	PickupWeaponToDestroy = PickupActor;
 
-	InventoryComponent->SetIsNewPickupWeaponAllowed(true);
+	if (!InventoryComponent->IsWeaponExistsInInventory())
+	{
+		InventoryComponent->SetIsNewPickupWeaponAllowed(true);
+	}
 }
 
 void ATDSCharacter::EndSwitchWeapon()
 {
-	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon: EndSwitchWeapon called"));
+	if (!InventoryComponent)
+	{
+		UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::EndSwitchWeapon: InventoryComponent is NULL"));
+
+		return;
+	}
+
 	InventoryComponent->SetIsWeaponExistsInInventory(false);
 	InventoryComponent->SetIsNewPickupWeaponAllowed(false);
+
+	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon: Reset state"));
 }
 
 void ATDSCharacter::DropWeapon()
@@ -559,8 +570,7 @@ void ATDSCharacter::DropWeapon()
 			{
 				PickupWeaponToDestroy->PickupSuccess();
 			}
-		}	
-			
+
 			FTransform Transform;
 			Transform.SetLocation(GetActorLocation() + FVector(0.0f, 100.0f, -45.0f));
 			Transform.SetRotation(FQuat::Identity);
@@ -583,6 +593,7 @@ void ATDSCharacter::DropWeapon()
 			}
 		}
 	}
+}
 
 // in one func
 void ATDSCharacter::TrySwitchNextWeapon()

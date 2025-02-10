@@ -44,24 +44,15 @@ bool ATDSWeaponPickup::GivePickupTo(APawn* PlayerPawn)
 	{
 		return false;
 	}
-
-	if (InventoryComponent->IsWeaponExistsInInventory())
-	{
-		InventoryComponent->SetIsNewPickupWeaponAllowed(false);
-	}
-
-	if (InventoryComponent->GetIsNewPickupWeaponAllowed())
-	{
-		InventoryComponent->SetIsWeaponExistsInInventory(false);
-	}
 		
 	if (InventoryComponent->TryGetWeaponToInventory(WeaponSlot))
 	{
 		return true;
 	}
-	else
+
+	const auto Player = Cast<ATDSCharacter>(InventoryComponent->GetOwner());
+	if (Player)
 	{
-		const auto Player = Cast<ATDSCharacter>(InventoryComponent->GetOwner());
 		Player->StartSwitchWeapon(WeaponSlot, this);
 	}
 
@@ -73,8 +64,11 @@ void ATDSWeaponPickup::NotifyActorEndOverlap(AActor* OtherActor)
 	Super::NotifyActorEndOverlap(OtherActor);
 
 	const auto Player = Cast<ATDSCharacter>(OtherActor);
+	if (Player)
+	{
 		Player->EndSwitchWeapon();
 	}
+}
 
 void ATDSWeaponPickup::InitPickup(const FDropItem& DropItemInfo)
 {
