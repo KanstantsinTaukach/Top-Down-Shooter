@@ -96,8 +96,8 @@ bool UTDSInventoryComponent::TrySwitchToWeapon(int32 Index, int32 OldIndex)
 		return false;
 	}
 
-	//if (HasAmmoForWeapon(Slot.NameItem))
-	if (Slot.AdditionalInfo.Round > 0 || HasAmmoForWeapon(Slot.NameItem))
+	if (HasAmmoForWeapon(Slot.NameItem))
+	//if (Slot.AdditionalInfo.Round > 0 || HasAmmoForWeapon(Slot.NameItem))
 	{
 		CurrentWeaponIndex = Index;
 		CurrentWeaponId = Slot.NameItem;
@@ -124,8 +124,8 @@ bool UTDSInventoryComponent::HasAmmoForWeapon(FName WeaponName) const
 
 	for (const FAmmoSlot& AmmoSlot : AmmoSlots)
 	{
-		//if (AmmoSlot.WeaponType == WeaponInfo.WeaponType)
-		if (AmmoSlot.WeaponType == WeaponInfo.WeaponType && AmmoSlot.Bullets > 0)
+		if (AmmoSlot.WeaponType == WeaponInfo.WeaponType)
+		//if (AmmoSlot.WeaponType == WeaponInfo.WeaponType && AmmoSlot.Bullets > 0)
 		{
 			return true;
 		}
@@ -274,6 +274,7 @@ bool UTDSInventoryComponent::CheckAmmoForWeapon(EWeaponType WeaponType, int32& A
 			if (AmmoSlots[i].Bullets > 0)
 			{
 				AvailableAmmoForWeapon = AmmoSlots[i].Bullets;
+				OnWeaponAmmoAvailable.Broadcast(WeaponType);
 				bIsFind = true;
 			}
 		}

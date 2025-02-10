@@ -394,44 +394,48 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 	{
 		if (GameInstance->GetWeaponInfoByName(IdWeaponName, MyWeaponInfo))
 		{
-			if (MyWeaponInfo.WeaponClass)
+			if (!MyWeaponInfo.WeaponClass)
 			{
-				FVector SpawnLocation = FVector(0);
-				FRotator SpawnRotation = FRotator(0);
+				return;
+			}
 
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				SpawnParams.Owner = this;
-				SpawnParams.Instigator = GetInstigator();
+			FVector SpawnLocation = FVector(0);
+			FRotator SpawnRotation = FRotator(0);
 
-				auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+			
+			auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
+			if (!MyWeapon)
+			{
+				return;
+			}
 
-				if (MyWeapon)
-				{
-					FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
-					CurrentWeapon = MyWeapon;
-					CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+			FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+			CurrentWeapon = MyWeapon;
+			CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 
-					MyWeapon->SetWeaponInfo(MyWeaponInfo);
-					MyWeapon->UpdateStateWeapon(MovementState);
-					MyWeapon->SetAdditionWeaponInfo(WeaponAdditionalInfo);
+			MyWeapon->SetWeaponInfo(MyWeaponInfo);
+			MyWeapon->UpdateStateWeapon(MovementState);
+			MyWeapon->SetAdditionWeaponInfo(WeaponAdditionalInfo);
 
-					CurrentIndexWeapon = NewCurrentIndexWeapon;
+			CurrentIndexWeapon = NewCurrentIndexWeapon;
 
-					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
-					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
-					MyWeapon->OnWeaponFire.AddDynamic(this, &ATDSCharacter::WeaponFire);
+			MyWeapon->OnWeaponReloadStart.AddDynamic(this, &ATDSCharacter::WeaponReloadStart);
+			MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &ATDSCharacter::WeaponReloadEnd);
+			MyWeapon->OnWeaponFire.AddDynamic(this, &ATDSCharacter::WeaponFire);
 
-					if (CurrentWeapon->GetWeaponRound() <= 0 && CurrentWeapon->CheckWeaponCanReload())
-					{
-						CurrentWeapon->InitReload();
-					}
+			if (CurrentWeapon->GetWeaponRound() <= 0 && CurrentWeapon->CheckWeaponCanReload())
+			{
+				CurrentWeapon->InitReload();
+			}
 
-					if (InventoryComponent)
-					{
-						InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeaponInfo.WeaponType);
-					}
-				}
+			const auto MyWeaponAdditionInfo = MyWeapon->GetAdditionWeaponInfo();
+			if (InventoryComponent && MyWeaponAdditionInfo.Round > 0)
+			{
+				InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeaponInfo.WeaponType);
 			}
 		}
 		else
@@ -533,6 +537,17 @@ void ATDSCharacter::EndSwitchWeapon()
 	InventoryComponent->SetIsWeaponExistsInInventory(false);
 	InventoryComponent->SetIsNewPickupWeaponAllowed(false);
 
+	const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+	const auto MyWeaponAdditionInfo = CurrentWeapon->GetAdditionWeaponInfo();
+	if (MyWeaponAdditionInfo.Round > 0)
+	{
+		InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeaponInfo.WeaponType);
+	}
+	else if (MyWeaponAdditionInfo.Round == 0)
+	{
+		InventoryComponent->OnWeaponAmmoEmpty.Broadcast(MyWeaponInfo.WeaponType);
+	}
+
 	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon: Reset state"));
 }
 
@@ -590,7 +605,7 @@ void ATDSCharacter::DropWeapon()
 			else
 			{
 				UE_LOG(TDSCharacterLog, Error, TEXT("ATDSCharacter::DropWeapon: DropWeapon not spawned"));
-			}
+			}	
 		}
 	}
 }
