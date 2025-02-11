@@ -3,6 +3,8 @@
 
 #include "TDSAmmoPickup.h"
 #include "../Components/TDSInventoryComponent.h"
+#include "../Weapons/TDS_WeaponDefault.h"
+#include "../Character/TDSCharacter.h"
 
 DEFINE_LOG_CATEGORY_STATIC(ATDSAmmoPickupLog, All, All);
 
@@ -72,6 +74,30 @@ bool ATDSAmmoPickup::GivePickupTo(APawn* PlayerPawn)
 	if (Result)
 	{
 		InventoryComponent->AmmoSlotChangeValue(WeaponType, BulletsAmount);
+
+		int32 BulletsStoredInWeapon;
+		const auto WeaponSlots = InventoryComponent->GetWeaponSlots();
+		for (auto Slot : WeaponSlots)
+		{
+			if (WeaponType == Slot.WeaponType)
+			{
+				BulletsStoredInWeapon = Slot.AdditionalInfo.Round;
+				break;
+			}
+		}
+
+		const auto Player = Cast<ATDSCharacter>(InventoryComponent->GetOwner());
+		const auto PlayerCurrentWeapon = Player->GetCurrentWeapon();
+		if (Player && PlayerCurrentWeapon)
+		{
+			const auto WeaponInfo = PlayerCurrentWeapon->GetWeaponInfo();
+			if (WeaponInfo.WeaponType == WeaponType && BulletsStoredInWeapon == 0)
+			{
+				PlayerCurrentWeapon->InitReload();
+				InventoryComponent->OnWeaponAmmoAvailable.Broadcast(WeaponType);
+			}
+		}
+		
 	}
 
 	return Result;

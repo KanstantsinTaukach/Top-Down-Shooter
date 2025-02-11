@@ -536,24 +536,11 @@ void ATDSCharacter::EndSwitchWeapon()
 
 	InventoryComponent->SetIsWeaponExistsInInventory(false);
 	InventoryComponent->SetIsNewPickupWeaponAllowed(false);
-
-	const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
-	const auto MyWeaponAdditionInfo = CurrentWeapon->GetAdditionWeaponInfo();
-	if (MyWeaponAdditionInfo.Round > 0)
-	{
-		InventoryComponent->OnWeaponAmmoAvailable.Broadcast(MyWeaponInfo.WeaponType);
-	}
-	else if (MyWeaponAdditionInfo.Round == 0)
-	{
-		InventoryComponent->OnWeaponAmmoEmpty.Broadcast(MyWeaponInfo.WeaponType);
-	}
-
-	UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::EndSwitchWeapon: Reset state"));
 }
 
 void ATDSCharacter::DropWeapon()
 {
-	if (!GetWorld() || !CurrentWeapon || !IsActorReadyToDropWeapon)
+	if (!GetWorld() || !CurrentWeapon || !IsActorReadyToDropWeapon || !InventoryComponent)
 	{
 		return;
 	}
@@ -563,52 +550,46 @@ void ATDSCharacter::DropWeapon()
 		CurrentWeapon->CancelReload();
 	}
 
-	if (InventoryComponent)
+	const auto Slots = InventoryComponent->GetWeaponSlots();
+	const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
+	FName WeaponName;
+	for (auto Slot : Slots)
 	{
-		const auto Slots = InventoryComponent->GetWeaponSlots();
-		const auto MyWeaponInfo = CurrentWeapon->GetWeaponInfo();
-		FName WeaponName;
-		for (auto Slot : Slots)
+		if (MyWeaponInfo.WeaponType == Slot.WeaponType)
 		{
-			if (MyWeaponInfo.WeaponType == Slot.WeaponType)
-			{
-				WeaponName = Slot.NameItem;
-				break;
-			}
+			WeaponName = Slot.NameItem;
+			break;
 		}
+	}
 		
-		const int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
-		FDropItem MyDropItem;
-		if (InventoryComponent->SwitchWeaponToInventory(WeaponSlotToSwitch, Index, MyDropItem))
+	const int32 Index = InventoryComponent->GetWeaponIndexSlotByName(WeaponName);
+	FDropItem MyDropItem;
+	if (InventoryComponent->SwitchWeaponToInventory(WeaponSlotToSwitch, Index, MyDropItem))
+	{
+		if (PickupWeaponToDestroy)
 		{
-			if (PickupWeaponToDestroy)
-			{
-				PickupWeaponToDestroy->PickupSuccess();
-			}
+			PickupWeaponToDestroy->PickupSuccess();
+			PickupWeaponToDestroy = nullptr;
+		}
 
-			FTransform Transform;
-			Transform.SetLocation(GetActorLocation() + FVector(0.0f, 100.0f, -45.0f));
-			Transform.SetRotation(FQuat::Identity);
-			Transform.SetScale3D(FVector(1.0f));
+		FTransform Transform;
+		Transform.SetLocation(GetActorLocation() + FVector(0.0f, 100.0f, -45.0f));
+		Transform.SetRotation(FQuat::Identity);
+		Transform.SetScale3D(FVector(1.0f));
 
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-			SpawnParams.Owner = nullptr;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		SpawnParams.Owner = nullptr;
 
-			ATDSWeaponPickup* DropWeapon = GetWorld()->SpawnActor<ATDSWeaponPickup>(ATDSWeaponPickup::StaticClass(), Transform, SpawnParams);
+		ATDSWeaponPickup* DropWeapon = GetWorld()->SpawnActor<ATDSWeaponPickup>(ATDSWeaponPickup::StaticClass(), Transform, SpawnParams);
 
-			if (DropWeapon)
-			{
-				UE_LOG(TDSCharacterLog, Display, TEXT("ATDSCharacter::DropWeapon: DropWeapon Spawned: %s"), *DropWeapon->GetName());
-				DropWeapon->InitPickup(MyDropItem);
-			}
-			else
-			{
-				UE_LOG(TDSCharacterLog, Error, TEXT("ATDSCharacter::DropWeapon: DropWeapon not spawned"));
-			}	
+		if (DropWeapon)
+		{
+			DropWeapon->InitPickup(MyDropItem);
 		}
 	}
 }
+
 
 // in one func
 void ATDSCharacter::TrySwitchNextWeapon()
