@@ -587,6 +587,11 @@ void ATDSCharacter::DropWeapon()
 		{
 			DropWeapon->InitPickup(MyDropItem);
 		}
+
+		if (WeaponSlotToSwitch.AdditionalInfo.Round > 0)
+		{
+			InventoryComponent->OnWeaponAmmoAvailable.Broadcast(WeaponSlotToSwitch.WeaponType);
+		}
 	}
 }
 

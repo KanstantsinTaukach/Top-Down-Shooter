@@ -96,15 +96,7 @@ bool UTDSInventoryComponent::TrySwitchToWeapon(int32 Index, int32 OldIndex)
 		return false;
 	}
 
-	if (Slot.AdditionalInfo.Round > 0 || HasAmmoForWeapon(Slot.NameItem))
-	{
-		CurrentWeaponIndex = Index;
-		CurrentWeaponId = Slot.NameItem;
-		CurrentAdditionalInfo = Slot.AdditionalInfo;
-
-		return true;
-	}
-	else if (Slot.AdditionalInfo.Round == 0)
+	if (Slot.AdditionalInfo.Round >= 0 || HasAmmoForWeapon(Slot.NameItem))
 	{
 		CurrentWeaponIndex = Index;
 		CurrentWeaponId = Slot.NameItem;
