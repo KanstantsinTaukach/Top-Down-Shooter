@@ -9,6 +9,7 @@
 
 class UTDSStaminaComponent;
 class UTDSInventoryComponent;
+class UTDSHealthComponent_Character;
 class ATDS_WeaponDefault;
 class ATDSWeaponPickup;
 
@@ -114,6 +115,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSInventoryComponent* InventoryComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UTDSHealthComponent_Character* HealthComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	UMaterialInterface* CursorMaterial = nullptr;

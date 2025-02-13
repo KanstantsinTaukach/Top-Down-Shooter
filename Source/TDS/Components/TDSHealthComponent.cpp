@@ -11,7 +11,11 @@ UTDSHealthComponent::UTDSHealthComponent()
 
 void UTDSHealthComponent::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
+
+	check(MaxHealth > 0.0f);
+
+	SetCurrentHealth(MaxHealth);
 }
 
 void UTDSHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -19,17 +23,16 @@ void UTDSHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UTDSHealthComponent::ReceiveDamage(float Damage)
+void UTDSHealthComponent::ChangeCurrentHealth(float HealthValue)
 {
-	Health -= Damage;
-	OnHealthChanged.Broadcast(Health, Damage);
+	Health += HealthValue;
+	OnHealthChanged.Broadcast(Health, HealthValue);
 
 	if (Health <= 0.0f)
 	{
 		OnDeath.Broadcast();
 		IsDeadEvent();
 	}
-
 }
 
 void UTDSHealthComponent::IsDeadEvent_Implementation()

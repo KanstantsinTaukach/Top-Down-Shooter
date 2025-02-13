@@ -5,6 +5,7 @@
 #include "Components/ProgressBar.h"
 #include "../Components/TDSStaminaComponent.h"
 #include "../Components/TDSInventoryComponent.h"
+#include "../Components/TDSHealthComponent_Character.h"
 #include "../Character/TDSCharacter.h"
 #include "../Weapons/TDS_WeaponDefault.h"
 
@@ -23,6 +24,23 @@ float UTSD_GameplayWidget::GetStaminaPercent() const
 		return 0.0f;
 	}	
 	return StaminaComponent->GetStaminaPercent();
+}
+
+float UTSD_GameplayWidget::GetHealthPercent() const
+{
+	const auto Player = GetOwningPlayerPawn();
+	if (!Player)
+	{
+		return 0.0f;
+	}
+
+	const auto Component = Player->GetComponentByClass(UTDSHealthComponent_Character::StaticClass());
+	const auto HealthComponent = Cast<UTDSHealthComponent_Character>(Component);
+	if (!HealthComponent)
+	{
+		return 0.0f;
+	}
+	return HealthComponent->GetHealthPercent();
 }
 
 float UTSD_GameplayWidget::GetReloadPercent() const

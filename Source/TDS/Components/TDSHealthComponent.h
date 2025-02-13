@@ -31,17 +31,22 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetCurrentHealt() const { return Health; };
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void SetCurrentHealth(float NewHealth) { Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth); };
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	virtual void ReceiveDamage(float Damage);
+	virtual void ChangeCurrentHealth(float HealthValue);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void IsDeadEvent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction);
 
+	float GetHealthPercent() const { return Health / MaxHealth; };
+
 protected:
 	float Health = 100.0f;
+	float MaxHealth = 100.0f;
 
 	virtual void BeginPlay() override;
 };

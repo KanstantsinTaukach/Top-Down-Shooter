@@ -8,6 +8,7 @@
 #include "Components/InputComponent.h"
 #include "../Components/TDSStaminaComponent.h"
 #include "../Components/TDSInventoryComponent.h"
+#include "../Components/TDSHealthComponent_Character.h"
 #include "../Weapons/TDS_WeaponDefault.h"
 #include "../Game/TDSGameInstance.h"
 #include "../Pickups/TDSWeaponPickup.h"
@@ -63,6 +64,8 @@ ATDSCharacter::ATDSCharacter()
 	{
 		InventoryComponent->OnSwitchWeapon.AddUObject(this, &ATDSCharacter::InitWeapon);
 	}
+
+	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent_Character>("HealthComponent");
 }
 
 void ATDSCharacter::BeginPlay()
@@ -76,6 +79,7 @@ void ATDSCharacter::BeginPlay()
 
 	check(StaminaComponent);
 	check(InventoryComponent);
+	check(HealthComponent);
 
 	OnStaminaChanged(StaminaComponent->GetStamina());
 	
