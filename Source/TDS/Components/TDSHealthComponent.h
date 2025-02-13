@@ -1,0 +1,47 @@
+// Top Down Shooter. All Rights Reserved
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "TDSHealthComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, Health, float, Damage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathSignature);
+
+USTRUCT(BlueprintType)
+struct FStatsParam
+{
+	GENERATED_BODY()
+
+};
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class TDS_API UTDSHealthComponent : public UActorComponent
+{
+	GENERATED_BODY()
+	
+public:
+	UTDSHealthComponent();	
+
+	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	FOnHealthChangedSignature OnHealthChanged;
+	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	FOnDeathSignature OnDeath;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetCurrentHealt() const { return Health; };
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	virtual void ReceiveDamage(float Damage);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void IsDeadEvent();
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction);
+
+protected:
+	float Health = 100.0f;
+
+	virtual void BeginPlay() override;
+};
