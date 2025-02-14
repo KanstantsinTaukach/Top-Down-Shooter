@@ -20,4 +20,3 @@ void ATDSGameMode::StartPlay()
 	HUD = Cast<ATDS_HUD>(PC->GetHUD());
 	check(HUD);
 }
-

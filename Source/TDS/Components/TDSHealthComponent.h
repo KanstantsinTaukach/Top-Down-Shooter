@@ -33,9 +33,13 @@ public:
 	float GetCurrentHealt() const { return Health; };
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void SetCurrentHealth(float NewHealth) { Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth); };
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetMaxHealth() const { return MaxHealth; };
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	virtual void ChangeCurrentHealth(float HealthValue);
+	virtual void AddToCurrentHealth(float HealthValue);
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	virtual void RemoveFromCurrentHealth(float HealthValue);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction);
 

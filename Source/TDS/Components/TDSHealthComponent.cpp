@@ -23,7 +23,7 @@ void UTDSHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UTDSHealthComponent::ChangeCurrentHealth(float HealthValue)
+void UTDSHealthComponent::AddToCurrentHealth(float HealthValue)
 {
 	Health += HealthValue;
 	OnHealthChanged.Broadcast(Health, HealthValue);
@@ -32,6 +32,13 @@ void UTDSHealthComponent::ChangeCurrentHealth(float HealthValue)
 	{
 		Health = MaxHealth;
 	}
+}
+
+void UTDSHealthComponent::RemoveFromCurrentHealth(float HealthValue)
+{
+	Health -= HealthValue;
+	OnHealthChanged.Broadcast(Health, HealthValue);
+
 	if (Health <= 0.0f)
 	{
 		OnDeath.Broadcast();

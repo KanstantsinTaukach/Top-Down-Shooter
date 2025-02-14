@@ -10,7 +10,4 @@ UCLASS()
 class TDS_API UTDSHealthComponent_Character : public UTDSHealthComponent
 {
 	GENERATED_BODY()
-	
-public:
-	virtual void ChangeCurrentHealth(float HealthValue) override;
 };
