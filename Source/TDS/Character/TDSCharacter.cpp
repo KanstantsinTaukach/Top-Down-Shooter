@@ -66,6 +66,10 @@ ATDSCharacter::ATDSCharacter()
 	}
 
 	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent_Character>("HealthComponent");
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &ATDSCharacter::OnCharacterDeath);
+	}
 }
 
 void ATDSCharacter::BeginPlay()
@@ -653,5 +657,40 @@ void ATDSCharacter::TrySwitchPreviousWeapon()
 
 			}
 		}
+	}
+}
+
+float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	HealthComponent->ChangeCurrentHealth(Damage);
+
+	return ActualDamage;
+}
+
+void ATDSCharacter::OnCharacterDeath()
+{
+	float AnimationTime = 0.0f;
+	int32 RandomNumber = FMath::RandHelper(DeathAnimations.Num());
+	if (DeathAnimations.IsValidIndex(RandomNumber) && DeathAnimations[RandomNumber] && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		AnimationTime = DeathAnimations[RandomNumber]->GetPlayLength();
+		GetMesh()->GetAnimInstance()->Montage_Play(DeathAnimations[RandomNumber]);
+	}
+
+	UnPossessed();
+
+	GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSCharacter::EnableRagdoll, AnimationTime, false);
+}
+
+void ATDSCharacter::EnableRagdoll()
+{
+	UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::EnableRagdoll - Ragdoll init"));
+
+	if (GetMesh())
+	{
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		GetMesh()->SetSimulatePhysics(true);
 	}
 }

@@ -37,9 +37,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	virtual void ChangeCurrentHealth(float HealthValue);
 
-	UFUNCTION(BlueprintNativeEvent)
-	void IsDeadEvent();
-
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction);
 
 	float GetHealthPercent() const { return Health / MaxHealth; };

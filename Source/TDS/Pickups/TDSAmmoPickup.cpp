@@ -75,7 +75,7 @@ bool ATDSAmmoPickup::GivePickupTo(APawn* PlayerPawn)
 	{
 		InventoryComponent->AmmoSlotChangeValue(WeaponType, BulletsAmount);
 
-		int32 BulletsStoredInWeapon;
+		int32 BulletsStoredInWeapon = 0;
 		const auto WeaponSlots = InventoryComponent->GetWeaponSlots();
 		for (auto Slot : WeaponSlots)
 		{

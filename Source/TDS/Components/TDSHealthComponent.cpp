@@ -28,14 +28,12 @@ void UTDSHealthComponent::ChangeCurrentHealth(float HealthValue)
 	Health += HealthValue;
 	OnHealthChanged.Broadcast(Health, HealthValue);
 
+	if (Health > MaxHealth)
+	{
+		Health = MaxHealth;
+	}
 	if (Health <= 0.0f)
 	{
 		OnDeath.Broadcast();
-		IsDeadEvent();
 	}
-}
-
-void UTDSHealthComponent::IsDeadEvent_Implementation()
-{
-	//in BP
 }

@@ -77,11 +77,22 @@ public:
 	UFUNCTION()
 	void EndSwitchWeapon();
 
+	UFUNCTION()
+	void OnCharacterDeath();
+
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	float AxisX = 0.0f;
 	float AxisY = 0.0f;
 
+	UDecalComponent* CurrentCursor = nullptr;
+
+	ATDS_WeaponDefault* CurrentWeapon = nullptr;
+
 	int32 CurrentIndexWeapon = 0;
+
+	bool IsAlive = true;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
@@ -125,8 +136,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
 
-	UDecalComponent* CurrentCursor = nullptr;
-	ATDS_WeaponDefault* CurrentWeapon = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TArray<UAnimMontage*> DeathAnimations;
 
 	virtual void BeginPlay() override;
 
@@ -155,6 +166,7 @@ private:
 	float CurrentCameraDistance = 0;
 
 	FTimerHandle CameraTimerHandle;
+	FTimerHandle RagdollTimerHandle;
 
 	void CameraScroll();
 
@@ -182,4 +194,6 @@ private:
 	void TrySwitchPreviousWeapon();
 
 	void DropWeapon();
+
+	void EnableRagdoll();
 };
