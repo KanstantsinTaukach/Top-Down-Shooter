@@ -128,7 +128,7 @@ protected:
 	UTDSInventoryComponent* InventoryComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UTDSHealthComponent_Character* HealthComponent;
+	UTDSHealthComponent_Character* CharacterHealthComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	UMaterialInterface* CursorMaterial = nullptr;

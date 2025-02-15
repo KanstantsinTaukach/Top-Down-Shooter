@@ -32,7 +32,7 @@ bool ATDSHealthPickup::GivePickupTo(APawn* PlayerPawn)
 	}
 	
 	float PlayerMaxHealth = HealthComponent->GetMaxHealth();
-	float PlayerCurrentHealth = HealthComponent->GetCurrentHealt();
+	float PlayerCurrentHealth = HealthComponent->GetCurrentHealth();
 
 	if (PlayerMaxHealth == PlayerCurrentHealth)
 	{

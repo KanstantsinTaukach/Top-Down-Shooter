@@ -65,10 +65,10 @@ ATDSCharacter::ATDSCharacter()
 		InventoryComponent->OnSwitchWeapon.AddUObject(this, &ATDSCharacter::InitWeapon);
 	}
 
-	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent_Character>("HealthComponent");
-	if (HealthComponent)
+	CharacterHealthComponent = CreateDefaultSubobject<UTDSHealthComponent_Character>("HealthComponent");
+	if (CharacterHealthComponent)
 	{
-		HealthComponent->OnDeath.AddDynamic(this, &ATDSCharacter::OnCharacterDeath);
+		CharacterHealthComponent->OnDeath.AddDynamic(this, &ATDSCharacter::OnCharacterDeath);
 	}
 }
 
@@ -83,7 +83,7 @@ void ATDSCharacter::BeginPlay()
 
 	check(StaminaComponent);
 	check(InventoryComponent);
-	check(HealthComponent);
+	check(CharacterHealthComponent);
 
 	OnStaminaChanged(StaminaComponent->GetStamina());
 	
@@ -669,7 +669,7 @@ float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, A
 
 	if (IsAlive)
 	{
-		HealthComponent->RemoveFromCurrentHealth(Damage);
+		CharacterHealthComponent->RemoveFromCurrentHealth(Damage);
 	}
 
 	return ActualDamage;

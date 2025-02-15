@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "TDSHealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTakeDamageSignature, float, Health, float, Damage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, Health, float, Damage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathSignature);
 
@@ -25,12 +26,14 @@ public:
 	UTDSHealthComponent();	
 
 	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	FOnTakeDamageSignature OnTakeDamage;
+	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
 	FOnHealthChangedSignature OnHealthChanged;
 	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
 	FOnDeathSignature OnDeath;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	float GetCurrentHealt() const { return Health; };
+	float GetCurrentHealth() const { return Health; };
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void SetCurrentHealth(float NewHealth) { Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth); };
 	UFUNCTION(BlueprintCallable, Category = "Health")
@@ -39,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	virtual void AddToCurrentHealth(float HealthValue);
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	virtual void RemoveFromCurrentHealth(float HealthValue);
+	virtual void RemoveFromCurrentHealth(float DamageValue);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction);
 

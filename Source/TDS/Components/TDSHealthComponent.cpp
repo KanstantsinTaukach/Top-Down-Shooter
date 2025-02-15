@@ -34,10 +34,10 @@ void UTDSHealthComponent::AddToCurrentHealth(float HealthValue)
 	}
 }
 
-void UTDSHealthComponent::RemoveFromCurrentHealth(float HealthValue)
+void UTDSHealthComponent::RemoveFromCurrentHealth(float DamageValue)
 {
-	Health -= HealthValue;
-	OnHealthChanged.Broadcast(Health, HealthValue);
+	Health -= DamageValue;
+	OnTakeDamage.Broadcast(Health, DamageValue);
 
 	if (Health <= 0.0f)
 	{
