@@ -52,5 +52,8 @@ protected:
 	float Health = 100.0f;
 	float MaxHealth = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float DamageFactor = 1.0f;
+
 	virtual void BeginPlay() override;
 };

@@ -693,9 +693,12 @@ void ATDSCharacter::OnCharacterDeath()
 
 	AttackCharEvent(false);
 
-	GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSCharacter::EnableRagdoll, AnimationTime, false);
-
 	GetCursorToWorld()->SetVisibility(false);
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSCharacter::EnableRagdoll, AnimationTime, false);
+	}
 }
 
 void ATDSCharacter::EnableRagdoll()

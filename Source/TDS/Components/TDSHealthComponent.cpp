@@ -36,6 +36,7 @@ void UTDSHealthComponent::AddToCurrentHealth(float HealthValue)
 
 void UTDSHealthComponent::RemoveFromCurrentHealth(float DamageValue)
 {
+	DamageValue *= DamageFactor;
 	Health -= DamageValue;
 	OnTakeDamage.Broadcast(Health, DamageValue);
 
