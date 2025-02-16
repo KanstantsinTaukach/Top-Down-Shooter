@@ -21,6 +21,9 @@ public:
 	float GetHealthPercent() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
+	float GetShieldPercent() const;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	float GetReloadPercent() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
@@ -41,4 +44,7 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* HealthBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* ShieldBar;
 };

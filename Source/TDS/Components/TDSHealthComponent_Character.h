@@ -48,4 +48,6 @@ public:
 	virtual void AddToCurrentShield(float ShieldValue);
 
 	void ShieldUpdate();
+
+	float GetShieldPercent() const { return Shield / MaxShield; };
 };

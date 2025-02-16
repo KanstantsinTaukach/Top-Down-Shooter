@@ -56,6 +56,7 @@ void UTDSHealthComponent_Character::RemoveFromCurrentShield(float DamageValue)
 void UTDSHealthComponent_Character::AddToCurrentShield(float ShieldValue)
 {
 	Shield += ShieldValue;
+	OnShieldChanged.Broadcast(Shield, ShieldValue);
 
 	if (Shield > MaxShield)
 	{

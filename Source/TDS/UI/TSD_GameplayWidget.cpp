@@ -43,6 +43,23 @@ float UTSD_GameplayWidget::GetHealthPercent() const
 	return HealthComponent->GetHealthPercent();
 }
 
+float UTSD_GameplayWidget::GetShieldPercent() const
+{
+	const auto Player = GetOwningPlayerPawn();
+	if (!Player)
+	{
+		return 0.0f;
+	}
+
+	const auto Component = Player->GetComponentByClass(UTDSHealthComponent_Character::StaticClass());
+	const auto HealthComponent = Cast<UTDSHealthComponent_Character>(Component);
+	if (!HealthComponent)
+	{
+		return 0.0f;
+	}
+	return HealthComponent->GetShieldPercent();
+}
+
 float UTSD_GameplayWidget::GetReloadPercent() const
 {
 	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
