@@ -67,3 +67,8 @@ void UTDSStaminaComponent::SetStamina(float NewStamina)
 	Stamina = FMath::Clamp(NewStamina, 0.0f, MaxStamina);
 	OnStaminaChanged.Broadcast(Stamina);
 }
+
+void UTDSStaminaComponent::StopStaminaRegeneration()
+{
+	GetWorld()->GetTimerManager().ClearTimer(StaminaTimerHandle);
+}

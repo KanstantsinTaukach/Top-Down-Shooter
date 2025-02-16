@@ -31,6 +31,11 @@ void UTDSHealthComponent_Character::RemoveFromCurrentHealth(float DamageValue)
 	else
 	{
 		Super::RemoveFromCurrentHealth(DamageValue);
+
+		if (Health <= 0.0f)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(ShieldUpdateTimerHandle);
+		}
 	}
 }
 
@@ -38,14 +43,12 @@ void UTDSHealthComponent_Character::RemoveFromCurrentShield(float DamageValue)
 {
 	Shield -= DamageValue;
 
-	UE_LOG(TDSHealthComponent_CharacterLog, Warning, TEXT("UTDSHealthComponent_Character::RemoveFromCurrentShield - Shield value is: %f"), Shield);
-
-	OnShieldTakeDamage.Broadcast(Shield, DamageValue);
-
 	if (Shield < 0.0f)
 	{
 		Shield = 0.0f;
 	}
+
+	OnShieldTakeDamage.Broadcast(Shield, DamageValue);
 
 	if (GetWorld())
 	{
@@ -56,19 +59,18 @@ void UTDSHealthComponent_Character::RemoveFromCurrentShield(float DamageValue)
 void UTDSHealthComponent_Character::AddToCurrentShield(float ShieldValue)
 {
 	Shield += ShieldValue;
-	OnShieldChanged.Broadcast(Shield, ShieldValue);
 
 	if (Shield > MaxShield)
 	{
 		Shield = MaxShield;
 	}
+
+	OnShieldChanged.Broadcast(Shield, ShieldValue);
 }
 
 void UTDSHealthComponent_Character::ShieldUpdate()
 {
 	AddToCurrentShield(ShieldRecoveryRate);
-
-	UE_LOG(TDSHealthComponent_CharacterLog, Warning, TEXT("UTDSHealthComponent_Character::ShieldUpdate - Shield value is: %f"), Shield);
 
 	if (GetCurrentShield() == MaxShield && GetWorld())
 	{

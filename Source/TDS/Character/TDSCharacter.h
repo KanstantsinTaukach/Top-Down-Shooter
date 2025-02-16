@@ -101,7 +101,7 @@ protected:
 	FCharacterSpeed MovementInfo;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SprintAngleThreshold = 10.0f;
+	float SprintAngleThreshold = 15.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	bool DoSmoothScrolling = true;

@@ -26,12 +26,13 @@ void UTDSHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UTDSHealthComponent::AddToCurrentHealth(float HealthValue)
 {
 	Health += HealthValue;
-	OnHealthChanged.Broadcast(Health, HealthValue);
 
 	if (Health > MaxHealth)
 	{
 		Health = MaxHealth;
 	}
+
+	OnHealthChanged.Broadcast(Health, HealthValue);
 }
 
 void UTDSHealthComponent::RemoveFromCurrentHealth(float DamageValue)

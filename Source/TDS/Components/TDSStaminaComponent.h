@@ -23,6 +23,8 @@ public:
 	void ChangeSpamina(bool IsSprinting);
 	float GetStaminaPercent() const { return Stamina / MaxStamina; };
 
+	void StopStaminaRegeneration();
+
 	UFUNCTION(BlueprintCallable)
 	bool IsStaminaEmpty() const { return FMath::IsNearlyZero(Stamina); };
 
