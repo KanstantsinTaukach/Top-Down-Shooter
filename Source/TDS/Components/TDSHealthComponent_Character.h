@@ -6,8 +6,8 @@
 #include "TDSHealthComponent.h"
 #include "TDSHealthComponent_Character.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShieldTakeDamageSignature, float, Health, float, Damage);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShieldChangedSignature, float, Health, float, Damage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShieldTakeDamageSignature, float, Shield, float, Damage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShieldChangedSignature, float, Shield, float, ChangeValue);
 
 UCLASS()
 class TDS_API UTDSHealthComponent_Character : public UTDSHealthComponent
