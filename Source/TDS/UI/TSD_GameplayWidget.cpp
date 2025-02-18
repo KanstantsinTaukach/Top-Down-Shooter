@@ -8,55 +8,38 @@
 #include "../Components/TDSHealthComponent_Character.h"
 #include "../Character/TDSCharacter.h"
 #include "../Weapons/TDS_WeaponDefault.h"
+#include "../FunctionLibrary/TDSUtils.h"
 
 float UTSD_GameplayWidget::GetStaminaPercent() const
 {
-	const auto Player = GetOwningPlayerPawn();
-	if (!Player)
+	const auto StaminaComponent = TDSUtils::GetTDSPlayerComponent<UTDSStaminaComponent>(GetOwningPlayerPawn());
+	if (!StaminaComponent)
 	{
 		return 0.0f;
 	}
 
-	const auto Component = Player->GetComponentByClass(UTDSStaminaComponent::StaticClass());
-	const auto StaminaComponent = Cast<UTDSStaminaComponent>(Component);
-	if (!StaminaComponent)
-	{
-		return 0.0f;
-	}	
 	return StaminaComponent->GetStaminaPercent();
 }
 
 float UTSD_GameplayWidget::GetHealthPercent() const
 {
-	const auto Player = GetOwningPlayerPawn();
-	if (!Player)
-	{
-		return 0.0f;
-	}
-
-	const auto Component = Player->GetComponentByClass(UTDSHealthComponent_Character::StaticClass());
-	const auto HealthComponent = Cast<UTDSHealthComponent_Character>(Component);
+	const auto HealthComponent = TDSUtils::GetTDSPlayerComponent<UTDSHealthComponent_Character>(GetOwningPlayerPawn());
 	if (!HealthComponent)
 	{
 		return 0.0f;
 	}
+
 	return HealthComponent->GetHealthPercent();
 }
 
 float UTSD_GameplayWidget::GetShieldPercent() const
 {
-	const auto Player = GetOwningPlayerPawn();
-	if (!Player)
-	{
-		return 0.0f;
-	}
-
-	const auto Component = Player->GetComponentByClass(UTDSHealthComponent_Character::StaticClass());
-	const auto HealthComponent = Cast<UTDSHealthComponent_Character>(Component);
+	const auto HealthComponent = TDSUtils::GetTDSPlayerComponent<UTDSHealthComponent_Character>(GetOwningPlayerPawn());
 	if (!HealthComponent)
 	{
 		return 0.0f;
 	}
+
 	return HealthComponent->GetShieldPercent();
 }
 
@@ -96,15 +79,8 @@ bool UTSD_GameplayWidget::IsPlayerReloading() const
 
 bool UTSD_GameplayWidget::CheckPlayerCanDropWeapon() const
 {
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return false;
-	}
-
-	const auto Component = PlayerCharacter->GetComponentByClass(UTDSInventoryComponent::StaticClass());
-	const auto InventoryComponent = Cast<UTDSInventoryComponent>(Component);
-	if (!InventoryComponent)
+	const auto InventoryComponent = TDSUtils::GetTDSPlayerComponent<UTDSInventoryComponent>(GetOwningPlayerPawn());
+	if (InventoryComponent)
 	{
 		return false;
 	}
@@ -114,15 +90,8 @@ bool UTSD_GameplayWidget::CheckPlayerCanDropWeapon() const
 
 bool UTSD_GameplayWidget::CheckPlayerHasWeapon() const
 {
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return false;
-	}
-
-	const auto Component = PlayerCharacter->GetComponentByClass(UTDSInventoryComponent::StaticClass());
-	const auto InventoryComponent = Cast<UTDSInventoryComponent>(Component);
-	if (!InventoryComponent)
+	const auto InventoryComponent = TDSUtils::GetTDSPlayerComponent<UTDSInventoryComponent>(GetOwningPlayerPawn());
+	if (InventoryComponent)
 	{
 		return false;
 	}

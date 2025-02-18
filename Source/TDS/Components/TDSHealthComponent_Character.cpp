@@ -22,11 +22,6 @@ void UTDSHealthComponent_Character::RemoveFromCurrentHealth(float DamageValue)
 	if (Shield > 0.0f)
 	{
 		RemoveFromCurrentShield(CurrentDamage);
-		if (Shield <= 0.0f)
-		{
-			UE_LOG(TDSHealthComponent_CharacterLog, Warning, TEXT("UTDSHealthComponent_Character::RemoveFromCurrentHealth - Shield <= 0"));
-			//FX
-		}
 	}
 	else
 	{
