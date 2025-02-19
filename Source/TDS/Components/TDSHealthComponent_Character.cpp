@@ -17,6 +17,11 @@ void UTDSHealthComponent_Character::BeginPlay()
 
 void UTDSHealthComponent_Character::RemoveFromCurrentHealth(float DamageValue)
 {
+	if (!GetWorld())
+	{
+		return;
+	}
+
 	float CurrentDamage = DamageValue * DamageFactor;
 
 	if (Shield > 0.0f)
@@ -26,6 +31,9 @@ void UTDSHealthComponent_Character::RemoveFromCurrentHealth(float DamageValue)
 	else
 	{
 		Super::RemoveFromCurrentHealth(DamageValue);
+
+		GetWorld()->GetTimerManager().ClearTimer(ShieldUpdateTimerHandle);
+		GetWorld()->GetTimerManager().SetTimer(ShieldUpdateTimerHandle, this, &UTDSHealthComponent_Character::ShieldUpdate, ShieldUpdateTime, true, ShieldDelay);
 
 		if (Health <= 0.0f)
 		{
@@ -67,7 +75,7 @@ void UTDSHealthComponent_Character::ShieldUpdate()
 {
 	AddToCurrentShield(ShieldRecoveryRate);
 
-	if (GetCurrentShield() == MaxShield && GetWorld())
+	if (GetWorld() && FMath::IsNearlyEqual(Shield, MaxShield))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ShieldUpdateTimerHandle);
 	}

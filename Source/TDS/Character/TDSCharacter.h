@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../FunctionLibrary/Types.h"
+#include "../Interaction/TDSInterfaceGameActor.h"
 #include "TDSCharacter.generated.h"
 
 class UTDSStaminaComponent;
@@ -14,7 +15,7 @@ class ATDS_WeaponDefault;
 class ATDSWeaponPickup;
 
 UCLASS(Blueprintable)
-class ATDSCharacter : public ACharacter
+class ATDSCharacter : public ACharacter, public ITDSInterfaceGameActor
 {
 	GENERATED_BODY()
 
@@ -81,6 +82,8 @@ public:
 	void OnCharacterDeath();
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	EPhysicalSurface GetSurfaceType() override;
 
 protected:
 	float AxisX = 0.0f;

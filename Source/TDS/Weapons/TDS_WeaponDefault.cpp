@@ -10,7 +10,6 @@
 #include "../FunctionLibrary/AnimUtils.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "../Components/TDSInventoryComponent.h"
-#include "PhysicsEngine/RadialForceComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
 
@@ -728,7 +727,9 @@ void ATDS_WeaponDefault::SpawnImpactEffects(const FHitResult& Hit)
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.HitSound, Hit.ImpactPoint);
 		}
+
+		UTypes::AddEffectBySurfaceType(Hit.GetActor(), WeaponSettings.ProjectileSettings.Effect, MySurfaceType);
 	}
 
-	UGameplayStatics::ApplyDamage(Hit.GetActor(), WeaponSettings.ProjectileSettings.ProjectileDamage, GetInstigatorController(), this, NULL);
+	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), WeaponSettings.ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);
 }

@@ -7,7 +7,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
-#include "../FunctionLibrary/TDSUtils.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSProjectileLog, All, All);
 
@@ -110,9 +109,11 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ProjectileSettings.HitSound, Hit.ImpactPoint);
 		}
-	}	
 
-	UGameplayStatics::ApplyDamage(OtherActor, ProjectileSettings.ProjectileDamage, GetInstigatorController(), this, NULL); 
+		UTypes::AddEffectBySurfaceType(Hit.GetActor(), ProjectileSettings.Effect, MySurfaceType);
+	}
+
+	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);
 	
 	ImpactProjectile();
 }

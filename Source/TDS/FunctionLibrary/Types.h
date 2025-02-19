@@ -5,6 +5,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine/DataTable.h"
 #include "NiagaraFunctionLibrary.h"
+#include "../BuffSystem/TDSStateEffect.h"
 #include "Types.generated.h"
 
 UENUM(BlueprintType)
@@ -93,6 +94,9 @@ struct FProjectileInfo
 	float ExplodeMaxDamage = 50.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	float ExplodeFalloffCoef = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TSubclassOf<UTDSStateEffect> Effect = nullptr;
 };
 
 USTRUCT(BlueprintType)
@@ -304,4 +308,36 @@ UCLASS()
 class TDS_API UTypes : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static void AddEffectBySurfaceType(AActor* TargetActor, TSubclassOf<UTDSStateEffect> EffectClass, EPhysicalSurface SurfaceType)
+	{
+		if (!TargetActor || !EffectClass || SurfaceType == EPhysicalSurface::SurfaceType_Default)
+		{
+			return;
+		}
+
+		UTDSStateEffect* MyEffect = Cast<UTDSStateEffect>(EffectClass->GetDefaultObject());
+		if (!MyEffect)
+		{
+			return;
+		}
+
+		bool CanAdd = false;
+		int32 i = 0;
+		while (i < MyEffect->InteractEffects.Num() && !CanAdd)
+		{
+			if (MyEffect->InteractEffects[i] == SurfaceType)
+			{
+				CanAdd = true;
+				UTDSStateEffect* DebuffEffect = NewObject<UTDSStateEffect>(TargetActor, FName("DebuffEffect"));
+				if (DebuffEffect)
+				{
+					DebuffEffect->InitObject();
+				}
+			}
+			++i;
+		}
+	}
 };

@@ -23,6 +23,8 @@ public:
 
 	void InitProjectile(FProjectileInfo InitParam);
 
+	FProjectileInfo GetProjectileSettings() const { return ProjectileSettings; };
+
 	UFUNCTION()
 	virtual void BulletCollisionSphereHit(class UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	UFUNCTION()
@@ -46,6 +48,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UProjectileMovementComponent* BulletProjectileMovement = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
 	FProjectileInfo ProjectileSettings;
 
 	virtual void BeginPlay() override;

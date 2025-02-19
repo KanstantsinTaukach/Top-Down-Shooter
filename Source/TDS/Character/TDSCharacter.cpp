@@ -10,6 +10,7 @@
 #include "../Components/TDSInventoryComponent.h"
 #include "../Components/TDSHealthComponent_Character.h"
 #include "../Weapons/TDS_WeaponDefault.h"
+#include "../Weapons/TDS_ProjectileDefault.h"
 #include "../Game/TDSGameInstance.h"
 #include "../Pickups/TDSWeaponPickup.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -672,6 +673,15 @@ float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, A
 		CharacterHealthComponent->RemoveFromCurrentHealth(Damage);
 	}
 
+	if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		ATDS_ProjectileDefault* TargetProjectile = Cast<ATDS_ProjectileDefault>(DamageCauser);
+		if (TargetProjectile)
+		{
+			UTypes::AddEffectBySurfaceType(this, TargetProjectile->GetProjectileSettings().Effect, GetSurfaceType());
+		}
+	}
+
 	return ActualDamage;
 }
 
@@ -710,4 +720,26 @@ void ATDSCharacter::EnableRagdoll()
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		GetMesh()->SetSimulatePhysics(true);
 	}
+}
+
+EPhysicalSurface ATDSCharacter::GetSurfaceType()
+{
+	EPhysicalSurface Result = ITDSInterfaceGameActor::GetSurfaceType();
+
+	if (CharacterHealthComponent)
+	{
+		if (CharacterHealthComponent->GetCurrentShield() <= 0)
+		{
+			if (GetMesh())
+			{
+				UMaterialInterface* MyMaterial = GetMesh()->GetMaterial(0);
+				if (MyMaterial)
+				{
+					Result = MyMaterial->GetPhysicalMaterial()->SurfaceType;
+				}
+			}
+		}
+	}
+	
+	return Result;
 }
