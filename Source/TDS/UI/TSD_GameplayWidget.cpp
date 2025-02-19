@@ -98,3 +98,19 @@ bool UTSD_GameplayWidget::CheckPlayerHasWeapon() const
 
 	return InventoryComponent->IsWeaponExistsInInventory();
 }
+
+bool UTSD_GameplayWidget::Initialize()
+{
+	const auto HealthComponent = TDSUtils::GetTDSPlayerComponent<UTDSHealthComponent_Character>(GetOwningPlayerPawn());
+	if (HealthComponent)
+	{
+		HealthComponent->OnTakeDamage.AddDynamic(this, &UTSD_GameplayWidget::OnHealthTakesDamage);
+	}
+
+	return Super::Initialize();
+}
+
+void UTSD_GameplayWidget::OnHealthTakesDamage(float Health, float HealthDelta)
+{
+	OnTakeDamageUI();
+}

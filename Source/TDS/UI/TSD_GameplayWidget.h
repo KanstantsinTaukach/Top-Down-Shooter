@@ -35,6 +35,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	bool CheckPlayerHasWeapon() const;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void OnTakeDamageUI();
+
+	virtual bool Initialize() override;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* StaminaBar;
@@ -47,4 +52,8 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ShieldBar;
+
+private:
+	UFUNCTION()
+	void OnHealthTakesDamage(float Health, float HealthDelta);
 };

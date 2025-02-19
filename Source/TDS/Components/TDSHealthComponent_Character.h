@@ -6,6 +6,8 @@
 #include "TDSHealthComponent.h"
 #include "TDSHealthComponent_Character.generated.h"
 
+class UCameraShakeBase;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShieldTakeDamageSignature, float, Shield, float, Damage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnShieldChangedSignature, float, Shield, float, ChangeValue);
 
@@ -17,6 +19,8 @@ class TDS_API UTDSHealthComponent_Character : public UTDSHealthComponent
 private:
 	FTimerHandle ShieldUpdateTimerHandle;
 
+	void PlayCameraShake();
+
 protected:
 	float Shield = 100.0f;
 	float MaxShield = 100.0f;
@@ -27,6 +31,9 @@ protected:
 	float ShieldUpdateTime = 2.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield")
 	float ShieldDelay = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+	TSubclassOf<UCameraShakeBase> CameraShake;
 
 	virtual void BeginPlay() override;
 
