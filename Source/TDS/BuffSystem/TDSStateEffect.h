@@ -21,8 +21,18 @@ public:
 	virtual bool InitObject(AActor* Actor);
 	virtual void DestroyObject();
 
+	void DestroyEffectFX();
+
 protected:
 	AActor* TargetActor = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteEffectFX")
+	UParticleSystem* EffectFX = nullptr;
+
+	UParticleSystemComponent* ParticleEffect = nullptr;
+
+private:
+	void InitEffectFX();
 };
 
 
@@ -41,6 +51,11 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteOnceEffects")
 	float PowerOfOnceEffect = 10.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteOnceEffects")
+	float DestroyEffectFXtime = 2.0f;
+
+private:
+	FTimerHandle DestroyEffectFXTimerHandle;
 };
 
 
@@ -64,14 +79,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteTimerEffects")
 	float EffectRate = 2.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteTimerEffects")
-	UParticleSystem* EffectFX = nullptr;
-
 private:
 	FTimerHandle ExecuteEffectlTimerHandle;
-	FTimerHandle DestroyEffectTimerHandle;
 
 	float CurrentPowerOfTimerEffect = 20.0f;
-
-	UParticleSystemComponent* ParticleEffect = nullptr;
 };

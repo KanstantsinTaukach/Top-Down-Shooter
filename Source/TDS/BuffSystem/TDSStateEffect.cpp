@@ -15,7 +15,25 @@ bool UTDSStateEffect::InitObject(AActor* Actor)
 	}
 
 	TargetActor = Actor;
+	InitEffectFX();
+
 	return true;
+}
+
+void UTDSStateEffect::InitEffectFX()
+{
+	if (EffectFX)
+	{
+		FName NameBoneToAttach;
+		FVector EffectLocation = FVector(0);
+		ParticleEffect = UGameplayStatics::SpawnEmitterAttached(EffectFX, TargetActor->GetRootComponent(), NameBoneToAttach, EffectLocation, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
+
+		if (!ParticleEffect)
+		{
+			UE_LOG(UTDSStateEffectLog, Warning, TEXT("UTDSStateEffect_ExecuteTimer::InitObject: Failed to spawn ParticleEffect"));
+			return;
+		}
+	}
 }
 
 void UTDSStateEffect::DestroyObject()
@@ -25,6 +43,15 @@ void UTDSStateEffect::DestroyObject()
 	if (this && this->IsValidLowLevel())
 	{
 		this->ConditionalBeginDestroy();
+	}
+}
+
+void UTDSStateEffect::DestroyEffectFX()
+{
+	if (ParticleEffect)
+	{
+		ParticleEffect->DestroyComponent();
+		ParticleEffect = nullptr;
 	}
 }
 
@@ -43,6 +70,11 @@ bool UTDSStateEffect_ExecuteOnce::InitObject(AActor* Actor)
 
 void UTDSStateEffect_ExecuteOnce::DestroyObject()
 {
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(DestroyEffectFXTimerHandle, this, &UTDSStateEffect::DestroyEffectFX, DestroyEffectFXtime, false);
+	}
+
 	Super::DestroyObject();
 }
 
@@ -82,28 +114,13 @@ bool UTDSStateEffect_ExecuteTimer::InitObject(AActor* Actor)
 		GetWorld()->GetTimerManager().SetTimer(ExecuteEffectlTimerHandle, this, &UTDSStateEffect_ExecuteTimer::ExecuteOnTimer, EffectUpdateTime, true, -1.0f);
 	}
 
-	if (EffectFX)
-	{
-		FName NameBoneToAttach;
-		FVector EffectLocation = FVector(0);
-		ParticleEffect = UGameplayStatics::SpawnEmitterAttached(EffectFX, TargetActor->GetRootComponent(), NameBoneToAttach, EffectLocation, FRotator::ZeroRotator,EAttachLocation::SnapToTarget, false);
-
-		if (!ParticleEffect)
-		{
-			UE_LOG(UTDSStateEffectLog, Warning, TEXT("UTDSStateEffect_ExecuteTimer::InitObject: Failed to spawn ParticleEffect"));
-			return false;
-		}
-	}
-
 	return true;
 }
 
 void UTDSStateEffect_ExecuteTimer::DestroyObject()
 {
 	CurrentPowerOfTimerEffect = PowerOfTimerEffect;
-
-	ParticleEffect->DestroyComponent();
-	ParticleEffect = nullptr;
+	DestroyEffectFX();
 
 	Super::DestroyObject();
 }
