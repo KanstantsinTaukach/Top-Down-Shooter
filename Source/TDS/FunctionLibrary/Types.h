@@ -331,10 +331,10 @@ public:
 			if (MyEffect->InteractEffects[i] == SurfaceType)
 			{
 				CanAdd = true;
-				UTDSStateEffect* DebuffEffect = NewObject<UTDSStateEffect>(TargetActor, FName("DebuffEffect"));
+				UTDSStateEffect* DebuffEffect = NewObject<UTDSStateEffect>(TargetActor, EffectClass);
 				if (DebuffEffect)
 				{
-					DebuffEffect->InitObject();
+					DebuffEffect->InitObject(TargetActor);
 				}
 			}
 			++i;

@@ -81,7 +81,7 @@ void ATDS_ProjectileDefault::BeginPlay()
 
 	BulletCollisionSphere->OnComponentHit.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereHit);
 	BulletCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereBeginOverlap);
-	BulletCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereEndOverlap);	
+	BulletCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereEndOverlap);
 }
 
 void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

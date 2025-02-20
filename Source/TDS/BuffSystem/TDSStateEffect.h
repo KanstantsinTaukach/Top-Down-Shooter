@@ -7,20 +7,71 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "TDSStateEffect.generated.h"
 
+class UParticleSystemComponent;
+
 UCLASS(Blueprintable, BlueprintType)
 class TDS_API UTDSStateEffect : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
 	TArray<TEnumAsByte<EPhysicalSurface>> InteractEffects;
 
-	virtual bool InitObject();
-
-	virtual void ExecuteEffect(float DeltaTime);
-
+	virtual bool InitObject(AActor* Actor);
 	virtual void DestroyObject();
 
-	virtual bool CheckStackableEffect();
+protected:
+	AActor* TargetActor = nullptr;
+};
+
+
+
+UCLASS()
+class TDS_API UTDSStateEffect_ExecuteOnce : public UTDSStateEffect
+{
+	GENERATED_BODY()
+
+public:
+	bool InitObject(AActor* Actor) override;
+	void DestroyObject() override;
+
+	virtual void ExecuteOnce();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteOnceEffects")
+	float PowerOfOnceEffect = 10.0f;
+};
+
+
+
+UCLASS()
+class TDS_API UTDSStateEffect_ExecuteTimer : public UTDSStateEffect
+{
+	GENERATED_BODY()
+
+public:
+	bool InitObject(AActor* Actor) override;
+	void DestroyObject() override;
+
+	virtual void ExecuteOnTimer();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteTimerEffects")
+	float PowerOfTimerEffect = 20.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteTimerEffects")
+	float EffectUpdateTime = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteTimerEffects")
+	float EffectRate = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteTimerEffects")
+	UParticleSystem* EffectFX = nullptr;
+
+private:
+	FTimerHandle ExecuteEffectlTimerHandle;
+	FTimerHandle DestroyEffectTimerHandle;
+
+	float CurrentPowerOfTimerEffect = 20.0f;
+
+	UParticleSystemComponent* ParticleEffect = nullptr;
 };

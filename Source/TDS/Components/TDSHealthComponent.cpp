@@ -39,10 +39,11 @@ void UTDSHealthComponent::RemoveFromCurrentHealth(float DamageValue)
 {
 	DamageValue *= DamageFactor;
 	Health -= DamageValue;
-	OnTakeDamage.Broadcast(Health, DamageValue);
 
 	if (Health <= 0.0f)
 	{
 		OnDeath.Broadcast();
 	}
+
+	OnTakeDamage.Broadcast(Health, DamageValue);
 }
