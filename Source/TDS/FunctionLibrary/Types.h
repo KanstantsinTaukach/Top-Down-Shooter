@@ -319,65 +319,51 @@ public:
 			return;
 		}
 
-		UTDSStateEffect* MyEffect = Cast<UTDSStateEffect>(EffectClass->GetDefaultObject());
-		if (!MyEffect)
+		UTDSStateEffect* DefaultEffect = Cast<UTDSStateEffect>(EffectClass->GetDefaultObject());
+		if (!DefaultEffect)
 		{
 			return;
 		}
 
-		bool HasPossibleSurface = false;
-		int32 i = 0;
-		while (i < MyEffect->InteractEffects.Num() && !HasPossibleSurface)
+		if (!DefaultEffect->InteractEffects.Contains(SurfaceType))
 		{
-			if (MyEffect->InteractEffects[i] == SurfaceType)
-			{
-				HasPossibleSurface = true;
-
-				bool CanAddThisEffect = false;
-				if (!MyEffect->GetIsStackable())
-				{
-					TArray<UTDSStateEffect*> CurrentStateEffects;
-					ITDSInterfaceGameActor* MyInterface = Cast<ITDSInterfaceGameActor>(TargetActor);
-					if (MyInterface)
-					{
-						CurrentStateEffects = MyInterface->GetAllCurrentEffects();
-					}
-
-					if (CurrentStateEffects.Num() > 0)
-					{
-						for (const auto Effect : CurrentStateEffects)
-						{
-							if (Effect->GetClass() == EffectClass)
-							{
-								CanAddThisEffect = false;
-								break;
-							}
-							else
-							{
-								CanAddThisEffect = true;
-							}
-						}
-					}
-					else
-					{
-						CanAddThisEffect = true;
-					}
-				}
-				else
-				{
-					CanAddThisEffect = true;
-				}
-
-				if (CanAddThisEffect)
-				{
-					UTDSStateEffect* DebuffEffect = NewObject<UTDSStateEffect>(TargetActor, EffectClass);
-					if (DebuffEffect)
-					{
-						DebuffEffect->InitObject(TargetActor);
-					}
-				}
-			}
-			++i;
+			return;
 		}
-	}
+
+		if (!CanAddEffect(TargetActor, EffectClass, DefaultEffect->GetIsStackable()))
+		{
+			return;
+		}
+
+		UTDSStateEffect* NewEffect = NewObject<UTDSStateEffect>(TargetActor, EffectClass);
+		if (NewEffect)
+		{
+			NewEffect->InitObject(TargetActor);
+		}
+	};
+
+	static bool CanAddEffect(AActor* TargetActor, TSubclassOf<UTDSStateEffect> EffectClass, bool IsStackable)
+	{
+		if (IsStackable)
+		{
+			return true;
+		}
+
+		ITDSInterfaceGameActor* MyInterface = Cast<ITDSInterfaceGameActor>(TargetActor);
+		if (!MyInterface)
+		{
+			return false;
+		}
+
+		const TArray<UTDSStateEffect*> CurrentEffects = MyInterface->GetAllCurrentEffects();
+		for (const auto& Effect : CurrentEffects)
+		{
+			if (Effect->GetClass() == EffectClass)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	};
 };
