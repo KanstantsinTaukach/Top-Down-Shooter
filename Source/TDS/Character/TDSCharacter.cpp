@@ -743,3 +743,18 @@ EPhysicalSurface ATDSCharacter::GetSurfaceType()
 	
 	return Result;
 }
+
+TArray<UTDSStateEffect*> ATDSCharacter::GetAllCurrentEffects()
+{
+	return StateEffects;
+}
+
+void ATDSCharacter::RemoveEffect(UTDSStateEffect* EffectToRemove)
+{
+	StateEffects.Remove(EffectToRemove);
+}
+
+void ATDSCharacter::AddEffect(UTDSStateEffect* EffectToAdd)
+{
+	StateEffects.Add(EffectToAdd);
+}

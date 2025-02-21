@@ -6,6 +6,7 @@
 #include "Engine/DataTable.h"
 #include "NiagaraFunctionLibrary.h"
 #include "../BuffSystem/TDSStateEffect.h"
+#include "../Interaction/TDSInterfaceGameActor.h"
 #include "Types.generated.h"
 
 UENUM(BlueprintType)
@@ -324,17 +325,56 @@ public:
 			return;
 		}
 
-		bool CanAdd = false;
+		bool HasPossibleSurface = false;
 		int32 i = 0;
-		while (i < MyEffect->InteractEffects.Num() && !CanAdd)
+		while (i < MyEffect->InteractEffects.Num() && !HasPossibleSurface)
 		{
 			if (MyEffect->InteractEffects[i] == SurfaceType)
 			{
-				CanAdd = true;
-				UTDSStateEffect* DebuffEffect = NewObject<UTDSStateEffect>(TargetActor, EffectClass);
-				if (DebuffEffect)
+				HasPossibleSurface = true;
+
+				bool CanAddThisEffect = false;
+				if (!MyEffect->GetIsStackable())
 				{
-					DebuffEffect->InitObject(TargetActor);
+					TArray<UTDSStateEffect*> CurrentStateEffects;
+					ITDSInterfaceGameActor* MyInterface = Cast<ITDSInterfaceGameActor>(TargetActor);
+					if (MyInterface)
+					{
+						CurrentStateEffects = MyInterface->GetAllCurrentEffects();
+					}
+
+					if (CurrentStateEffects.Num() > 0)
+					{
+						for (const auto Effect : CurrentStateEffects)
+						{
+							if (Effect->GetClass() == EffectClass)
+							{
+								CanAddThisEffect = false;
+								break;
+							}
+							else
+							{
+								CanAddThisEffect = true;
+							}
+						}
+					}
+					else
+					{
+						CanAddThisEffect = true;
+					}
+				}
+				else
+				{
+					CanAddThisEffect = true;
+				}
+
+				if (CanAddThisEffect)
+				{
+					UTDSStateEffect* DebuffEffect = NewObject<UTDSStateEffect>(TargetActor, EffectClass);
+					if (DebuffEffect)
+					{
+						DebuffEffect->InitObject(TargetActor);
+					}
 				}
 			}
 			++i;

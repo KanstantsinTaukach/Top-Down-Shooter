@@ -85,6 +85,11 @@ public:
 
 	EPhysicalSurface GetSurfaceType() override;
 
+	TArray<UTDSStateEffect*> GetAllCurrentEffects() override;
+
+	void RemoveEffect(UTDSStateEffect* EffectToRemove) override;
+	void AddEffect(UTDSStateEffect* EffectToAdd) override;
+
 protected:
 	float AxisX = 0.0f;
 	float AxisY = 0.0f;
@@ -96,6 +101,8 @@ protected:
 	int32 CurrentIndexWeapon = 0;
 
 	bool IsAlive = true;
+
+	TArray<UTDSStateEffect*> StateEffects;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;

@@ -23,8 +23,13 @@ public:
 
 	void DestroyEffectFX();
 
+	bool GetIsStackable() const { return IsStackable; };
+
 protected:
 	AActor* TargetActor = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+	bool IsStackable = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteEffectFX")
 	UParticleSystem* EffectFX = nullptr;

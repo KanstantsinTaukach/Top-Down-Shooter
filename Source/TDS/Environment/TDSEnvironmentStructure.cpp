@@ -3,6 +3,7 @@
 #include "TDSEnvironmentStructure.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Materials/MaterialInterface.h"
+#include "../BuffSystem/TDSStateEffect.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSEnvironmentStructure, All, All);
 
@@ -30,4 +31,19 @@ EPhysicalSurface ATDSEnvironmentStructure::GetSurfaceType()
 		}
 	}
 	return Result;
+}
+
+TArray<UTDSStateEffect*> ATDSEnvironmentStructure::GetAllCurrentEffects()
+{
+	return StateEffects;
+}
+
+void ATDSEnvironmentStructure::RemoveEffect(UTDSStateEffect* EffectToRemove)
+{
+	StateEffects.Remove(EffectToRemove);
+}
+
+void ATDSEnvironmentStructure::AddEffect(UTDSStateEffect* EffectToAdd)
+{
+	StateEffects.Add(EffectToAdd);
 }

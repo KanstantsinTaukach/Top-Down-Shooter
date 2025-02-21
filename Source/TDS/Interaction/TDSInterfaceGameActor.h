@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "TDSInterfaceGameActor.generated.h"
 
+class UTDSStateEffect;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UTDSInterfaceGameActor : public UInterface
@@ -19,4 +21,9 @@ class TDS_API ITDSInterfaceGameActor
 
 public:
 	virtual EPhysicalSurface GetSurfaceType();
+
+	virtual TArray<UTDSStateEffect*> GetAllCurrentEffects();
+
+	virtual void RemoveEffect(UTDSStateEffect* EffectToRemove);
+	virtual void AddEffect(UTDSStateEffect* EffectToAdd);
 };

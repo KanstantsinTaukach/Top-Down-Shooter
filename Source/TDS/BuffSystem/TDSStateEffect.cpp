@@ -4,6 +4,7 @@
 #include "../Components/TDSHealthComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Interaction/TDSInterfaceGameActor.h"
 
 DEFINE_LOG_CATEGORY_STATIC(UTDSStateEffectLog, All, All);
 
@@ -15,6 +16,13 @@ bool UTDSStateEffect::InitObject(AActor* Actor)
 	}
 
 	TargetActor = Actor;
+
+	auto MyInterface = Cast<ITDSInterfaceGameActor>(TargetActor);
+	if (MyInterface)
+	{
+		MyInterface->AddEffect(this);
+	}
+
 	InitEffectFX();
 
 	return true;
@@ -38,6 +46,12 @@ void UTDSStateEffect::InitEffectFX()
 
 void UTDSStateEffect::DestroyObject()
 {
+	auto MyInterface = Cast<ITDSInterfaceGameActor>(TargetActor);
+	if (MyInterface)
+	{
+		MyInterface->RemoveEffect(this);
+	}
+
 	TargetActor = nullptr;
 
 	if (this && this->IsValidLowLevel())
