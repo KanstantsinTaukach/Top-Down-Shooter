@@ -145,6 +145,8 @@ void ATDSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction(TEXT("SwitchPreviousWeapon"), IE_Pressed, this, &ATDSCharacter::TrySwitchPreviousWeapon);
 
 	PlayerInputComponent->BindAction(TEXT("DropWeapon"), IE_Pressed, this, &ATDSCharacter::DropWeapon);
+
+	PlayerInputComponent->BindAction(TEXT("ActivateSpecialAbility"), IE_Pressed, this, &ATDSCharacter::ActivateSpecialAbility);
 }
 
 void ATDSCharacter::InputAxisX(float Value)
@@ -757,4 +759,16 @@ void ATDSCharacter::RemoveEffect(UTDSStateEffect* EffectToRemove)
 void ATDSCharacter::AddEffect(UTDSStateEffect* EffectToAdd)
 {
 	StateEffects.Add(EffectToAdd);
+}
+
+void ATDSCharacter::ActivateSpecialAbility()
+{
+	if (AbilityEffect)
+	{
+		UTDSStateEffect* NewEffect = NewObject<UTDSStateEffect>(this, AbilityEffect);
+		if (NewEffect)
+		{
+			NewEffect->InitObject(this);
+		}
+	}
 }

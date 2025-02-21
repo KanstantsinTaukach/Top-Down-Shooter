@@ -149,6 +149,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TArray<UAnimMontage*> DeathAnimations;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
+	TSubclassOf<UTDSStateEffect> AbilityEffect;
+
 	virtual void BeginPlay() override;
 
 private:
@@ -204,6 +207,8 @@ private:
 	void TrySwitchPreviousWeapon();
 
 	void DropWeapon();
+
+	void ActivateSpecialAbility();
 
 	void EnableRagdoll();
 };
