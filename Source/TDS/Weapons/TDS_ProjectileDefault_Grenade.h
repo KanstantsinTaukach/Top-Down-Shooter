@@ -32,4 +32,7 @@ private:
 	bool TimerEnabled = false;
 	float TimerToExplode = 0.0f;
 	float TimeToExplode = 2.0f;
+
+	void GetActorsInRange(UWorld* World, const FVector& Origin, float Radius, TArray<AActor*>& OutActors);
+	void TryToApplyStateEffect(TArray<AActor*>& OutActors);
 };

@@ -3,6 +3,7 @@
 #include "TDS_ProjectileDefault_Grenade.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "../Interaction/TDSInterfaceGameActor.h"
 
 int32 DebugExplodeShow = 0;
 FAutoConsoleVariableRef CVARExplodeShow(TEXT("DebugExplode"), DebugExplodeShow, TEXT("Draw Debug for Explode"), ECVF_Cheat);
@@ -101,5 +102,53 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 		nullptr
 	);
 
+	TArray<AActor*> AffectedActors;
+	GetActorsInRange(GetWorld(), GetActorLocation(), ProjectileSettings.ProjectileMaxRadiusDamage, AffectedActors);
+
+	TryToApplyStateEffect(AffectedActors);
+
 	this->Destroy();
+}
+
+void ATDS_ProjectileDefault_Grenade::GetActorsInRange(UWorld* World, const FVector& Origin, float Radius, TArray<AActor*>& OutActors)
+{
+	if (!World)
+	{
+		return;
+	}
+
+	TArray<AActor*> AllActors;
+	UGameplayStatics::GetAllActorsOfClass(World, AActor::StaticClass(), AllActors);
+
+	for (AActor* Actor : AllActors)
+	{
+		if (Actor && FVector::DistSquared(Actor->GetActorLocation(), Origin) <= FMath::Square(Radius))
+		{
+			OutActors.Add(Actor);
+		}
+	}
+}
+
+void ATDS_ProjectileDefault_Grenade::TryToApplyStateEffect(TArray<AActor*>& OutActors)
+{
+	for (AActor* OutdActor : OutActors)
+	{
+		if (!OutdActor || OutdActor == this)
+		{
+			continue;
+		}
+
+		auto MyInterface = Cast<ITDSInterfaceGameActor>(OutdActor);
+		if (MyInterface)
+		{
+			FHitResult Hit;
+			Hit.Actor = OutdActor;
+			Hit.ImpactPoint = OutdActor->GetActorLocation();
+			Hit.ImpactNormal = (Hit.ImpactPoint - GetActorLocation()).GetSafeNormal();
+
+			EPhysicalSurface Result = MyInterface->GetSurfaceType();
+
+			UTypes::AddEffectBySurfaceType(Hit.GetActor(), ProjectileSettings.Effect, Result, Hit);
+		}
+	}
 }

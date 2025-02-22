@@ -18,7 +18,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
 	TArray<TEnumAsByte<EPhysicalSurface>> InteractEffects;
 
-	virtual bool InitObject(AActor* Actor);
+	virtual bool InitObject(AActor* Actor, const FHitResult& Hit);
 	virtual void DestroyObject();
 
 	void DestroyEffectFX();
@@ -37,7 +37,7 @@ protected:
 	UParticleSystemComponent* ParticleEffect = nullptr;
 
 private:
-	void InitEffectFX();
+	void InitEffectFX(const FHitResult& Hit);
 };
 
 
@@ -48,7 +48,7 @@ class TDS_API UTDSStateEffect_ExecuteOnce : public UTDSStateEffect
 	GENERATED_BODY()
 
 public:
-	bool InitObject(AActor* Actor) override;
+	bool InitObject(AActor* Actor, const FHitResult& Hit) override;
 	void DestroyObject() override;
 
 	virtual void ExecuteOnce();
@@ -71,7 +71,7 @@ class TDS_API UTDSStateEffect_ExecuteTimer : public UTDSStateEffect
 	GENERATED_BODY()
 
 public:
-	bool InitObject(AActor* Actor) override;
+	bool InitObject(AActor* Actor, const FHitResult& Hit) override;
 	void DestroyObject() override;
 
 	virtual void ExecuteOnTimer();

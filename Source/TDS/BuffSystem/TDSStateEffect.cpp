@@ -8,7 +8,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(UTDSStateEffectLog, All, All);
 
-bool UTDSStateEffect::InitObject(AActor* Actor)
+bool UTDSStateEffect::InitObject(AActor* Actor, const FHitResult& Hit)
 {
 	if (!Actor)
 	{
@@ -23,17 +23,40 @@ bool UTDSStateEffect::InitObject(AActor* Actor)
 		MyInterface->AddEffect(this);
 	}
 
-	InitEffectFX();
+	InitEffectFX(Hit);
 
 	return true;
 }
 
-void UTDSStateEffect::InitEffectFX()
+void UTDSStateEffect::InitEffectFX(const FHitResult& Hit)
 {
-	if (EffectFX)
+	if (EffectFX && TargetActor)
 	{
-		FName NameBoneToAttach;
-		FVector EffectLocation = FVector(0);
+		if (!Hit.IsValidBlockingHit())
+		{
+			return;
+		}
+
+		FName NameBoneToAttach = NAME_None;
+		FVector EffectLocation = FVector::ZeroVector;
+
+		if (Hit.Component.IsValid())
+		{
+			USkeletalMeshComponent* SkeletalMesh = Cast<USkeletalMeshComponent>(Hit.Component.Get());
+			if (SkeletalMesh)
+			{
+				NameBoneToAttach = Hit.BoneName;
+
+				UE_LOG(UTDSStateEffectLog, Display, TEXT("Bone Name is: %s"), *NameBoneToAttach.ToString());
+			}
+			else
+			{
+				EffectLocation = Hit.ImpactPoint - TargetActor->GetActorLocation();
+
+				UE_LOG(UTDSStateEffectLog, Display, TEXT("Effect Location: X=%f, Y=%f, Z=%f"), EffectLocation.X, EffectLocation.Y, EffectLocation.Z);
+			}
+		}
+
 		ParticleEffect = UGameplayStatics::SpawnEmitterAttached(EffectFX, TargetActor->GetRootComponent(), NameBoneToAttach, EffectLocation, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
 
 		if (!ParticleEffect)
@@ -71,9 +94,9 @@ void UTDSStateEffect::DestroyEffectFX()
 
 
 
-bool UTDSStateEffect_ExecuteOnce::InitObject(AActor* Actor)
+bool UTDSStateEffect_ExecuteOnce::InitObject(AActor* Actor, const FHitResult& Hit)
 {
-	if (!Super::InitObject(Actor))
+	if (!Super::InitObject(Actor, Hit))
 	{
 		return false;
 	}
@@ -114,9 +137,9 @@ void UTDSStateEffect_ExecuteOnce::ExecuteOnce()
 
 
 
-bool UTDSStateEffect_ExecuteTimer::InitObject(AActor* Actor)
+bool UTDSStateEffect_ExecuteTimer::InitObject(AActor* Actor, const FHitResult& Hit)
 {
-	if (!Super::InitObject(Actor))
+	if (!Super::InitObject(Actor, Hit))
 	{
 		return false;
 	}
@@ -156,7 +179,7 @@ void UTDSStateEffect_ExecuteTimer::ExecuteOnTimer()
 			HealthComponent->RemoveFromCurrentHealth(EffectRate);
 			CurrentPowerOfTimerEffect -= EffectRate;
 
-			if (CurrentPowerOfTimerEffect <= 0)
+			if (CurrentPowerOfTimerEffect <= 0 || HealthComponent->GetCurrentHealth() <= 0)
 			{
 				GetWorld()->GetTimerManager().ClearTimer(ExecuteEffectlTimerHandle);
 				DestroyObject();

@@ -312,7 +312,7 @@ class TDS_API UTypes : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static void AddEffectBySurfaceType(AActor* TargetActor, TSubclassOf<UTDSStateEffect> EffectClass, EPhysicalSurface SurfaceType)
+	static void AddEffectBySurfaceType(AActor* TargetActor, TSubclassOf<UTDSStateEffect> EffectClass, EPhysicalSurface SurfaceType, const FHitResult& Hit)
 	{
 		if (!TargetActor || !EffectClass || SurfaceType == EPhysicalSurface::SurfaceType_Default)
 		{
@@ -338,7 +338,7 @@ public:
 		UTDSStateEffect* NewEffect = NewObject<UTDSStateEffect>(TargetActor, EffectClass);
 		if (NewEffect)
 		{
-			NewEffect->InitObject(TargetActor);
+			NewEffect->InitObject(TargetActor, Hit);
 		}
 	};
 
