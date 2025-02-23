@@ -312,12 +312,14 @@ class TDS_API UTypes : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static void AddEffectBySurfaceType(AActor* TargetActor, TSubclassOf<UTDSStateEffect> EffectClass, EPhysicalSurface SurfaceType, const FHitResult& Hit)
+	static void AddEffectBySurfaceType(TSubclassOf<UTDSStateEffect> EffectClass, EPhysicalSurface SurfaceType, const FHitResult& Hit)
 	{
-		if (!TargetActor || !EffectClass || SurfaceType == EPhysicalSurface::SurfaceType_Default)
+		if (!Hit.IsValidBlockingHit() || !EffectClass || SurfaceType == EPhysicalSurface::SurfaceType_Default)
 		{
 			return;
 		}
+
+		const auto TargetActor = Hit.GetActor();
 
 		UTDSStateEffect* DefaultEffect = Cast<UTDSStateEffect>(EffectClass->GetDefaultObject());
 		if (!DefaultEffect)

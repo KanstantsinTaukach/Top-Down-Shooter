@@ -8,6 +8,8 @@
 #include "TDSStateEffect.generated.h"
 
 class UParticleSystemComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS(Blueprintable, BlueprintType)
 class TDS_API UTDSStateEffect : public UObject
@@ -35,6 +37,11 @@ protected:
 	UParticleSystem* EffectFX = nullptr;
 
 	UParticleSystemComponent* ParticleEffect = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+	UNiagaraSystem* NiagaraEffectFX;
+
+	UNiagaraComponent* NiagaraEffect;
 
 private:
 	void InitEffectFX(const FHitResult& Hit);

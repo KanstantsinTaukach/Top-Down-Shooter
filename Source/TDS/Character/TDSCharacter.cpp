@@ -684,7 +684,7 @@ float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, A
 			Hit.Actor = this;
 			Hit.ImpactPoint = this->GetActorLocation();
 
-			UTypes::AddEffectBySurfaceType(this, TargetProjectile->GetProjectileSettings().Effect, GetSurfaceType(), Hit);
+			UTypes::AddEffectBySurfaceType(TargetProjectile->GetProjectileSettings().Effect, GetSurfaceType(), Hit);
 		}
 	}
 
@@ -767,14 +767,18 @@ void ATDSCharacter::AddEffect(UTDSStateEffect* EffectToAdd)
 
 void ATDSCharacter::ActivateSpecialAbility()
 {
+	UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::ActivateSpecialAbility: Call this func"));
+
 	if (AbilityEffect)
 	{
+		UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::ActivateSpecialAbility: AbilityEffect ok"));
 		UTDSStateEffect* NewEffect = NewObject<UTDSStateEffect>(this, AbilityEffect);
 		if (NewEffect)
 		{
 			FHitResult Hit;
 			Hit.Actor = this;
 			Hit.ImpactPoint = this->GetActorLocation();
+			Hit.ImpactNormal = FVector::UpVector;
 
 			NewEffect->InitObject(this, Hit);
 		}

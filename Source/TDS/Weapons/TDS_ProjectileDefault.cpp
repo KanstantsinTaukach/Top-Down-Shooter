@@ -110,7 +110,10 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ProjectileSettings.HitSound, Hit.ImpactPoint);
 		}
 
-		UTypes::AddEffectBySurfaceType(Hit.GetActor(), ProjectileSettings.Effect, MySurfaceType, Hit);
+		if (ShouldSpawnStateEffect)
+		{
+			UTypes::AddEffectBySurfaceType(ProjectileSettings.Effect, MySurfaceType, Hit);
+		}
 	}
 
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);

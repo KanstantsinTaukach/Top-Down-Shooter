@@ -36,6 +36,8 @@ public:
 	virtual void ImpactProjectile();
 
 protected:
+	bool ShouldSpawnStateEffect = true;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	USphereComponent* BulletCollisionSphere = nullptr;
 

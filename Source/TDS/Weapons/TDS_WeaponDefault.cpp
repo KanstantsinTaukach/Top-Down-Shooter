@@ -728,7 +728,7 @@ void ATDS_WeaponDefault::SpawnImpactEffects(const FHitResult& Hit)
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponSettings.ProjectileSettings.HitSound, Hit.ImpactPoint);
 		}
 
-		UTypes::AddEffectBySurfaceType(Hit.GetActor(), WeaponSettings.ProjectileSettings.Effect, MySurfaceType, Hit);
+		UTypes::AddEffectBySurfaceType(WeaponSettings.ProjectileSettings.Effect, MySurfaceType, Hit);
 	}
 
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), WeaponSettings.ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);

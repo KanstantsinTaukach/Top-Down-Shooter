@@ -5,6 +5,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Interaction/TDSInterfaceGameActor.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(UTDSStateEffectLog, All, All);
 
@@ -30,13 +32,8 @@ bool UTDSStateEffect::InitObject(AActor* Actor, const FHitResult& Hit)
 
 void UTDSStateEffect::InitEffectFX(const FHitResult& Hit)
 {
-	if (EffectFX && TargetActor)
+	if (TargetActor)
 	{
-		if (!Hit.IsValidBlockingHit())
-		{
-			return;
-		}
-
 		FName NameBoneToAttach = NAME_None;
 		FVector EffectLocation = FVector::ZeroVector;
 
@@ -51,18 +48,33 @@ void UTDSStateEffect::InitEffectFX(const FHitResult& Hit)
 			}
 			else
 			{
-				EffectLocation = Hit.ImpactPoint - TargetActor->GetActorLocation();
+				FVector LocalImpactPoint = TargetActor->GetRootComponent()->GetComponentTransform().InverseTransformPosition(Hit.ImpactPoint);
+				EffectLocation = LocalImpactPoint;
 
 				UE_LOG(UTDSStateEffectLog, Display, TEXT("Effect Location: X=%f, Y=%f, Z=%f"), EffectLocation.X, EffectLocation.Y, EffectLocation.Z);
 			}
 		}
 
-		ParticleEffect = UGameplayStatics::SpawnEmitterAttached(EffectFX, TargetActor->GetRootComponent(), NameBoneToAttach, EffectLocation, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
-
-		if (!ParticleEffect)
+		if (EffectFX)
 		{
-			UE_LOG(UTDSStateEffectLog, Warning, TEXT("UTDSStateEffect_ExecuteTimer::InitObject: Failed to spawn ParticleEffect"));
-			return;
+			ParticleEffect = UGameplayStatics::SpawnEmitterAttached(EffectFX, TargetActor->GetRootComponent(), NameBoneToAttach, EffectLocation, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
+
+			if (!ParticleEffect)
+			{
+				UE_LOG(UTDSStateEffectLog, Warning, TEXT("UTDSStateEffect_ExecuteTimer::InitObject: Failed to spawn ParticleEffect"));
+				return;
+			}
+		}
+
+		if (NiagaraEffectFX)
+		{
+			NiagaraEffect = UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraEffectFX, TargetActor->GetRootComponent(), NameBoneToAttach, EffectLocation, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
+
+			if (!NiagaraEffect)
+			{
+				UE_LOG(UTDSStateEffectLog, Warning, TEXT("UTDSStateEffect_ExecuteTimer::InitObject: Failed to spawn NiagaraEffect"));
+				return;
+			}
 		}
 	}
 }
@@ -89,6 +101,12 @@ void UTDSStateEffect::DestroyEffectFX()
 	{
 		ParticleEffect->DestroyComponent();
 		ParticleEffect = nullptr;
+	}
+
+	if (NiagaraEffect)
+	{
+		NiagaraEffect->DestroyComponent();
+		NiagaraEffect = nullptr;
 	}
 }
 

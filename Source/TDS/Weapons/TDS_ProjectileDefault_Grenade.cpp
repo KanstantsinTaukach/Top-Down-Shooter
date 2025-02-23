@@ -10,6 +10,8 @@ FAutoConsoleVariableRef CVARExplodeShow(TEXT("DebugExplode"), DebugExplodeShow, 
 
 void ATDS_ProjectileDefault_Grenade::BeginPlay()
 {
+	ShouldSpawnStateEffect = false;
+
 	Super::BeginPlay();
 }
 
@@ -131,24 +133,24 @@ void ATDS_ProjectileDefault_Grenade::GetActorsInRange(UWorld* World, const FVect
 
 void ATDS_ProjectileDefault_Grenade::TryToApplyStateEffect(TArray<AActor*>& OutActors)
 {
-	for (AActor* OutdActor : OutActors)
+	for (AActor* OutActor : OutActors)
 	{
-		if (!OutdActor || OutdActor == this)
+		if (!OutActor || OutActor == this)
 		{
 			continue;
 		}
 
-		auto MyInterface = Cast<ITDSInterfaceGameActor>(OutdActor);
+		auto MyInterface = Cast<ITDSInterfaceGameActor>(OutActor);
 		if (MyInterface)
 		{
 			FHitResult Hit;
-			Hit.Actor = OutdActor;
-			Hit.ImpactPoint = OutdActor->GetActorLocation();
+			Hit.Actor = OutActor;
+			Hit.ImpactPoint = OutActor->GetActorLocation();
 			Hit.ImpactNormal = (Hit.ImpactPoint - GetActorLocation()).GetSafeNormal();
 
 			EPhysicalSurface Result = MyInterface->GetSurfaceType();
 
-			UTypes::AddEffectBySurfaceType(Hit.GetActor(), ProjectileSettings.Effect, Result, Hit);
+			UTypes::AddEffectBySurfaceType(ProjectileSettings.Effect, Result, Hit);
 		}
 	}
 }
