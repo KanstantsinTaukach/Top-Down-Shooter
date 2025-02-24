@@ -314,7 +314,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void AddEffectBySurfaceType(TSubclassOf<UTDSStateEffect> EffectClass, EPhysicalSurface SurfaceType, const FHitResult& Hit)
 	{
-		if (!Hit.IsValidBlockingHit() || !EffectClass || SurfaceType == EPhysicalSurface::SurfaceType_Default)
+		if (!Hit.GetActor() || !EffectClass || SurfaceType == EPhysicalSurface::SurfaceType_Default)
 		{
 			return;
 		}

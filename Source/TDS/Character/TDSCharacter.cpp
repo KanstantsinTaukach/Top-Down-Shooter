@@ -767,11 +767,8 @@ void ATDSCharacter::AddEffect(UTDSStateEffect* EffectToAdd)
 
 void ATDSCharacter::ActivateSpecialAbility()
 {
-	UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::ActivateSpecialAbility: Call this func"));
-
 	if (AbilityEffect)
 	{
-		UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::ActivateSpecialAbility: AbilityEffect ok"));
 		UTDSStateEffect* NewEffect = NewObject<UTDSStateEffect>(this, AbilityEffect);
 		if (NewEffect)
 		{
