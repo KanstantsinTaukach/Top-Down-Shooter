@@ -80,7 +80,7 @@ bool UTSD_GameplayWidget::IsPlayerReloading() const
 bool UTSD_GameplayWidget::CheckPlayerCanDropWeapon() const
 {
 	const auto InventoryComponent = TDSUtils::GetTDSPlayerComponent<UTDSInventoryComponent>(GetOwningPlayerPawn());
-	if (InventoryComponent)
+	if (!InventoryComponent)
 	{
 		return false;
 	}
@@ -91,7 +91,7 @@ bool UTSD_GameplayWidget::CheckPlayerCanDropWeapon() const
 bool UTSD_GameplayWidget::CheckPlayerHasWeapon() const
 {
 	const auto InventoryComponent = TDSUtils::GetTDSPlayerComponent<UTDSInventoryComponent>(GetOwningPlayerPawn());
-	if (InventoryComponent)
+	if (!InventoryComponent)
 	{
 		return false;
 	}
