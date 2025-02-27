@@ -102,6 +102,8 @@ bool UTDSInventoryComponent::TrySwitchToWeapon(int32 Index, int32 OldIndex)
 		CurrentWeaponId = Slot.NameItem;
 		CurrentAdditionalInfo = Slot.AdditionalInfo;
 
+		OnWeaponAmmoAvailable.Broadcast(Slot.WeaponType);
+
 		return true;
 	}
 
@@ -273,6 +275,9 @@ bool UTDSInventoryComponent::CheckAmmoForWeapon(EWeaponType WeaponType, int32& A
 			if (AmmoSlots[i].Bullets > 0)
 			{
 				AvailableAmmoForWeapon = AmmoSlots[i].Bullets;
+
+				OnWeaponAmmoAvailable.Broadcast(WeaponType);
+
 				bIsFind = true;
 			}
 		}

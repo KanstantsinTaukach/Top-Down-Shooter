@@ -420,7 +420,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigator();
-			
+
 			auto* MyWeapon = Cast<ATDS_WeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
 			if (!MyWeapon)
 			{
@@ -456,7 +456,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 		{
 			UE_LOG(TDSCharacterLog, Warning, TEXT("ATDSCharacter::InitWeapon - Weapon not found if table"));
 		}
-	}	
+	}
 }
 
 void ATDSCharacter::OnStaminaEmpty()

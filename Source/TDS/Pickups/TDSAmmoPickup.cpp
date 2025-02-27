@@ -94,10 +94,9 @@ bool ATDSAmmoPickup::GivePickupTo(APawn* PlayerPawn)
 			if (WeaponInfo.WeaponType == WeaponType && BulletsStoredInWeapon == 0)
 			{
 				PlayerCurrentWeapon->InitReload();
-				InventoryComponent->OnWeaponAmmoAvailable.Broadcast(WeaponType);
 			}
 		}
-		
+		InventoryComponent->OnWeaponAmmoAvailable.Broadcast(WeaponType);
 	}
 
 	return Result;
