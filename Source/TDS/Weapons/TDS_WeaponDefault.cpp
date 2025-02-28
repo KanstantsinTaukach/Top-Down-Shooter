@@ -258,22 +258,16 @@ bool ATDS_WeaponDefault::CheckWeaponCanFire()
 
 bool ATDS_WeaponDefault::CheckWeaponCanReload()
 {
-	bool Result = true;
-
 	if (GetOwner())
 	{
 		auto InventoryComp = Cast<UTDSInventoryComponent>(GetOwner()->GetComponentByClass(UTDSInventoryComponent::StaticClass()));
 		if (InventoryComp)
 		{
 			int32 AvailableAmmoForWeapon = 0;
-			if (!InventoryComp->CheckAmmoForWeapon(WeaponSettings.WeaponType, AvailableAmmoForWeapon))
-			{
-				Result = false;
-			}
+			return InventoryComp->CheckAmmoForWeapon(WeaponSettings.WeaponType, AvailableAmmoForWeapon);
 		}
 	}
-
-	return Result;
+	return false;
 }
 
 int32 ATDS_WeaponDefault::GetAmmoForReload()

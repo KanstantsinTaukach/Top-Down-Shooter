@@ -234,6 +234,24 @@ int32 UTDSInventoryComponent::GetWeaponIndexSlotByName(FName IdWeaponName)
 	return result;
 }
 
+int32 UTDSInventoryComponent::GetWeaponIndexSlotByWeaponType(EWeaponType WeaponType)
+{
+	int32 result = -1;
+	int8 i = 0;
+	bool bIsFind = false;
+	while (i < WeaponSlots.Num() && !bIsFind)
+	{
+		if (WeaponSlots[i].WeaponType == WeaponType)
+		{
+			bIsFind = true;
+			result = i;
+		}
+		++i;
+	}
+
+	return result;
+}
+
 void UTDSInventoryComponent::SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditionalWeaponInfo NewInfo)
 {
 	if (WeaponSlots.IsValidIndex(IndexWeapon))
@@ -284,7 +302,10 @@ bool UTDSInventoryComponent::CheckAmmoForWeapon(EWeaponType WeaponType, int32& A
 		++i;
 	}
 
-	if (bIsFind == false)
+	int32 TargetIndexSlot = GetWeaponIndexSlotByWeaponType(WeaponType);
+	FAdditionalWeaponInfo TargetAdditionalInfo = GetAdditionalInfoWeapon(TargetIndexSlot);
+
+	if (!bIsFind && TargetAdditionalInfo.Round <= 0)
 	{
 		OnWeaponAmmoEmpty.Broadcast(WeaponType);
 	}

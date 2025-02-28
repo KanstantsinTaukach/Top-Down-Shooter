@@ -7,7 +7,7 @@
 #include "../FunctionLibrary/Types.h"
 #include "TDSInventoryComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnSwitchWeaponSignature, FName, FAdditionalWeaponInfo, int32);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSwitchWeaponSignature, FName, WeaponName, FAdditionalWeaponInfo, AdditionalWeaponInfo, int32, NewCurrentWeaponIndex);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoChangeSignature, EWeaponType, AmmoType, int32, Bullets);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponAdditionalInfoChangeSignature, int32, SlotIndex, FAdditionalWeaponInfo, WeaponAdditionalInfo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWeaponSlotsSignature, int32, IndexSlotChange, FWeaponSlot, NewInfo);
@@ -24,8 +24,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintAssignable)
 	FOnSwitchWeaponSignature OnSwitchWeapon;
-
 	UPROPERTY(BlueprintAssignable)
 	FOnAmmoChangeSignature OnAmmoChange;
 	UPROPERTY(BlueprintAssignable)
@@ -58,6 +58,8 @@ public:
 
 	FName GetWeaponNameBySlotIndex(int32 IndexSlot);
 	int32 GetWeaponIndexSlotByName(FName IdWeaponName);
+
+	int32 GetWeaponIndexSlotByWeaponType(EWeaponType WeaponType);
 
 	void SetAdditionalInfoWeapon(int32 IndexWeapon, FAdditionalWeaponInfo NewInfo);
 

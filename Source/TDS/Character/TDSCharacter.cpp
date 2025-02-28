@@ -63,7 +63,7 @@ ATDSCharacter::ATDSCharacter()
 	InventoryComponent = CreateDefaultSubobject<UTDSInventoryComponent>("InventoryComponent");
 	if (InventoryComponent)
 	{
-		InventoryComponent->OnSwitchWeapon.AddUObject(this, &ATDSCharacter::InitWeapon);
+		InventoryComponent->OnSwitchWeapon.AddDynamic(this, &ATDSCharacter::InitWeapon);
 	}
 
 	CharacterHealthComponent = CreateDefaultSubobject<UTDSHealthComponent_Character>("HealthComponent");

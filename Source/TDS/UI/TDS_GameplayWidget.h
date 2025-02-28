@@ -24,12 +24,6 @@ public:
 	float GetShieldPercent() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	float GetReloadPercent() const;
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool IsPlayerReloading() const;
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
 	bool CheckPlayerCanDropWeapon() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
@@ -43,9 +37,6 @@ public:
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* StaminaBar;
-
-	UPROPERTY(meta = (BindWidget))
-	UProgressBar* ReloadBar;
 
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* HealthBar;

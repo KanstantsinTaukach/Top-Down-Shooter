@@ -43,40 +43,6 @@ float UTDS_GameplayWidget::GetShieldPercent() const
 	return HealthComponent->GetShieldPercent();
 }
 
-float UTDS_GameplayWidget::GetReloadPercent() const
-{
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return 0.0f;
-	}
-
-	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
-	if (!Weapon)
-	{
-		return 0.0f;
-	}
-
-	return Weapon->GetReloadPercent();
-}
-
-bool UTDS_GameplayWidget::IsPlayerReloading() const
-{
-	ATDSCharacter* PlayerCharacter = Cast<ATDSCharacter>(GetOwningPlayerPawn());
-	if (!PlayerCharacter)
-	{
-		return false;
-	}
-
-	ATDS_WeaponDefault* Weapon = PlayerCharacter->GetCurrentWeapon();
-	if (!Weapon)
-	{
-		return false;
-	}
-
-	return Weapon->GetReloadState();
-}
-
 bool UTDS_GameplayWidget::CheckPlayerCanDropWeapon() const
 {
 	const auto InventoryComponent = TDSUtils::GetTDSPlayerComponent<UTDSInventoryComponent>(GetOwningPlayerPawn());

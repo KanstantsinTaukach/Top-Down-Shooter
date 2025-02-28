@@ -48,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ATDS_WeaponDefault* GetCurrentWeapon();
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentWeaponIndex() const { return CurrentIndexWeapon; };
+
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	float GetMovementDirection() const;
 
