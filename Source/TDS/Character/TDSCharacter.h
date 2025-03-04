@@ -83,6 +83,8 @@ public:
 
 	UFUNCTION()
 	void OnCharacterDeath();
+	UFUNCTION(BlueprintNativeEvent)
+	void OnCharacterDeath_BP();
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 

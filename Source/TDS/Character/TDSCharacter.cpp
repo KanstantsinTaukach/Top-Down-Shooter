@@ -703,7 +703,10 @@ void ATDSCharacter::OnCharacterDeath()
 
 	IsAlive = false;
 
-	UnPossessed();
+	if (GetController())
+	{
+		GetController()->UnPossess();
+	}
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
@@ -717,6 +720,13 @@ void ATDSCharacter::OnCharacterDeath()
 
 		StaminaComponent->StopStaminaRegeneration();
 	}
+
+	OnCharacterDeath_BP();
+}
+
+void ATDSCharacter::OnCharacterDeath_BP_Implementation()
+{
+	//in BP
 }
 
 void ATDSCharacter::EnableRagdoll()
