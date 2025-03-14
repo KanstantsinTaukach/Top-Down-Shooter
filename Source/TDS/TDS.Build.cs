@@ -30,7 +30,11 @@ public class TDS : ModuleRules
             "TDS/Game", 
             "TDS/Components", 
             "TDS/UI", 
-            "TDS/Weapons" 
+            "TDS/Weapons",
+            "TDS/BuffSystem",
+            "TDS/Environment",
+            "TDS/Interaction",
+            "TDS/Pickups"
         });
     }
 }

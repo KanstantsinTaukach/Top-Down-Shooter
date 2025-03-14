@@ -6,11 +6,6 @@
 #include "../UI/TDS_HUD.h"
 #include "UObject/ConstructorHelpers.h"
 
-ATDSGameMode::ATDSGameMode()
-{
-
-}
-
 void ATDSGameMode::StartPlay()
 {
 	Super::StartPlay();

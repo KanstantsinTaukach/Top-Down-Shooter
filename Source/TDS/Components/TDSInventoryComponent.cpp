@@ -30,11 +30,22 @@ void UTDSInventoryComponent::BeginPlay()
 
 	MaximumSlotIndex = WeaponSlots.Num();
 
-	if (WeaponSlots.IsValidIndex(0))
+	for (int8 i = MaximumSlotIndex - 1; i >= 0; --i)
 	{
-		if (!WeaponSlots[0].NameItem.IsNone())
+		for (int8 j = i - 1; j >= 0; --j)
 		{
-			OnSwitchWeapon.Broadcast(WeaponSlots[0].NameItem, WeaponSlots[0].AdditionalInfo, 0);
+			if (WeaponSlots[i].NameItem == WeaponSlots[j].NameItem)
+			{
+				UE_LOG(TDSInventoryComponentLog, Warning, TEXT("Weapons in slots %d and %d are identical. Please assign different weapons."), i, j);
+			}
+		}
+
+		if (WeaponSlots.IsValidIndex(i))
+		{
+			if (!WeaponSlots[i].NameItem.IsNone())
+			{
+				OnSwitchWeapon.Broadcast(WeaponSlots[i].NameItem, WeaponSlots[i].AdditionalInfo, i);
+			}
 		}
 	}
 }

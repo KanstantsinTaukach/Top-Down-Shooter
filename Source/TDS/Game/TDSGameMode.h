@@ -14,7 +14,6 @@ class ATDSGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	ATDSGameMode();
 	virtual void StartPlay() override;
 
 private:
