@@ -338,14 +338,14 @@ void ATDS_WeaponDefault::Fire()
 	else
 	{
 		GetWorldTimerManager().SetTimerForNextTick([this]()
-			{
-				FTimerHandle DelayTimerHandle;
-				GetWorldTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda([this]()
-					{
-						SpawnTrailEffect();
-						HandleHitScan();
-					}), TraceSpeed, false);
-			});
+		{
+			FTimerHandle DelayTimerHandle;
+			GetWorldTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda([this]()
+				{
+					SpawnTrailEffect();
+					HandleHitScan();
+				}), TraceSpeed, false);
+		});
 	}
 
 	if (GetWeaponRound() <= 0 && !WeaponReloading)

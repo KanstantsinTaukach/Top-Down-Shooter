@@ -1,6 +1,7 @@
 // Top Down Shooter. All Rights Reserved
 
 #include "TDSInventoryComponent.h"
+#include "../Weapons/TDS_WeaponDefault.h"
 #include "../Game/TDSGameInstance.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSInventoryComponentLog, All, All);
@@ -54,10 +55,7 @@ void UTDSInventoryComponent::InitInventory()
 
 bool UTDSInventoryComponent::SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo, bool bIsForward)
 {
-	if (WeaponSlots.Num() == 0)
-	{
-		return false;
-	}
+	if (WeaponSlots.Num() == 0) return false;
 
 	int32 CorrectIndex = NormalizeIndex(ChangeToIndex);
 	bool bIsSuccess = TrySwitchToWeapon(CorrectIndex, OldIndex);

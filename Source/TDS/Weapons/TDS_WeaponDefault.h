@@ -64,7 +64,7 @@ public:
 
 	const FVector& GetShootEndLocation() const { return ShootEndLocation; };
 	void SetShootEndLocation(FVector NewShootEndLocation) { ShootEndLocation = NewShootEndLocation; };
-	
+
 	virtual void Tick(float DeltaTime) override;
 
 protected:
