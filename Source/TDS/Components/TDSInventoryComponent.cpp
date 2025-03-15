@@ -14,6 +14,11 @@ void UTDSInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitInventory();
+}
+
+void UTDSInventoryComponent::InitInventory()
+{
 	for (int8 i = 0; i < WeaponSlots.Num(); ++i)
 	{
 		UTDSGameInstance* GameInstance = Cast<UTDSGameInstance>(GetWorld()->GetGameInstance());
@@ -40,12 +45,9 @@ void UTDSInventoryComponent::BeginPlay()
 			}
 		}
 
-		if (WeaponSlots.IsValidIndex(i))
+		if (WeaponSlots.IsValidIndex(i) && !WeaponSlots[i].NameItem.IsNone())
 		{
-			if (!WeaponSlots[i].NameItem.IsNone())
-			{
-				OnSwitchWeapon.Broadcast(WeaponSlots[i].NameItem, WeaponSlots[i].AdditionalInfo, i);
-			}
+			OnSwitchWeapon.Broadcast(WeaponSlots[i].NameItem, WeaponSlots[i].AdditionalInfo, i);
 		}
 	}
 }

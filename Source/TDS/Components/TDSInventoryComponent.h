@@ -75,6 +75,9 @@ public:
 	bool GetIsNewPickupWeaponAllowed() const { return IsNewPickupWeaponAllowed; };
 	void SetIsNewPickupWeaponAllowed(bool Exists) { IsNewPickupWeaponAllowed = Exists; };
 
+	UFUNCTION(BlueprintCallable)
+	void InitInventory();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<FWeaponSlot> WeaponSlots;
