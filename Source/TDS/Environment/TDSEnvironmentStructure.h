@@ -30,10 +30,9 @@ public:
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
-	UNiagaraComponent* NiagaraComponent;
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	TArray<UTDSStateEffect*> StateEffects;
+
+	UNiagaraComponent* NiagaraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSHealthComponent* HealthComponent;

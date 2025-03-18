@@ -151,7 +151,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> DeathAnimations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")

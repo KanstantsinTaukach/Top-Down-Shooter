@@ -708,7 +708,7 @@ void ATDSCharacter::OnCharacterDeath()
 
 	if (GetWorld())
 	{
-		GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSCharacter::EnableRagdoll, AnimationTime, false);
+		//GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSCharacter::EnableRagdoll, AnimationTime, false);
 
 		StaminaComponent->StopStaminaRegeneration();
 	}
