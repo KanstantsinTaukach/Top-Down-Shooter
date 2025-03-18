@@ -34,7 +34,8 @@ public class TDS : ModuleRules
             "TDS/BuffSystem",
             "TDS/Environment",
             "TDS/Interaction",
-            "TDS/Pickups"
+            "TDS/Pickups",
+            "TDS/AI"
         });
     }
 }

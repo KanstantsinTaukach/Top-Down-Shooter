@@ -65,6 +65,8 @@ void ATDS_ProjectileDefault_Grenade::ImpactProjectile()
 
 void ATDS_ProjectileDefault_Grenade::Explode()
 {
+	if (!GetWorld()) return;
+
 	if (DebugExplodeShow)
 	{
 		DrawDebugSphere(GetWorld(), GetActorLocation(), ProjectileSettings.ProjectileMaxRadiusDamage, 18, FColor::Green, false, 10.0f);
@@ -87,7 +89,7 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), ProjectileSettings.ExplodeDecal, FVector(50.0f, 50.0f, 50.0f), GetActorLocation(), FRotator(-90.0f, 0.0f, 0.0f), 10.0f);
 	}
 
-	TArray<AActor*> IgnoredActor;
+	TArray<AActor*> IgnoredActors;
 
 	UGameplayStatics::ApplyRadialDamageWithFalloff
 	(
@@ -99,9 +101,9 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 		ProjectileSettings.ProjectileMaxRadiusDamage, 
 		5, 
 		NULL, 
-		IgnoredActor, 
+		IgnoredActors, 
 		this, 
-		nullptr
+		this->GetInstigatorController()
 	);
 
 	TArray<AActor*> AffectedActors;

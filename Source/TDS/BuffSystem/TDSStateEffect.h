@@ -64,7 +64,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteOnceEffects")
 	float PowerOfOnceEffect = 10.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ExecuteOnceEffects")
-	float DestroyEffectFXtime = 2.0f;
+	float DestroyEffectFXtime = 1.0f;
 
 private:
 	FTimerHandle DestroyEffectFXTimerHandle;

@@ -85,11 +85,8 @@ void ATDSCharacter::BeginPlay()
 	check(StaminaComponent);
 	check(InventoryComponent);
 	check(CharacterHealthComponent);
-
-	OnStaminaChanged(StaminaComponent->GetStamina());
 	
 	StaminaComponent->OnStaminaEmpty.AddUObject(this, &ATDSCharacter::OnStaminaEmpty);
-	StaminaComponent->OnStaminaChanged.AddUObject(this, &ATDSCharacter::OnStaminaChanged);
 }
 
 void ATDSCharacter::Tick(float DeltaSeconds)
@@ -462,11 +459,6 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 void ATDSCharacter::OnStaminaEmpty()
 {
 	OnStopSprinting();
-}
-
-void ATDSCharacter::OnStaminaChanged(float Stamina)
-{
-	
 }
 
 UDecalComponent* ATDSCharacter::GetCursorToWorld()

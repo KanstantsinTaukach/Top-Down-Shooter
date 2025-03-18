@@ -15,7 +15,7 @@ class ATDS_WeaponDefault;
 class ATDSWeaponPickup;
 
 UCLASS(Blueprintable)
-class ATDSCharacter : public ACharacter, public ITDSInterfaceGameActor
+class TDS_API ATDSCharacter : public ACharacter, public ITDSInterfaceGameActor
 {
 	GENERATED_BODY()
 
@@ -204,7 +204,6 @@ private:
 	void InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon);
 
 	void OnStaminaEmpty();
-	void OnStaminaChanged(float Stamina);
 
 	void TryReloadWeapon();
 
