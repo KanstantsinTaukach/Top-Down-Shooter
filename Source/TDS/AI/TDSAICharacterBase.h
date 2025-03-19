@@ -16,7 +16,7 @@ class TDS_API ATDSAICharacterBase : public ACharacter, public ITDSInterfaceGameA
 	GENERATED_BODY()
 
 public:
-	ATDSAICharacterBase();
+	ATDSAICharacterBase(const FObjectInitializer& ObjInit);
 
 	EPhysicalSurface GetSurfaceType() override;
 

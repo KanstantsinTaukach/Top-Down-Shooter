@@ -8,15 +8,24 @@
 #include "../Components/TDSLootDropComponent.h"
 #include "../Weapons/TDS_ProjectileDefault.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "TDSAIController.h"
 
-ATDSAICharacterBase::ATDSAICharacterBase()
+ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	AIControllerClass = ATDSAIController::StaticClass();
+
 	PrimaryActorTick.bCanEverTick = false;
 
 	IsDead = false;
 
 	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent>("HealthComponent");
 	LootDropComponent = CreateDefaultSubobject<UTDSLootDropComponent>("LootDropComponent");
+
+	GetCharacterMovement()->MaxAcceleration = 300.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+
 }
 
 void ATDSAICharacterBase::BeginPlay()
