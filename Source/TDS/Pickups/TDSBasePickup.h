@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "../FunctionLibrary/Types.h"
 #include "TDSBasePickup.generated.h"
 
 class USphereComponent;

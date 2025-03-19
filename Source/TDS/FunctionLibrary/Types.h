@@ -305,6 +305,18 @@ struct FDropItem : public FTableRowBase
 	USoundBase* WeaponDropSound = nullptr;
 };
 
+USTRUCT(BlueprintType)
+struct FLootDropChance
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot")
+	TSubclassOf<class ATDSBasePickup> PickupClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float PickupDropChance = 0.5f;
+};
+
 UCLASS()
 class TDS_API UTypes : public UBlueprintFunctionLibrary
 {

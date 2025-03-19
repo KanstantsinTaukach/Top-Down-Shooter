@@ -8,6 +8,7 @@
 #include "TDSAICharacterBase.generated.h"
 
 class UTDSHealthComponent;
+class UTDSLootDropComponent;
 
 UCLASS()
 class TDS_API ATDSAICharacterBase : public ACharacter, public ITDSInterfaceGameActor
@@ -41,6 +42,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSHealthComponent* HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UTDSLootDropComponent* LootDropComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> DeathAnimations;

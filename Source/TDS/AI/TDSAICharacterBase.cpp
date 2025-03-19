@@ -5,6 +5,7 @@
 #include "Materials/MaterialInterface.h"
 #include "../BuffSystem/TDSStateEffect.h"
 #include "../Components/TDSHealthComponent.h"
+#include "../Components/TDSLootDropComponent.h"
 #include "../Weapons/TDS_ProjectileDefault.h"
 #include "Components/CapsuleComponent.h"
 
@@ -15,11 +16,15 @@ ATDSAICharacterBase::ATDSAICharacterBase()
 	IsDead = false;
 
 	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent>("HealthComponent");
+	LootDropComponent = CreateDefaultSubobject<UTDSLootDropComponent>("LootDropComponent");
 }
 
 void ATDSAICharacterBase::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
+
+	check(LootDropComponent);
+
 	check(HealthComponent);
 	HealthComponent->OnDeath.AddDynamic(this, &ATDSAICharacterBase::OnAICharacterDeath);
 
@@ -107,6 +112,9 @@ void ATDSAICharacterBase::OnAICharacterDeath()
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	FVector DeathLocation = GetActorLocation();
+	LootDropComponent->DropLoot(DeathLocation);
 
 	if (GetWorld())
 	{
