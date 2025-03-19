@@ -48,11 +48,28 @@ void UTDSLootDropComponent::DropLoot(const FVector& Location)
 			AccumulatedChance += LootChance.PickupDropChance;
 			if (RandomValue <= AccumulatedChance && LootChance.PickupClass && !HasExecuted)
 			{
+				FVector Start = Location;
+				FVector End = Start - FVector(0.0f, 0.0f, 500.0f);
+				FHitResult HitResult;
+
+				FCollisionQueryParams QueryParams;
+				QueryParams.bTraceComplex = false;
+				QueryParams.AddIgnoredActor(GetOwner());
+
+				bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+
+				FVector SpawnLocation = Location;
+				if (bHit)
+				{
+					SpawnLocation = HitResult.ImpactPoint + FVector(0.0f, 100.0f, 50.0f);
+				}
+
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = GetOwner();
 				SpawnParams.Instigator = Cast<APawn>(GetOwner());
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 
-				ATDSBasePickup* Pickup = GetWorld()->SpawnActor<ATDSBasePickup>(LootChance.PickupClass, Location, FRotator::ZeroRotator, SpawnParams);
+				ATDSBasePickup* Pickup = GetWorld()->SpawnActor<ATDSBasePickup>(LootChance.PickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
 				HasExecuted = true;
 				return;
 			}
