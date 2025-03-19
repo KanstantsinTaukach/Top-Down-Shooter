@@ -109,8 +109,6 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 	TArray<AActor*> AffectedActors;
 	GetActorsInRange(GetWorld(), GetActorLocation(), ProjectileSettings.ProjectileMaxRadiusDamage, AffectedActors);
 
-	TryToApplyStateEffect(AffectedActors);
-
 	this->Destroy();
 }
 
@@ -126,33 +124,14 @@ void ATDS_ProjectileDefault_Grenade::GetActorsInRange(UWorld* World, const FVect
 
 	for (AActor* Actor : AllActors)
 	{
-		if (Actor && FVector::DistSquared(Actor->GetActorLocation(), Origin) <= FMath::Square(Radius))
-		{
-			OutActors.Add(Actor);
-		}
-	}
-}
-
-void ATDS_ProjectileDefault_Grenade::TryToApplyStateEffect(TArray<AActor*>& OutActors)
-{
-	for (AActor* OutActor : OutActors)
-	{
-		if (!OutActor || OutActor == this)
-		{
-			continue;
-		}
-
-		auto MyInterface = Cast<ITDSInterfaceGameActor>(OutActor);
-		if (MyInterface)
+		if (Actor && FVector::DistSquared(Actor->GetActorLocation(), Origin) <= FMath::Square(Radius) && Actor != this)
 		{
 			FHitResult Hit;
-			Hit.Actor = OutActor;
-			Hit.ImpactPoint = OutActor->GetActorLocation();
+			Hit.Actor = Actor;
+			Hit.ImpactPoint = Actor->GetActorLocation();
 			Hit.ImpactNormal = (Hit.ImpactPoint - GetActorLocation()).GetSafeNormal();
 
-			EPhysicalSurface Result = MyInterface->GetSurfaceType();
-
-			UTypes::AddEffectBySurfaceType(ProjectileSettings.Effect, Result, Hit);
+			OutActors.Add(Actor);
 		}
 	}
 }

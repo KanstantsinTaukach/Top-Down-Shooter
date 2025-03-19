@@ -12,15 +12,14 @@ ATDSAICharacterBase::ATDSAICharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	IsDead = false;
+
 	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent>("HealthComponent");
 }
 
 void ATDSAICharacterBase::BeginPlay()
 {
-	Super::BeginPlay();
-
-	IsDead = false;
-	
+	Super::BeginPlay();	
 	check(HealthComponent);
 	HealthComponent->OnDeath.AddDynamic(this, &ATDSAICharacterBase::OnAICharacterDeath);
 
@@ -63,25 +62,24 @@ void ATDSAICharacterBase::AddEffect(UTDSStateEffect* EffectToAdd)
 
 float ATDSAICharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (IsDead) return 0.0f;
-
-	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
 	if (HealthComponent && !IsDead)
 	{
 		HealthComponent->RemoveFromCurrentHealth(Damage);
 	}
+
+	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	return ActualDamage;
 }
 
 void ATDSAICharacterBase::OnTakeRadialDamageHandle(AActor* DamagedActor, float Damage, const UDamageType* DamageType, FVector Origin, FHitResult HitInfo, AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (IsDead) return;
-
-	ATDS_ProjectileDefault* TargetProjectile = Cast<ATDS_ProjectileDefault>(DamageCauser);
-	if (TargetProjectile)
+	if (!IsDead)
 	{
-		UTypes::AddEffectBySurfaceType(TargetProjectile->GetProjectileSettings().Effect, GetSurfaceType(), HitInfo);
+		ATDS_ProjectileDefault* TargetProjectile = Cast<ATDS_ProjectileDefault>(DamageCauser);
+		if (TargetProjectile)
+		{
+			UTypes::AddEffectBySurfaceType(TargetProjectile->GetProjectileSettings().Effect, GetSurfaceType(), HitInfo);
+		}
 	}
 }
 
