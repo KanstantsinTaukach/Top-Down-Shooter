@@ -8,7 +8,6 @@
 #include "../Components/TDSLootDropComponent.h"
 #include "../Weapons/TDS_ProjectileDefault.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "TDSAIController.h"
 
 ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Super(ObjInit)
@@ -18,14 +17,14 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 
 	PrimaryActorTick.bCanEverTick = false;
 
-	IsDead = false;
-
 	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent>("HealthComponent");
 	LootDropComponent = CreateDefaultSubobject<UTDSLootDropComponent>("LootDropComponent");
 
-	GetCharacterMovement()->MaxAcceleration = 300.0f;
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	IsDead = false;
+	CanAttack = true;
 
+	SetMovement(true, MaxSpeed);
+	GetCharacterMovement()->MaxAcceleration = 200.0f;
 }
 
 void ATDSAICharacterBase::BeginPlay()
@@ -79,6 +78,12 @@ float ATDSAICharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEv
 	if (HealthComponent && !IsDead)
 	{
 		HealthComponent->RemoveFromCurrentHealth(Damage);
+
+		float RandomChance = FMath::FRandRange(0.0f, 1.0f);
+		if (RandomChance < ConfusionChance)
+		{
+			EnableConfusion();
+		}
 	}
 
 	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
@@ -97,12 +102,48 @@ void ATDSAICharacterBase::OnTakeRadialDamageHandle(AActor* DamagedActor, float D
 	}
 }
 
+void ATDSAICharacterBase::EnableConfusion()
+{
+	SetMovement(false, ConfusionSpeed);
+
+	float AnimationTime = 0.0f;
+	int32 RandomNumber = 0;
+	if (ConfusionAnimations.Num() > 1)
+	{
+		RandomNumber = FMath::RandHelper(DeathAnimations.Num());
+	}	
+
+	if (ConfusionAnimations.IsValidIndex(RandomNumber) && ConfusionAnimations[RandomNumber] && GetMesh() && GetMesh()->GetAnimInstance() && GetWorld())
+	{
+		AnimationTime = ConfusionAnimations[RandomNumber]->GetPlayLength();
+		GetMesh()->GetAnimInstance()->Montage_Play(ConfusionAnimations[RandomNumber]);
+
+		if (IsDead)
+		{
+			OnAICharacterDeath();
+		}
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(ConfusionTimerHandle, this, &ATDSAICharacterBase::DisableConfusion, AnimationTime, false);
+}
+
+void ATDSAICharacterBase::DisableConfusion()
+{
+	GetWorld()->GetTimerManager().ClearTimer(ConfusionTimerHandle);
+	SetMovement(true, MaxSpeed);
+}
+
 void ATDSAICharacterBase::OnAICharacterDeath()
 {
 	IsDead = true;
 
 	float AnimationTime = 0.0f;
-	int32 RandomNumber = FMath::RandHelper(DeathAnimations.Num());
+	int32 RandomNumber = 0;
+	if (DeathAnimations.Num() > 1)
+	{
+		RandomNumber = FMath::RandHelper(DeathAnimations.Num());
+	}
+		
 	if (DeathAnimations.IsValidIndex(RandomNumber) && DeathAnimations[RandomNumber] && GetMesh() && GetMesh()->GetAnimInstance())
 	{
 		AnimationTime = DeathAnimations[RandomNumber]->GetPlayLength();
@@ -115,7 +156,7 @@ void ATDSAICharacterBase::OnAICharacterDeath()
 	}
 
 	SetCanAttack(false);
-	SetCanMove(false);
+	SetMovement(false, 0.0f);
 
 	SetLifeSpan(10);
 
