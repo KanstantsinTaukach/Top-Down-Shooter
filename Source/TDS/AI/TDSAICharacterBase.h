@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../FunctionLibrary/Types.h"
 #include "../Interaction/TDSInterfaceGameActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TDSAICharacterBase.generated.h"
@@ -28,44 +29,34 @@ public:
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	UFUNCTION(BlueprintCallable)
-	void SetCanAttack(bool CanCharacterAttack) { CanAttack = CanCharacterAttack; };
-	UFUNCTION(BlueprintCallable)
-	bool GetCanAttack() const { return CanAttack; };
-
-	UFUNCTION(BlueprintCallable)
-	void SetMovement(bool CanCharacterMove, float Speed) { CanMove = CanCharacterMove; GetCharacterMovement()->MaxWalkSpeed = Speed; };
-	UFUNCTION(BlueprintCallable)
-	bool GetCanMove() const { return CanMove; };
-
 protected:
 	bool IsDead = false;
-	bool CanAttack = true;
-	bool CanMove = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float MaxSpeed = 500.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float HitSpeed = 300.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float ConfusionSpeed = 0.0f;
+	bool IsConfusion = false;
+	bool IsDamaged = false;
 
 	TArray<UTDSStateEffect*> StateEffects;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSHealthComponent* HealthComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSLootDropComponent* LootDropComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> DeathAnimations;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> ConfusionAnimations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	TArray<UAnimMontage*> HitAnimations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float ConfusionChance = 0.2f;
+	float ConfusionChance = 0.1f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float HitChance = 0.1f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	EAIMovementState AIMovementState = EAIMovementState::Run_State;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	FAISpeed AISpeedInfo;
 
 	UFUNCTION()
 	virtual void OnAICharacterDeath();
@@ -75,6 +66,7 @@ protected:
 private:
 	FTimerHandle RagdollTimerHandle;
 	FTimerHandle ConfusionTimerHandle;
+	FTimerHandle HitTimerHandle;
 
 	UFUNCTION()
 	void OnTakeRadialDamageHandle(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser);
@@ -83,4 +75,11 @@ private:
 
 	void EnableConfusion();
 	void DisableConfusion();
+
+	void EnableHit();
+	void DisableHit();
+
+	void CheckAnimationArrays();
+
+	void ChangeMovementState(EAIMovementState InMovementState);
 };

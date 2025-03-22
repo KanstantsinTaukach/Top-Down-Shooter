@@ -12,21 +12,21 @@
 UENUM(BlueprintType)
 enum class EMovementState : uint8
 {
-	Aim_State = 0 UMETA(DisplayName = "Aim State"),
-	Walk_State UMETA(DisplayName = "Walk State"),
-	Run_State UMETA(DisplayName = "Run State"),
-	Sprint_State UMETA(DisplayName = "Sprint State")
+	Aim_State = 0	UMETA(DisplayName = "Aim State"),
+	Walk_State		UMETA(DisplayName = "Walk State"),
+	Run_State		UMETA(DisplayName = "Run State"),
+	Sprint_State	UMETA(DisplayName = "Sprint State")
 };
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	RifleType = 0 UMETA(DisplayName = "Rifle"),
-	ShotgunType UMETA(DisplayName = "Shotgun"),	
+	RifleType = 0		UMETA(DisplayName = "Rifle"),
+	ShotgunType			UMETA(DisplayName = "Shotgun"),	
 	GrenadeLauncherType UMETA(DisplayName = "GrenadeLauncher"),
-	RocketLauncherType UMETA(DisplayName = "RocketLauncher"),
-	SniperRifleType UMETA(DisplayName = "SniperRifle"),
-	None UMETA(DisplayName = "None")
+	RocketLauncherType	UMETA(DisplayName = "RocketLauncher"),
+	SniperRifleType		UMETA(DisplayName = "SniperRifle"),
+	None				UMETA(DisplayName = "None")
 };
 
 USTRUCT(BlueprintType)
@@ -316,6 +316,30 @@ struct FLootDropChance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float PickupDropChance = 0.5f;
 };
+
+UENUM(BlueprintType)
+enum class EAIMovementState : uint8
+{
+	Confusion_State = 0 UMETA(DisplayName = "Confusion State"),
+	Hit_State			UMETA(DisplayName = "Hit State"),
+	Run_State			UMETA(DisplayName = "Run State"),
+};
+
+USTRUCT(BlueprintType)
+struct FAISpeed
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float ConfusionSpeed = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float HitSpeed = 50.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float RunSpeed = 500.0f;
+};
+
 
 UCLASS()
 class TDS_API UTypes : public UBlueprintFunctionLibrary
