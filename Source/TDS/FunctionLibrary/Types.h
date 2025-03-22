@@ -334,7 +334,7 @@ struct FAISpeed
 	float ConfusionSpeed = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float HitSpeed = 50.0f;
+	float HitSpeed = 250.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float RunSpeed = 500.0f;

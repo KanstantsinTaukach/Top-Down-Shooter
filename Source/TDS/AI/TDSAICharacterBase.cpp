@@ -80,14 +80,14 @@ void ATDSAICharacterBase::AddEffect(UTDSStateEffect* EffectToAdd)
 
 float ATDSAICharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (!HealthComponent && IsDead)
+	if (!HealthComponent || IsDead)
 	{
 		return 0.0f;
 	}
 		
 	HealthComponent->RemoveFromCurrentHealth(Damage);
 
-	if(!IsConfusion && !IsDamaged)
+	if(!IsConfusion && !IsDamaged && !IsDead)
 	{
 		float RandomConfusionChance = FMath::FRandRange(0.0f, 1.0f);
 		if (RandomConfusionChance < ConfusionChance)
@@ -102,7 +102,6 @@ float ATDSAICharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEv
 				EnableHit();
 			}
 		}
-
 	}
 
 	return Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
@@ -128,11 +127,6 @@ void ATDSAICharacterBase::EnableConfusion()
 		float AnimationTime = RandomAnimation->GetPlayLength();
 		GetMesh()->GetAnimInstance()->Montage_Play(RandomAnimation);
 
-		if (IsDead)
-		{
-			OnAICharacterDeath();
-		}
-
 		GetWorld()->GetTimerManager().SetTimer(ConfusionTimerHandle, this, &ATDSAICharacterBase::DisableConfusion, AnimationTime, false);
 	}
 }
@@ -155,11 +149,6 @@ void ATDSAICharacterBase::EnableHit()
 	{
 		float AnimationTime = RandomAnimation->GetPlayLength();
 		GetMesh()->GetAnimInstance()->Montage_Play(RandomAnimation);
-
-		if (IsDead)
-		{
-			OnAICharacterDeath();
-		}
 
 		GetWorld()->GetTimerManager().SetTimer(HitTimerHandle, this, &ATDSAICharacterBase::DisableHit, AnimationTime, false);
 	}
