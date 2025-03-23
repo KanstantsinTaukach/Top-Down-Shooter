@@ -22,7 +22,7 @@ protected:
 	TArray<FLootDropChance> LootChances;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float DropChance = 0.1f;
+	float DropChance = 0.2f;
 
 	virtual void BeginPlay() override;
 

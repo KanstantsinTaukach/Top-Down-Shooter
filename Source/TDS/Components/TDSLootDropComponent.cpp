@@ -67,7 +67,7 @@ void UTDSLootDropComponent::DropLoot(const FVector& Location)
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = GetOwner();
 			SpawnParams.Instigator = Cast<APawn>(GetOwner());
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 			ATDSBasePickup* Pickup = GetWorld()->SpawnActor<ATDSBasePickup>(LootChance.PickupClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
 			HasExecuted = true;
