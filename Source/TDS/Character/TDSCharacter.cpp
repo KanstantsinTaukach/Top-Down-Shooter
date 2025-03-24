@@ -660,12 +660,7 @@ void ATDSCharacter::TrySwitchPreviousWeapon()
 
 float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-	if (IsAlive)
-	{
-		CharacterHealthComponent->RemoveFromCurrentHealth(Damage);
-	}
+	if (!CharacterHealthComponent || !IsAlive || Damage <= 0.0) return 0.0f;
 
 	if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
 	{
@@ -680,24 +675,32 @@ float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, A
 		}
 	}
 
-	return ActualDamage;
+	CharacterHealthComponent->RemoveFromCurrentHealth(Damage);
+
+	return Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ATDSCharacter::OnCharacterDeath()
 {
+	if (!IsAlive || !GetMesh() || !GetMesh()->GetAnimInstance()) return;
+
 	float AnimationTime = 0.0f;
-	int32 RandomNumber = FMath::RandHelper(DeathAnimations.Num());
-	if (DeathAnimations.IsValidIndex(RandomNumber) && DeathAnimations[RandomNumber] && GetMesh() && GetMesh()->GetAnimInstance())
+	if (DeathAnimations.Num() > 0)
 	{
-		AnimationTime = DeathAnimations[RandomNumber]->GetPlayLength();
-		GetMesh()->GetAnimInstance()->Montage_Play(DeathAnimations[RandomNumber]);
+		int32 RandomNumber = FMath::RandRange(0, DeathAnimations.Num() - 1);
+		if (UAnimMontage* DeathMontage = DeathAnimations[RandomNumber] )
+		{
+			AnimationTime = DeathMontage->GetPlayLength();
+			GetMesh()->GetAnimInstance()->Montage_Play(DeathMontage);
+		}
 	}
 
 	IsAlive = false;
 
-	if (GetController())
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
-		GetController()->UnPossess();
+		PC->UnPossess();
+		PC->SetShowMouseCursor(false);
 	}
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -706,10 +709,8 @@ void ATDSCharacter::OnCharacterDeath()
 
 	GetCursorToWorld()->SetVisibility(false);
 
-	if (GetWorld())
+	if (StaminaComponent)
 	{
-		//GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSCharacter::EnableRagdoll, AnimationTime, false);
-
 		StaminaComponent->StopStaminaRegeneration();
 	}
 

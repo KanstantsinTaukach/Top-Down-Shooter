@@ -184,7 +184,6 @@ private:
 	float CurrentCameraDistance = 0;
 
 	FTimerHandle CameraTimerHandle;
-	FTimerHandle RagdollTimerHandle;
 
 	void CameraScroll();
 
