@@ -682,7 +682,7 @@ float ATDSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, A
 
 void ATDSCharacter::OnCharacterDeath()
 {
-	if (!IsAlive || !GetMesh() || !GetMesh()->GetAnimInstance()) return;
+	if (!GetWorld() || !IsAlive || !GetMesh() || !GetMesh()->GetAnimInstance()) return;
 
 	float AnimationTime = 0.0f;
 	if (DeathAnimations.Num() > 0)
@@ -697,14 +697,6 @@ void ATDSCharacter::OnCharacterDeath()
 
 	IsAlive = false;
 
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		PC->UnPossess();
-		PC->SetShowMouseCursor(false);
-	}
-
-	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-
 	AttackCharEvent(false);
 
 	GetCursorToWorld()->SetVisibility(false);
@@ -713,13 +705,31 @@ void ATDSCharacter::OnCharacterDeath()
 	{
 		StaminaComponent->StopStaminaRegeneration();
 	}
-
-	OnCharacterDeath_BP();
+	
+	GetWorld()->GetTimerManager().SetTimer(DeathDelayTimerHandle, this, &ATDSCharacter::HandleDelayedDeathEvents, 3.0f, false);
 }
 
 void ATDSCharacter::OnCharacterDeath_BP_Implementation()
 {
 	//in BP
+}
+
+void ATDSCharacter::HandleDelayedDeathEvents()
+{
+	if (DeathDelayTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(DeathDelayTimerHandle);
+	}
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->UnPossess();
+		PC->SetShowMouseCursor(false);
+	}
+
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	OnCharacterDeath_BP();
 }
 
 void ATDSCharacter::EnableRagdoll()
@@ -770,7 +780,7 @@ void ATDSCharacter::AddEffect(UTDSStateEffect* EffectToAdd)
 
 void ATDSCharacter::ActivateSpecialAbility()
 {
-	if (AbilityEffect)
+	if (AbilityEffect && IsAlive)
 	{
 		UTDSStateEffect* NewEffect = NewObject<UTDSStateEffect>(this, AbilityEffect);
 		if (NewEffect)

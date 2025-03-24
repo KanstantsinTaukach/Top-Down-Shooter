@@ -184,6 +184,7 @@ private:
 	float CurrentCameraDistance = 0;
 
 	FTimerHandle CameraTimerHandle;
+	FTimerHandle DeathDelayTimerHandle;
 
 	void CameraScroll();
 
@@ -214,4 +215,6 @@ private:
 	void ActivateSpecialAbility();
 
 	void EnableRagdoll();
+
+	void HandleDelayedDeathEvents();
 };
