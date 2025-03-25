@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "../Interaction/TDSInterfaceGameActor.h"
+#include "Perception/AISense_Damage.h"
 
 int32 DebugExplodeShow = 0;
 FAutoConsoleVariableRef CVARExplodeShow(TEXT("DebugExplode"), DebugExplodeShow, TEXT("Draw Debug for Explode"), ECVF_Cheat);
@@ -132,6 +133,8 @@ void ATDS_ProjectileDefault_Grenade::GetActorsInRange(UWorld* World, const FVect
 			Hit.ImpactNormal = (Hit.ImpactPoint - GetActorLocation()).GetSafeNormal();
 
 			OutActors.Add(Actor);
+
+			UAISense_Damage::ReportDamageEvent(GetWorld(), Actor, GetInstigator(), ProjectileSettings.ExplodeMaxDamage, GetOwner()->GetActorLocation(), Hit.ImpactPoint);
 		}
 	}
 }

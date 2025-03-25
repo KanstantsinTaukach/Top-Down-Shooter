@@ -7,6 +7,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
+#include "Perception/AISense_Damage.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSProjectileLog, All, All);
 
@@ -117,7 +118,8 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 	}
 
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);
-	
+	UAISense_Damage::ReportDamageEvent(GetWorld(), Hit.GetActor(), GetInstigator(), ProjectileSettings.ProjectileDamage, GetOwner()->GetActorLocation(), Hit.Location);
+
 	ImpactProjectile();
 }
 

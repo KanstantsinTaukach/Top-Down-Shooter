@@ -10,6 +10,7 @@
 #include "../FunctionLibrary/AnimUtils.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "../Components/TDSInventoryComponent.h"
+#include "Perception/AISense_Damage.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
 
@@ -726,4 +727,5 @@ void ATDS_WeaponDefault::SpawnImpactEffects(const FHitResult& Hit)
 	}
 
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), WeaponSettings.ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);
+	UAISense_Damage::ReportDamageEvent(GetWorld(), Hit.GetActor(), GetInstigator(), WeaponSettings.ProjectileSettings.ProjectileDamage, Hit.TraceStart, Hit.Location);
 }
