@@ -16,6 +16,13 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = ATDSAIController::StaticClass();
 
+	bUseControllerRotationYaw = false;
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		GetCharacterMovement()->RotationRate = FRotator(0.0f, 180.0f, 0.0f);
+	}
+
 	PrimaryActorTick.bCanEverTick = false;
 
 	HealthComponent = CreateDefaultSubobject<UTDSHealthComponent>("HealthComponent");
@@ -25,7 +32,7 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 	IsConfusion = false;
 	IsDamaged = false;
 
-	GetCharacterMovement()->MaxAcceleration = 300.0f;
+	GetCharacterMovement()->MaxAcceleration = 500.0f;
 
 	ChangeMovementState(EAIMovementState::Run_State);
 }

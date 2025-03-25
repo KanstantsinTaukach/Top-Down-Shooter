@@ -10,5 +10,7 @@ UCLASS()
 class TDS_API ATDSAIController : public AAIController
 {
 	GENERATED_BODY()
-	
+
+protected:
+	virtual void OnPossess(APawn *InPawn) override;	
 };

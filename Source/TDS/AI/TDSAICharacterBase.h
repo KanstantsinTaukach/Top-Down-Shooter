@@ -11,6 +11,7 @@
 
 class UTDSHealthComponent;
 class UTDSLootDropComponent;
+class UBehaviorTree;
 
 UCLASS()
 class TDS_API ATDSAICharacterBase : public ACharacter, public ITDSInterfaceGameActor
@@ -18,6 +19,9 @@ class TDS_API ATDSAICharacterBase : public ACharacter, public ITDSInterfaceGameA
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
+	UBehaviorTree* BehaviorTreeAsset;
+
 	ATDSAICharacterBase(const FObjectInitializer& ObjInit);
 
 	EPhysicalSurface GetSurfaceType() override;
