@@ -86,6 +86,8 @@ struct FProjectileInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	UParticleSystem* ExplodeFX = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
+	USoundBase* WarningSound = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	USoundBase* ExplodeSound = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ExplodeSettings", meta = (EditCondition = "ExplosiveProjectile"))
 	float ProjectileMaxRadiusDamage = 200.0f;

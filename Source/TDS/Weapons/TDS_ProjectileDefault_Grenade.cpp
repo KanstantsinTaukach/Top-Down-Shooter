@@ -5,6 +5,8 @@
 #include "DrawDebugHelpers.h"
 #include "../Interaction/TDSInterfaceGameActor.h"
 #include "Perception/AISense_Damage.h"
+#include "Perception/AISense_Hearing.h"
+#include "Components/AudioComponent.h"
 
 int32 DebugExplodeShow = 0;
 FAutoConsoleVariableRef CVARExplodeShow(TEXT("DebugExplode"), DebugExplodeShow, TEXT("Draw Debug for Explode"), ECVF_Cheat);
@@ -23,6 +25,16 @@ void ATDS_ProjectileDefault_Grenade::Tick(float DeltaTime)
 	if (HasDelayBeforeExplosion)
 	{
 		TimerExplode(DeltaTime);
+	}
+
+	if (IsLuringEnemies)
+	{
+		NoiseUpdateTimer += DeltaTime;
+		if (NoiseUpdateTimer >= NoiseUpdateInterval)
+		{
+			UpdateLuringNoise();
+			NoiseUpdateTimer = 0.0f;
+		}
 	}
 }
 
@@ -74,6 +86,16 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 		DrawDebugSphere(GetWorld(), GetActorLocation(), ProjectileSettings.ProjectileMinRadiusDamage, 18, FColor::Red, false, 10.0f);
 	}
 
+	IsLuringEnemies = false;
+
+	if (FlightSoundComponent)
+	{
+		FlightSoundComponent->Stop();
+		FlightSoundComponent->ConditionalBeginDestroy();
+		FlightSoundComponent = nullptr;
+		IsSoundPlaying = false;
+	}
+
 	TimerEnabled = false;
 	if (ProjectileSettings.ExplodeFX)
 	{
@@ -115,10 +137,7 @@ void ATDS_ProjectileDefault_Grenade::Explode()
 
 void ATDS_ProjectileDefault_Grenade::GetActorsInRange(UWorld* World, const FVector& Origin, float Radius, TArray<AActor*>& OutActors)
 {
-	if (!World)
-	{
-		return;
-	}
+	if (!World) return;
 
 	TArray<AActor*> AllActors;
 	UGameplayStatics::GetAllActorsOfClass(World, AActor::StaticClass(), AllActors);
@@ -137,4 +156,34 @@ void ATDS_ProjectileDefault_Grenade::GetActorsInRange(UWorld* World, const FVect
 			UAISense_Damage::ReportDamageEvent(GetWorld(), Actor, GetInstigator(), ProjectileSettings.ExplodeMaxDamage, GetOwner()->GetActorLocation(), Hit.ImpactPoint);
 		}
 	}
+}
+
+void ATDS_ProjectileDefault_Grenade::UpdateLuringNoise()
+{
+	if (!GetWorld() || !ProjectileSettings.WarningSound) return;
+
+	if (FlightSoundComponent && IsSoundPlaying)
+	{
+		FlightSoundComponent->SetWorldLocation(GetActorLocation());
+		return;
+	}
+	
+	FlightSoundComponent = UGameplayStatics::SpawnSoundAttached(ProjectileSettings.WarningSound, GetRootComponent(), NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset, false, 1.0f, 1.0f, 0.0f, nullptr, nullptr, false);
+	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 5.0f, this, 1000.0f, TEXT("LureTarget"));
+
+	if (FlightSoundComponent)
+	{
+		IsSoundPlaying = true;
+		FlightSoundComponent->OnAudioFinished.AddDynamic(this, &ATDS_ProjectileDefault_Grenade::OnSoundFinished);
+	}
+}
+
+void ATDS_ProjectileDefault_Grenade::OnSoundFinished()
+{
+	if (FlightSoundComponent)
+	{
+		FlightSoundComponent->ConditionalBeginDestroy();
+		FlightSoundComponent = nullptr;
+	}
+	IsSoundPlaying = false;
 }

@@ -25,13 +25,27 @@ public:
 
 	void Explode();
 
+	void UpdateLuringNoise();
+
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	bool TimerEnabled = false;
 	float TimerToExplode = 0.0f;
-	float TimeToExplode = 2.0f;
+	float TimeToExplode = 3.5f;
+
+	bool IsLuringEnemies = true;
+	float NoiseUpdateInterval = 0.01f;
+	float NoiseUpdateTimer = 0.0f;
+
+	bool IsSoundPlaying = false;
+
+	UPROPERTY()
+	UAudioComponent* FlightSoundComponent;
+
+	UFUNCTION()
+	void OnSoundFinished();
 
 	void GetActorsInRange(UWorld* World, const FVector& Origin, float Radius, TArray<AActor*>& OutActors);
 };
