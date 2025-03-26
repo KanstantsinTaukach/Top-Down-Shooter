@@ -36,7 +36,7 @@ private:
 	float TimeToExplode = 3.5f;
 
 	bool IsLuringEnemies = true;
-	float NoiseUpdateInterval = 0.01f;
+	float NoiseUpdateInterval = 0.1f;
 	float NoiseUpdateTimer = 0.0f;
 
 	bool IsSoundPlaying = false;

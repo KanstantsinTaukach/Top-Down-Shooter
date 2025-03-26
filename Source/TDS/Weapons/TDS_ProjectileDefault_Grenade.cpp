@@ -24,6 +24,7 @@ void ATDS_ProjectileDefault_Grenade::Tick(float DeltaTime)
 
 	if (HasDelayBeforeExplosion)
 	{
+		IsLuringEnemies = true;
 		TimerExplode(DeltaTime);
 	}
 
@@ -168,8 +169,8 @@ void ATDS_ProjectileDefault_Grenade::UpdateLuringNoise()
 		return;
 	}
 	
-	FlightSoundComponent = UGameplayStatics::SpawnSoundAttached(ProjectileSettings.WarningSound, GetRootComponent(), NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset, false, 1.0f, 1.0f, 0.0f, nullptr, nullptr, false);
-	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 5.0f, this, 1000.0f, TEXT("LureTarget"));
+	FlightSoundComponent = UGameplayStatics::SpawnSoundAttached(ProjectileSettings.WarningSound, GetRootComponent(), NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset, false, 0.5f, 1.0f, 0.0f, nullptr, nullptr, false);
+	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 2.0f, this, 1000.0f, TEXT("GrenadeInAir"));
 
 	if (FlightSoundComponent)
 	{
