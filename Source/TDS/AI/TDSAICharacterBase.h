@@ -51,6 +51,10 @@ protected:
 	TArray<UAnimMontage*> ConfusionAnimations;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	TArray<UAnimMontage*> HitAnimations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	TArray<UAnimMontage*> LightAttackAnimations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	TArray<UAnimMontage*> HeavyAttackAnimations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float ConfusionChance = 0.1f;
