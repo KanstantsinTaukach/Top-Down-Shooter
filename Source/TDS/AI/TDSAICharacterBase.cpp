@@ -10,6 +10,9 @@
 #include "Components/CapsuleComponent.h"
 #include "../FunctionLibrary/AnimUtils.h"
 #include "TDSAIController.h"
+#include "../Animations/TDSAIAttackAnimNotify.h"
+
+DEFINE_LOG_CATEGORY_STATIC(TDSAICharacterBaseLog, All, All);
 
 ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
@@ -43,6 +46,8 @@ void ATDSAICharacterBase::BeginPlay()
 	Super::BeginPlay();
 
 	CheckAnimationArrays();
+
+	InitAnimation();
 
 	check(LootDropComponent);
 
@@ -127,7 +132,7 @@ void ATDSAICharacterBase::OnTakeRadialDamageHandle(AActor* DamagedActor, float D
 void ATDSAICharacterBase::EnableConfusion()
 {
 	IsConfused = true;
-	ChangeMovementState(EAIMovementState::Confusion_State);
+	ChangeMovementState(EAIMovementState::CantMove_State);
 
 	UAnimMontage* RandomAnimation = AnimUtils::GetRandomAnimation(ConfusionAnimations);
 	if (RandomAnimation && GetMesh() && GetMesh()->GetAnimInstance())
@@ -227,7 +232,7 @@ void ATDSAICharacterBase::ChangeMovementState(EAIMovementState InAIMovementState
 	float ResSpeed = 500.0f;
 	switch (AIMovementState)
 	{
-	case EAIMovementState::Confusion_State: ResSpeed = AISpeedInfo.ConfusionSpeed;	break;
+	case EAIMovementState::CantMove_State:	ResSpeed = AISpeedInfo.CantMoveSpeed;	break;
 	case EAIMovementState::Hit_State:		ResSpeed = AISpeedInfo.HitSpeed;		break;
 	case EAIMovementState::Run_State:		ResSpeed = AISpeedInfo.RunSpeed;		break;
 	default: break;
@@ -253,7 +258,7 @@ void ATDSAICharacterBase::LightAttack()
 void ATDSAICharacterBase::HeavyAttack()
 {
 	CanAttack = false;
-	ChangeMovementState(EAIMovementState::Confusion_State);
+	ChangeMovementState(EAIMovementState::CantMove_State);
 
 	UAnimMontage* RandomAnimation = AnimUtils::GetRandomAnimation(HeavyAttackAnimations);
 	if (RandomAnimation && GetMesh() && GetMesh()->GetAnimInstance())
@@ -270,5 +275,48 @@ void ATDSAICharacterBase::AttackCompleted()
 	GetWorld()->GetTimerManager().ClearTimer(AttackTimerHandle);
 
 	CanAttack = true;
-	ChangeMovementState(EAIMovementState::Run_State);
+	if (AIMovementState == EAIMovementState::CantMove_State)
+	{
+		ChangeMovementState(EAIMovementState::Run_State);
+	}
+}
+
+void ATDSAICharacterBase::InitAnimation()
+{
+	for (auto LightAttackAnimation : LightAttackAnimations)
+	{
+		const auto NotifyEvents = LightAttackAnimation->Notifies;
+		for (auto NotifyEvent : NotifyEvents)
+		{
+			auto AttackAnimNotify = Cast<UTDSAIAttackAnimNotify>(NotifyEvent.Notify);
+			if (AttackAnimNotify)
+			{
+				AttackAnimNotify->OnNotified.AddUObject(this, &ATDSAICharacterBase::NotifyAttackHitConfirmed);
+				break;
+			}
+		}
+	}
+
+	for (auto HeavyAttackAnimation : HeavyAttackAnimations)
+	{
+		const auto NotifyEvents = HeavyAttackAnimation->Notifies;
+		for (auto NotifyEvent : NotifyEvents)
+		{
+			auto AttackAnimNotify = Cast<UTDSAIAttackAnimNotify>(NotifyEvent.Notify);
+			if (AttackAnimNotify)
+			{
+				AttackAnimNotify->OnNotified.AddUObject(this, &ATDSAICharacterBase::NotifyAttackHitConfirmed);
+				break;
+			}
+		}
+	}
+	
+}
+
+void ATDSAICharacterBase::NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshComponent)
+{
+	if (this->GetMesh() == MeshComponent)
+	{
+		UE_LOG(TDSAICharacterBaseLog, Display, TEXT("ATDSAICharacterBase::InitAnimation - %s attack hit comfirmed"), *GetName());
+	}
 }

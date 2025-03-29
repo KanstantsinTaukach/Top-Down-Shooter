@@ -35,7 +35,8 @@ public class TDS : ModuleRules
             "TDS/Environment",
             "TDS/Interaction",
             "TDS/Pickups",
-            "TDS/AI"
+            "TDS/AI",
+            "TDS/Animations"
         });
     }
 }

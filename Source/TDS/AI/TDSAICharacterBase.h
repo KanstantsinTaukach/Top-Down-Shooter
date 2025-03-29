@@ -103,4 +103,7 @@ private:
 	void ChangeMovementState(EAIMovementState InMovementState);
 
 	void AttackCompleted();
+
+	void InitAnimation();
+	void NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshComponent);
 };

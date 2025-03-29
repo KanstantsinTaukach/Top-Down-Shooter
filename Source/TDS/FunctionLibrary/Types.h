@@ -322,7 +322,7 @@ struct FLootDropChance
 UENUM(BlueprintType)
 enum class EAIMovementState : uint8
 {
-	Confusion_State = 0 UMETA(DisplayName = "Confusion State"),
+	CantMove_State = 0 UMETA(DisplayName = "Confusion State"),
 	Hit_State			UMETA(DisplayName = "Hit State"),
 	Run_State			UMETA(DisplayName = "Run State"),
 };
@@ -333,7 +333,7 @@ struct FAISpeed
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float ConfusionSpeed = 0.0f;
+	float CantMoveSpeed = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float HitSpeed = 250.0f;
