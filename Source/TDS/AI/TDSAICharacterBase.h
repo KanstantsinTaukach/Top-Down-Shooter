@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "../FunctionLibrary/Types.h"
 #include "../Interaction/TDSInterfaceGameActor.h"
+#include "../Interaction/TDSAIInterfaceCombat.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TDSAICharacterBase.generated.h"
 
@@ -14,7 +15,7 @@ class UTDSLootDropComponent;
 class UBehaviorTree;
 
 UCLASS()
-class TDS_API ATDSAICharacterBase : public ACharacter, public ITDSInterfaceGameActor
+class TDS_API ATDSAICharacterBase : public ACharacter, public ITDSInterfaceGameActor, public ITDSAIInterfaceCombat
 {
 	GENERATED_BODY()
 
@@ -33,10 +34,19 @@ public:
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	UFUNCTION(BlueprintCallable)
+	bool CheckCanAttack() const override { return CanAttack; };
+
+	UFUNCTION(BlueprintCallable)
+	void LightAttack() override;
+	UFUNCTION(BlueprintCallable)
+	void HeavyAttack() override;
+
 protected:
 	bool IsDead = false;
-	bool IsConfusion = false;
+	bool IsConfused = false;
 	bool IsDamaged = false;
+	bool CanAttack = false;
 
 	TArray<UTDSStateEffect*> StateEffects;
 
@@ -75,6 +85,7 @@ private:
 	FTimerHandle RagdollTimerHandle;
 	FTimerHandle ConfusionTimerHandle;
 	FTimerHandle HitTimerHandle;
+	FTimerHandle AttackTimerHandle;
 
 	UFUNCTION()
 	void OnTakeRadialDamageHandle(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser);
@@ -90,4 +101,6 @@ private:
 	void CheckAnimationArrays();
 
 	void ChangeMovementState(EAIMovementState InMovementState);
+
+	void AttackCompleted();
 };

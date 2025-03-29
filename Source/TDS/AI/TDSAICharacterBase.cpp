@@ -29,8 +29,9 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 	LootDropComponent = CreateDefaultSubobject<UTDSLootDropComponent>("LootDropComponent");
 
 	IsDead = false;
-	IsConfusion = false;
+	IsConfused = false;
 	IsDamaged = false;
+	CanAttack = true;
 
 	GetCharacterMovement()->MaxAcceleration = 500.0f;
 
@@ -94,7 +95,7 @@ float ATDSAICharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEv
 		
 	HealthComponent->RemoveFromCurrentHealth(Damage);
 
-	if(!IsConfusion && !IsDamaged && !IsDead)
+	if(!IsConfused && !IsDamaged && !IsDead)
 	{
 		float RandomConfusionChance = FMath::FRandRange(0.0f, 1.0f);
 		if (RandomConfusionChance < ConfusionChance)
@@ -125,7 +126,7 @@ void ATDSAICharacterBase::OnTakeRadialDamageHandle(AActor* DamagedActor, float D
 
 void ATDSAICharacterBase::EnableConfusion()
 {
-	IsConfusion = true;
+	IsConfused = true;
 	ChangeMovementState(EAIMovementState::Confusion_State);
 
 	UAnimMontage* RandomAnimation = AnimUtils::GetRandomAnimation(ConfusionAnimations);
@@ -142,7 +143,7 @@ void ATDSAICharacterBase::DisableConfusion()
 {
 	GetWorld()->GetTimerManager().ClearTimer(ConfusionTimerHandle);
 
-	IsConfusion = false;
+	IsConfused = false;
 	ChangeMovementState(EAIMovementState::Run_State);
 }
 
@@ -233,4 +234,41 @@ void ATDSAICharacterBase::ChangeMovementState(EAIMovementState InAIMovementState
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = ResSpeed;
+}
+
+void ATDSAICharacterBase::LightAttack()
+{
+	CanAttack = false;
+
+	UAnimMontage* RandomAnimation = AnimUtils::GetRandomAnimation(LightAttackAnimations);
+	if (RandomAnimation && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		float AnimationTime = RandomAnimation->GetPlayLength();
+		GetMesh()->GetAnimInstance()->Montage_Play(RandomAnimation);
+
+		GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle, this, &ATDSAICharacterBase::AttackCompleted, AnimationTime, false);
+	}
+}
+
+void ATDSAICharacterBase::HeavyAttack()
+{
+	CanAttack = false;
+	ChangeMovementState(EAIMovementState::Confusion_State);
+
+	UAnimMontage* RandomAnimation = AnimUtils::GetRandomAnimation(HeavyAttackAnimations);
+	if (RandomAnimation && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		float AnimationTime = RandomAnimation->GetPlayLength();
+		GetMesh()->GetAnimInstance()->Montage_Play(RandomAnimation);
+
+		GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle, this, &ATDSAICharacterBase::AttackCompleted, AnimationTime, false);
+	}
+}
+
+void ATDSAICharacterBase::AttackCompleted()
+{
+	GetWorld()->GetTimerManager().ClearTimer(AttackTimerHandle);
+
+	CanAttack = true;
+	ChangeMovementState(EAIMovementState::Run_State);
 }
