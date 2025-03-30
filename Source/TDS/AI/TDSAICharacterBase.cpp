@@ -39,9 +39,21 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 
 	GetCharacterMovement()->MaxAcceleration = 500.0f;
 
-	ChangeMovementState(EAIMovementState::Run_State);
+	//ChangeMovementState(EAIMovementState::Run_State);
 
 	InitAttackParams();
+
+	ECollisionChannel MeleeAttackChannel = ECC_GameTraceChannel4;
+
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		Capsule->SetCollisionResponseToChannel(MeleeAttackChannel, ECR_Ignore);
+	}
+
+	if (USkeletalMeshComponent* SkeletalMesh = GetMesh())
+	{
+		SkeletalMesh->SetCollisionResponseToChannel(MeleeAttackChannel, ECR_Ignore);
+	}
 }
 
 void ATDSAICharacterBase::BeginPlay()
@@ -336,8 +348,8 @@ void ATDSAICharacterBase::NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshC
 
 void ATDSAICharacterBase::PerformAttackTrace(const FAIAttackParams& Params)
 {
-	FVector TraceStart = GetActorLocation() + GetActorForwardVector() * Params.Radius;
-	FVector TraceEnd = GetActorLocation() + GetActorForwardVector() * Params.Radius * 3;
+	FVector TraceStart = GetActorLocation() + GetActorForwardVector() * 50.0f;
+	FVector TraceEnd = GetActorLocation() + GetActorForwardVector() * 150.0f;
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
@@ -377,11 +389,11 @@ void ATDSAICharacterBase::InitAttackParams()
 {
 	LightAttackParams.Damage = 20.0f;
 	LightAttackParams.Spread = 10.0f;
-	LightAttackParams.Radius = 50.0f;
+	LightAttackParams.Radius = 25.0f;
 
 	HeavyAttackParams.Damage = 50.0f;
 	HeavyAttackParams.Spread = 20.0f;
-	HeavyAttackParams.Radius = 100.0f;
+	HeavyAttackParams.Radius = 75.0f;
 }
 
 float ATDSAICharacterBase::GetRandomizedDamage(float BaseDamage, float Spread)
