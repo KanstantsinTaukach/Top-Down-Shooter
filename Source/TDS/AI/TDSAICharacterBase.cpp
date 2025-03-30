@@ -11,6 +11,7 @@
 #include "../FunctionLibrary/AnimUtils.h"
 #include "TDSAIController.h"
 #include "../Animations/TDSAIAttackAnimNotify.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSAICharacterBaseLog, All, All);
 
@@ -39,6 +40,8 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 	GetCharacterMovement()->MaxAcceleration = 500.0f;
 
 	ChangeMovementState(EAIMovementState::Run_State);
+
+	InitAttackParams();
 }
 
 void ATDSAICharacterBase::BeginPlay()
@@ -191,7 +194,7 @@ void ATDSAICharacterBase::OnAICharacterDeath()
 		GetMesh()->GetAnimInstance()->Montage_Play(RandomAnimation);
 
 		//GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &ATDSAICharacterBase::EnableRagdoll, AnimationTime, false);
-	}	
+	}
 
 	if (GetController())
 	{
@@ -243,6 +246,7 @@ void ATDSAICharacterBase::ChangeMovementState(EAIMovementState InAIMovementState
 
 void ATDSAICharacterBase::LightAttack()
 {
+	CurrentAttackType = EAIAttackType::Light;
 	CanAttack = false;
 
 	UAnimMontage* RandomAnimation = AnimUtils::GetRandomAnimation(LightAttackAnimations);
@@ -257,6 +261,7 @@ void ATDSAICharacterBase::LightAttack()
 
 void ATDSAICharacterBase::HeavyAttack()
 {
+	CurrentAttackType = EAIAttackType::Heavy;
 	CanAttack = false;
 	ChangeMovementState(EAIMovementState::CantMove_State);
 
@@ -315,8 +320,79 @@ void ATDSAICharacterBase::InitAnimation()
 
 void ATDSAICharacterBase::NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshComponent)
 {
-	if (this->GetMesh() == MeshComponent)
+	if (this->GetMesh() != MeshComponent) return;
+
+	switch (CurrentAttackType)
 	{
-		UE_LOG(TDSAICharacterBaseLog, Display, TEXT("ATDSAICharacterBase::InitAnimation - %s attack hit comfirmed"), *GetName());
+		case EAIAttackType::Light:
+			PerformAttackTrace(LightAttackParams);
+			break;
+		case EAIAttackType::Heavy:
+			PerformAttackTrace(HeavyAttackParams);
+			break;
 	}
+
+}
+
+void ATDSAICharacterBase::PerformAttackTrace(const FAIAttackParams& Params)
+{
+	FVector TraceStart = GetActorLocation() + GetActorForwardVector() * Params.Radius;
+	FVector TraceEnd = GetActorLocation() + GetActorForwardVector() * Params.Radius * 3;
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
+	ETraceTypeQuery MeleeAttackQuery = UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel4);
+
+	FHitResult HitResult;
+	bool Hit = UKismetSystemLibrary::SphereTraceSingle(
+		GetWorld(),
+		TraceStart,
+		TraceEnd,
+		Params.Radius,
+		MeleeAttackQuery,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::ForDuration,
+		HitResult,
+		true
+	);
+
+	if (Hit && HitResult.GetActor() && HitResult.GetActor()->ActorHasTag("Player"))
+	{
+		float FinalDamage = GetRandomizedDamage(Params.Damage, Params.Spread);
+
+		UGameplayStatics::ApplyDamage(HitResult.GetActor(), FinalDamage, GetController(), this, NULL);
+	}
+
+	if (HitResult.PhysMaterial.IsValid())
+	{
+		EPhysicalSurface SurfaceType = UGameplayStatics::GetSurfaceType(HitResult);
+		// add FX
+		// add sound
+	}
+}
+
+void ATDSAICharacterBase::InitAttackParams()
+{
+	LightAttackParams.Damage = 20.0f;
+	LightAttackParams.Spread = 10.0f;
+	LightAttackParams.Radius = 50.0f;
+
+	HeavyAttackParams.Damage = 50.0f;
+	HeavyAttackParams.Spread = 20.0f;
+	HeavyAttackParams.Radius = 100.0f;
+}
+
+float ATDSAICharacterBase::GetRandomizedDamage(float BaseDamage, float Spread)
+{
+	if (BaseDamage <= 0.0f) return 0.0f;
+	if (Spread < 0.0f) Spread = 0.0f;
+
+	float RandomFactor = FMath::RandRange(-1.0f, 1.0f);
+	RandomFactor = FMath::Sin(RandomFactor * PI / 2);
+
+	float FinalDamage = BaseDamage + Spread * RandomFactor;
+
+	return FMath::RoundToFloat(FMath::Max(FinalDamage, 1.0f));
 }

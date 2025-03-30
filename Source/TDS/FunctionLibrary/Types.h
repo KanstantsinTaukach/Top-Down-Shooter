@@ -322,9 +322,9 @@ struct FLootDropChance
 UENUM(BlueprintType)
 enum class EAIMovementState : uint8
 {
-	CantMove_State = 0 UMETA(DisplayName = "Confusion State"),
+	CantMove_State = 0	UMETA(DisplayName = "Confusion State"),
 	Hit_State			UMETA(DisplayName = "Hit State"),
-	Run_State			UMETA(DisplayName = "Run State"),
+	Run_State			UMETA(DisplayName = "Run State")
 };
 
 USTRUCT(BlueprintType)
@@ -332,7 +332,7 @@ struct FAISpeed
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CantMoveSpeed = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -342,6 +342,27 @@ struct FAISpeed
 	float RunSpeed = 500.0f;
 };
 
+UENUM(BlueprintType)
+enum class EAIAttackType : uint8
+{
+	Light = 0	UMETA(DisplayName = "Light Attack"),
+	Heavy		UMETA(DisplayName = "Heavy Attack")
+};
+
+USTRUCT(BlueprintType)
+struct FAIAttackParams
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float Damage = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float Spread = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float Radius = 0.0f;
+};
 
 UCLASS()
 class TDS_API UTypes : public UBlueprintFunctionLibrary

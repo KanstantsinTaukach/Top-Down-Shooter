@@ -50,6 +50,8 @@ protected:
 
 	TArray<UTDSStateEffect*> StateEffects;
 
+	EAIAttackType CurrentAttackType;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -73,13 +75,22 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EAIMovementState AIMovementState = EAIMovementState::Run_State;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	FAISpeed AISpeedInfo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	FAIAttackParams LightAttackParams;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	FAIAttackParams HeavyAttackParams;
 
 	UFUNCTION()
 	virtual void OnAICharacterDeath();
 
 	virtual void BeginPlay() override;
+
+	void NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshComponent);
+
+	void PerformAttackTrace(const FAIAttackParams& Params);
 
 private:
 	FTimerHandle RagdollTimerHandle;
@@ -105,5 +116,8 @@ private:
 	void AttackCompleted();
 
 	void InitAnimation();
-	void NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshComponent);
+
+	void InitAttackParams();
+
+	float GetRandomizedDamage(float BaseDamage, float Spread);
 };
