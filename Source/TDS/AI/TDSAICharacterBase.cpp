@@ -348,8 +348,8 @@ void ATDSAICharacterBase::NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshC
 
 void ATDSAICharacterBase::PerformAttackTrace(const FAIAttackParams& Params)
 {
-	FVector TraceStart = GetActorLocation() + GetActorForwardVector() * 50.0f;
-	FVector TraceEnd = GetActorLocation() + GetActorForwardVector() * 150.0f;
+	FVector TraceStart = GetActorLocation() + GetActorForwardVector() * Params.Radius;
+	FVector TraceEnd = GetActorLocation() + GetActorForwardVector() * Params.Radius * 2.5f;
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);

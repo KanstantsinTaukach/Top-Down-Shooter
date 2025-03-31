@@ -92,6 +92,8 @@ protected:
 
 	void PerformAttackTrace(const FAIAttackParams& Params);
 
+	float GetRandomizedDamage(float BaseDamage, float Spread);
+
 private:
 	FTimerHandle RagdollTimerHandle;
 	FTimerHandle ConfusionTimerHandle;
@@ -118,6 +120,4 @@ private:
 	void InitAnimation();
 
 	void InitAttackParams();
-
-	float GetRandomizedDamage(float BaseDamage, float Spread);
 };

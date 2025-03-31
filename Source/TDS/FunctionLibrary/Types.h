@@ -360,7 +360,7 @@ struct FAIAttackParams
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (ClampMin = "1.0", ClampMax = "100.0"))
 	float Spread = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (ClampMin = "1.0", ClampMax = "200.0"))
 	float Radius = 0.0f;
 };
 
