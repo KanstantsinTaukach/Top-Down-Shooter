@@ -39,7 +39,7 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 
 	GetCharacterMovement()->MaxAcceleration = 500.0f;
 
-	//ChangeMovementState(EAIMovementState::Run_State);
+	ChangeMovementState(EAIMovementState::Run_State);
 
 	InitAttackParams();
 
