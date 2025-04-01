@@ -2,6 +2,7 @@
 
 #include "TDSAIJumpingEnemy.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Animations/TDSAIAttackAnimNotify.h"
 
 void ATDSAIJumpingEnemy::JumpAttack()
 {
@@ -11,12 +12,31 @@ void ATDSAIJumpingEnemy::JumpAttack()
 
 	float AnimDuration = GetMesh()->GetAnimInstance()->Montage_Play(JumpAttackAnimation);
 
-	FVector JumpImpulse = GetActorForwardVector() * JumpForwardForce + FVector::UpVector * JumpHeight;
-	LaunchCharacter(JumpImpulse, false, true);
-
-	GetWorld()->GetTimerManager().SetTimer(JumpAttackTimerHandle, this, &ATDSAIJumpingEnemy::PerformJumpAttackHitCheck, AnimDuration * 0.5, false);
+	FVector LaunchVelocity = GetActorForwardVector() * JumpForwardForce + FVector::UpVector * JumpHeight;
+	LaunchCharacter(LaunchVelocity, true, true);
 
 	GetWorld()->GetTimerManager().SetTimer(JumpAttackTimerHandle, this, &ATDSAIJumpingEnemy::EndJumpAttack, AnimDuration, false);
+}
+
+void ATDSAIJumpingEnemy::InitAnimation()
+{
+	const auto NotifyEvents = JumpAttackAnimation->Notifies;
+	for (auto NotifyEvent : NotifyEvents)
+	{
+		auto AttackAnimNotify = Cast<UTDSAIAttackAnimNotify>(NotifyEvent.Notify);
+		if (AttackAnimNotify)
+		{
+			AttackAnimNotify->OnNotified.AddUObject(this, &ATDSAIJumpingEnemy::NotifyJumpAttackHitConfirmed);
+			break;
+		}
+	}
+}
+
+void ATDSAIJumpingEnemy::NotifyJumpAttackHitConfirmed(USkeletalMeshComponent* MeshComponent)
+{
+	if (this->GetMesh() != MeshComponent) return;
+
+	PerformJumpAttackHitCheck();
 }
 
 void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
@@ -38,7 +58,11 @@ void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
 		MeleeAttackQuery,
 		false,
 		ActorsToIgnore,
+#if ENABLE_DRAW_DEBUG
 		EDrawDebugTrace::ForDuration,
+#else
+		EDrawDebugTrace::None,
+#endif
 		HitResult,
 		true
 	);
@@ -61,5 +85,8 @@ void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
 void ATDSAIJumpingEnemy::EndJumpAttack()
 {
 	CanAttack = true;
-	GetWorld()->GetTimerManager().ClearTimer(JumpAttackTimerHandle);
+	if (JumpAttackTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(JumpAttackTimerHandle);
+	}
 }

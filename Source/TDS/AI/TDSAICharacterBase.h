@@ -94,6 +94,8 @@ protected:
 
 	float GetRandomizedDamage(float BaseDamage, float Spread);
 
+	virtual void InitAnimation();
+
 private:
 	FTimerHandle RagdollTimerHandle;
 	FTimerHandle ConfusionTimerHandle;
@@ -116,8 +118,6 @@ private:
 	void ChangeMovementState(EAIMovementState InMovementState);
 
 	void AttackCompleted();
-
-	void InitAnimation();
 
 	void InitAttackParams();
 };

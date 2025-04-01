@@ -26,17 +26,24 @@ protected:
 	float JumpAttackSpread = 20.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
-	float JumpAttackRadius = 300.0f;
+	float JumpAttackRadius = 250.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
-	float JumpHeight = 300.0f;
+	float JumpHeight = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
-	float JumpForwardForce = 500.0f;
+	float JumpForwardForce = 300.0f;
+
+	UFUNCTION()
+	void PerformJumpAttackHitCheck();
+
+	UFUNCTION()
+	void EndJumpAttack();
+
+	virtual void InitAnimation() override;
+
+	void NotifyJumpAttackHitConfirmed(USkeletalMeshComponent* MeshComponent);
 
 private:
 	FTimerHandle JumpAttackTimerHandle;
-
-	void PerformJumpAttackHitCheck();
-	void EndJumpAttack();
 };

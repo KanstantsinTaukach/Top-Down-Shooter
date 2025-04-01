@@ -326,8 +326,7 @@ void ATDSAICharacterBase::InitAnimation()
 				break;
 			}
 		}
-	}
-	
+	}	
 }
 
 void ATDSAICharacterBase::NotifyAttackHitConfirmed(USkeletalMeshComponent* MeshComponent)
