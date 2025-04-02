@@ -21,7 +21,7 @@ protected:
 	UTDSAIPerceptionComponent* TDSAIPerceptionComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
-	FName FocusOnKeyName = "TargetActor";
+	FName FocusOnKeyName = "EnemyActor";
 
 	virtual void OnPossess(APawn *InPawn) override;
 

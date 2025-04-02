@@ -39,6 +39,7 @@ public class TDS : ModuleRules
             "TDS/AI",
             "TDS/Animations",
             "TDS/AI/Services",
+             "TDS/AI/Tasks"
         });
     }
 }
