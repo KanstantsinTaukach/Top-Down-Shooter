@@ -3,6 +3,7 @@
 #include "TDSAIController.h"
 #include "TDSAICharacterBase.h"
 #include "../Components/TDSAIPerceptionComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 ATDSAIController::ATDSAIController()
 {
@@ -25,6 +26,13 @@ void ATDSAIController::Tick(float Deltatime)
 {
 	Super::Tick(Deltatime);
 
-	const auto AimActor = TDSAIPerceptionComponent->GetClosesEnemy();
+	const auto AimActor = GetFocusOnActor();
 	SetFocus(AimActor);
+}
+
+AActor* ATDSAIController::GetFocusOnActor() const
+{
+	if (!GetBlackboardComponent()) return nullptr;
+
+	return Cast<AActor>(GetBlackboardComponent()->GetValueAsObject(FocusOnKeyName));
 }

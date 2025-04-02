@@ -20,7 +20,8 @@ public class TDS : ModuleRules
           "UMG",
           "Niagara",
           "PhysicsCore",
-          "Slate"
+          "Slate",
+          "GameplayTasks"
         });
 
         PublicIncludePaths.AddRange(new string[] 
@@ -36,7 +37,8 @@ public class TDS : ModuleRules
             "TDS/Interaction",
             "TDS/Pickups",
             "TDS/AI",
-            "TDS/Animations"
+            "TDS/Animations",
+            "TDS/AI/Services",
         });
     }
 }

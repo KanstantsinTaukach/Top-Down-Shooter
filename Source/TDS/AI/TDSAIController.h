@@ -20,7 +20,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTDSAIPerceptionComponent* TDSAIPerceptionComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	FName FocusOnKeyName = "TargetActor";
+
 	virtual void OnPossess(APawn *InPawn) override;
 
 	virtual void Tick(float Deltatime) override;
+
+private:
+	AActor* GetFocusOnActor() const;
 };
