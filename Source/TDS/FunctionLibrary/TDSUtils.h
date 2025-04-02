@@ -5,7 +5,7 @@
 class TDSUtils
 {
 public:
-	template<typename T> static T* GetTDSPlayerComponent(APawn* PlayerPawn)
+	template<typename T> static T* GetTDSPlayerComponent(AActor* PlayerPawn)
 	{
 		if (!PlayerPawn)
 		{

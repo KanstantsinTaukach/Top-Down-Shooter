@@ -50,7 +50,7 @@ void ATDSAIJumpingEnemy::Tick(float DeltaTime)
 		{
 			FVector Force = GetActorForwardVector() * JumpDistance * CurveValue + FVector::UpVector * JumpHeight * CurveValue;
 
-			GetCharacterMovement()->AddImpulse(Force * DeltaTime * 2, true);
+			GetCharacterMovement()->AddImpulse(Force * DeltaTime, true);
 
 			float NewGravityScale = (GetCharacterMovement()->Velocity.Z < 0) ? InitialGravityScale * 2.5 : InitialGravityScale;
 			GetCharacterMovement()->GravityScale = NewGravityScale;

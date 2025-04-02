@@ -2,7 +2,13 @@
 
 #include "TDSAIController.h"
 #include "TDSAICharacterBase.h"
-#include "BehaviorTree/BlackboardComponent.h"
+#include "../Components/TDSAIPerceptionComponent.h"
+
+ATDSAIController::ATDSAIController()
+{
+	TDSAIPerceptionComponent = CreateDefaultSubobject<UTDSAIPerceptionComponent>("TDSAIPerceptionComponent");
+	SetPerceptionComponent(*TDSAIPerceptionComponent);
+}
 
 void ATDSAIController::OnPossess(APawn* InPawn)
 {
@@ -13,4 +19,12 @@ void ATDSAIController::OnPossess(APawn* InPawn)
 	{
 		RunBehaviorTree(AICharacter->BehaviorTreeAsset);
 	}
+}
+
+void ATDSAIController::Tick(float Deltatime)
+{
+	Super::Tick(Deltatime);
+
+	const auto AimActor = TDSAIPerceptionComponent->GetClosesEnemy();
+	SetFocus(AimActor);
 }
