@@ -3,21 +3,33 @@
 #include "TDSAIJumpingEnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Animations/TDSAIAttackAnimNotify.h"
+#include "Components/CapsuleComponent.h"
 
 ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	InitialGravityScale = GetCharacterMovement()->GravityScale;
 }
 
 void ATDSAIJumpingEnemy::JumpAttack()
 {
-	if (!CanAttack || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance()) return;
+	if (!CanAttack || IsJumpAttackOnCooldown || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance()) return;
 
 	CanAttack = false;
 	IsJumpAttacking = true;
+	IsJumpAttackOnCooldown = true;
 
-	InitialGravityScale = GetCharacterMovement()->GravityScale;
+	GetWorld()->GetTimerManager().SetTimer(JumpAttackCooldownTimerHandle, this, &ATDSAIJumpingEnemy::ResetJumpAttackCooldown, JumpAttackCooldown, false);
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	}
 
 	float AnimDuration = GetMesh()->GetAnimInstance()->Montage_Play(JumpAttackAnimation);
 
@@ -36,18 +48,47 @@ void ATDSAIJumpingEnemy::Tick(float DeltaTime)
 
 		if (CurveValue > 0.1f)
 		{
-			FVector Force = GetActorForwardVector() * JumpForwardForce * CurveValue + FVector::UpVector * JumpHeight * CurveValue;
+			FVector Force = GetActorForwardVector() * JumpDistance * CurveValue + FVector::UpVector * JumpHeight * CurveValue;
 
-			GetCharacterMovement()->AddImpulse(Force * DeltaTime, true);
+			GetCharacterMovement()->AddImpulse(Force * DeltaTime * 2, true);
+
+			float NewGravityScale = (GetCharacterMovement()->Velocity.Z < 0) ? InitialGravityScale * 2.5 : InitialGravityScale;
+			GetCharacterMovement()->GravityScale = NewGravityScale;
 		}
-
-		float CurrentGravity = FMath::Lerp(InitialGravityScale, InitialGravityScale * 2.5f, GetCharacterMovement()->Velocity.Z < 0 ? 1 : 0);
-		GetCharacterMovement()->GravityScale = CurrentGravity;
 	}
+}
+
+void ATDSAIJumpingEnemy::EndJumpAttack()
+{
+	CanAttack = true;
+	IsJumpAttacking = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->GravityScale = InitialGravityScale;
+
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	}
+
+	SetActorTickEnabled(false);
+
+	if (JumpAttackTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(JumpAttackTimerHandle);
+	}
+}
+
+void ATDSAIJumpingEnemy::ResetJumpAttackCooldown()
+{
+	IsJumpAttackOnCooldown = false;
 }
 
 void ATDSAIJumpingEnemy::InitAnimation()
 {
+	if (!JumpAttackAnimation) return;
+
 	const auto NotifyEvents = JumpAttackAnimation->Notifies;
 	for (auto NotifyEvent : NotifyEvents)
 	{
@@ -69,6 +110,8 @@ void ATDSAIJumpingEnemy::NotifyJumpAttackHitConfirmed(USkeletalMeshComponent* Me
 
 void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
 {
+	if (!GetWorld()) return;
+
 	FVector TraceStart = GetActorLocation();
 	FVector TraceEnd = TraceStart + FVector::DownVector * 50.0f;
 
@@ -103,20 +146,5 @@ void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
 		EPhysicalSurface SurfaceType = UGameplayStatics::GetSurfaceType(HitResult);
 		// add FX
 		// add sound
-	}
-}
-
-void ATDSAIJumpingEnemy::EndJumpAttack()
-{
-	CanAttack = true;
-	IsJumpAttacking = false;
-
-	SetActorTickEnabled(false);
-
-	GetCharacterMovement()->GravityScale = InitialGravityScale;
-
-	if (JumpAttackTimerHandle.IsValid())
-	{
-		GetWorld()->GetTimerManager().ClearTimer(JumpAttackTimerHandle);
 	}
 }

@@ -21,20 +21,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
 	UAnimMontage* JumpAttackAnimation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
 	float JumpAttackDamage = 50.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
 	float JumpAttackSpread = 20.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
 	float JumpAttackRadius = 250.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
-	float JumpHeight = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
+	float JumpHeight = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
+	float JumpDistance = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
-	float JumpForwardForce = 300.0f;
+	float JumpAttackCooldown = 7.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
 	FName JumpPowerCurveName = "JumpPower";
@@ -45,6 +48,9 @@ protected:
 	UFUNCTION()
 	void EndJumpAttack();
 
+	UFUNCTION()
+	void ResetJumpAttackCooldown();
+
 	virtual void InitAnimation() override;
 
 	void NotifyJumpAttackHitConfirmed(USkeletalMeshComponent* MeshComponent);
@@ -53,8 +59,10 @@ protected:
 
 private:
 	bool IsJumpAttacking = false;
+	bool IsJumpAttackOnCooldown = false;
 
-	float InitialGravityScale;
+	float InitialGravityScale = 0.0f;
 
 	FTimerHandle JumpAttackTimerHandle;
+	FTimerHandle JumpAttackCooldownTimerHandle;
 };

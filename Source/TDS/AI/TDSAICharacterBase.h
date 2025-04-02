@@ -96,6 +96,8 @@ protected:
 
 	virtual void InitAnimation();
 
+	void ChangeMovementState(EAIMovementState InMovementState);
+
 private:
 	FTimerHandle RagdollTimerHandle;
 	FTimerHandle ConfusionTimerHandle;
@@ -114,8 +116,6 @@ private:
 	void DisableHit();
 
 	void CheckAnimationArrays();
-
-	void ChangeMovementState(EAIMovementState InMovementState);
 
 	void AttackCompleted();
 
