@@ -4,18 +4,46 @@
 #include "Kismet/GameplayStatics.h"
 #include "../Animations/TDSAIAttackAnimNotify.h"
 
+ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Super(ObjInit)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+}
+
 void ATDSAIJumpingEnemy::JumpAttack()
 {
 	if (!CanAttack || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance()) return;
 
 	CanAttack = false;
+	IsJumpAttacking = true;
+
+	InitialGravityScale = GetCharacterMovement()->GravityScale;
 
 	float AnimDuration = GetMesh()->GetAnimInstance()->Montage_Play(JumpAttackAnimation);
 
-	FVector LaunchVelocity = GetActorForwardVector() * JumpForwardForce + FVector::UpVector * JumpHeight;
-	LaunchCharacter(LaunchVelocity, true, true);
+	SetActorTickEnabled(true);
 
 	GetWorld()->GetTimerManager().SetTimer(JumpAttackTimerHandle, this, &ATDSAIJumpingEnemy::EndJumpAttack, AnimDuration, false);
+}
+
+void ATDSAIJumpingEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (IsJumpAttacking && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		float CurveValue = GetMesh()->GetAnimInstance()->GetCurveValue(JumpPowerCurveName);
+
+		if (CurveValue > 0.1f)
+		{
+			FVector Force = GetActorForwardVector() * JumpForwardForce * CurveValue + FVector::UpVector * JumpHeight * CurveValue;
+
+			GetCharacterMovement()->AddImpulse(Force * DeltaTime, true);
+		}
+
+		float CurrentGravity = FMath::Lerp(InitialGravityScale, InitialGravityScale * 2.5f, GetCharacterMovement()->Velocity.Z < 0 ? 1 : 0);
+		GetCharacterMovement()->GravityScale = CurrentGravity;
+	}
 }
 
 void ATDSAIJumpingEnemy::InitAnimation()
@@ -58,11 +86,7 @@ void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
 		MeleeAttackQuery,
 		false,
 		ActorsToIgnore,
-#if ENABLE_DRAW_DEBUG
 		EDrawDebugTrace::ForDuration,
-#else
-		EDrawDebugTrace::None,
-#endif
 		HitResult,
 		true
 	);
@@ -85,6 +109,12 @@ void ATDSAIJumpingEnemy::PerformJumpAttackHitCheck()
 void ATDSAIJumpingEnemy::EndJumpAttack()
 {
 	CanAttack = true;
+	IsJumpAttacking = false;
+
+	SetActorTickEnabled(false);
+
+	GetCharacterMovement()->GravityScale = InitialGravityScale;
+
 	if (JumpAttackTimerHandle.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(JumpAttackTimerHandle);

@@ -12,6 +12,8 @@ class TDS_API ATDSAIJumpingEnemy : public ATDSAICharacterBase
 	GENERATED_BODY()
 
 public:
+	ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit);
+
 	UFUNCTION(BlueprintCallable)
 	void JumpAttack();
 
@@ -34,6 +36,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
 	float JumpForwardForce = 300.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
+	FName JumpPowerCurveName = "JumpPower";
+
 	UFUNCTION()
 	void PerformJumpAttackHitCheck();
 
@@ -44,6 +49,12 @@ protected:
 
 	void NotifyJumpAttackHitConfirmed(USkeletalMeshComponent* MeshComponent);
 
+	virtual void Tick(float DeltaTime) override;
+
 private:
+	bool IsJumpAttacking = false;
+
+	float InitialGravityScale;
+
 	FTimerHandle JumpAttackTimerHandle;
 };
