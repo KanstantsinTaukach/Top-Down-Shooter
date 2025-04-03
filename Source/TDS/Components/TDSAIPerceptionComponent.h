@@ -13,5 +13,6 @@ class TDS_API UTDSAIPerceptionComponent : public UAIPerceptionComponent
 
 public:
 	AActor* GetClosesEnemy() const;
-	
+
+	AActor* GetHighestPriorityTarget() const;	
 };

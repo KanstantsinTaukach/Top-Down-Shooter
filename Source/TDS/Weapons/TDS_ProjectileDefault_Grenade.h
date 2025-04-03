@@ -28,6 +28,9 @@ public:
 	void UpdateLuringNoise();
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float AILuringRadius = 1000.0f;
+
 	virtual void BeginPlay() override;
 
 private:

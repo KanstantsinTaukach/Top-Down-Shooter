@@ -20,7 +20,7 @@ void UTDSFindEnemyService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* No
 		const auto PerceptionComponent = TDSUtils::GetTDSPlayerComponent<UTDSAIPerceptionComponent>(Controller);
 		if (PerceptionComponent)
 		{
-			Blackboard->SetValueAsObject(EnemyActorKey.SelectedKeyName, PerceptionComponent->GetClosesEnemy());
+			Blackboard->SetValueAsObject(EnemyActorKey.SelectedKeyName, PerceptionComponent->GetHighestPriorityTarget());
 		}
 	}
 
