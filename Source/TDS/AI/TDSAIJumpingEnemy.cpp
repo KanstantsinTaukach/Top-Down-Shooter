@@ -167,6 +167,8 @@ void ATDSAIJumpingEnemy::InitAnimation()
 			break;
 		}
 	}
+
+	Super::InitAnimation();
 }
 
 void ATDSAIJumpingEnemy::NotifyJumpAttackHitConfirmed(USkeletalMeshComponent* MeshComponent)

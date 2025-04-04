@@ -31,7 +31,7 @@ protected:
 	float JumpAttackRadius = 250.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
-	float JumpHeight = 300.0f;
+	float JumpHeight = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
 	float JumpDistance = 1000.0f;
