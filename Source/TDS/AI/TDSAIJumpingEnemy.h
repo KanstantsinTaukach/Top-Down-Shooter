@@ -14,7 +14,7 @@ class TDS_API ATDSAIJumpingEnemy : public ATDSAICharacterBase
 public:
 	ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AI|JumpAttack")
 	void JumpAttack();
 
 protected:
@@ -36,11 +36,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 0.0f))
 	float JumpDistance = 1000.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 1.0f))
 	float JumpAttackCooldown = 7.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
-	FName JumpPowerCurveName = "JumpPower";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 1.0f))
+	float FallingGravityMultiplier = 2.5;
 
 	UFUNCTION()
 	void PerformJumpAttackHitCheck();
@@ -57,11 +57,18 @@ protected:
 
 	virtual void Tick(float DeltaTime) override;
 
+	virtual ACharacter* GetTarget() const;
+
+	FVector CalculateLaunchVelocity(const ACharacter* Target) const;
+
 private:
+	UPROPERTY()
+	UCharacterMovementComponent* CachedMovementComponent = nullptr;
+
 	bool IsJumpAttacking = false;
 	bool IsJumpAttackOnCooldown = false;
 
-	float InitialGravityScale = 0.0f;
+	float InitialGravityScale = 1.0f;
 
 	FTimerHandle JumpAttackTimerHandle;
 	FTimerHandle JumpAttackCooldownTimerHandle;
