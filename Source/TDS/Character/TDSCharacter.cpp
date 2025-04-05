@@ -258,15 +258,15 @@ void ATDSCharacter::MovementTick(float DeltaSeconds)
 					switch (MovementState)
 					{
 					case EMovementState::Aim_State:
-						Displacement = FVector(0.0f, 0.0f, 160.0f);
+						Displacement = FVector(0.0f, 0.0f, 120.0f);
 						CurrentWeapon->ShouldReduceDispersion = true;
 						break;
 					case EMovementState::Walk_State:
-						Displacement = FVector(0.0f, 0.0f, 120.0f);
+						Displacement = FVector(0.0f, 0.0f, 80.0f);
 						CurrentWeapon->ShouldReduceDispersion = false;
 						break;
 					case EMovementState::Run_State:
-						Displacement = FVector(0.0f, 0.0f, 120.0f);
+						Displacement = FVector(0.0f, 0.0f, 80.0f);
 						CurrentWeapon->ShouldReduceDispersion = false;
 						break;
 					case EMovementState::Sprint_State: break;

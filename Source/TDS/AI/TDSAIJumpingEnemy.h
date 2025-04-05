@@ -6,6 +6,9 @@
 #include "TDSAICharacterBase.h"
 #include "TDSAIJumpingEnemy.generated.h"
 
+class UNiagaraSystem;
+class UNiagaraComponent;
+
 UCLASS()
 class TDS_API ATDSAIJumpingEnemy : public ATDSAICharacterBase
 {
@@ -41,6 +44,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack", meta = (ClampMin = 1.0f))
 	float FallingGravityMultiplier = 2.5;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects|JumpAttack")
+	UNiagaraSystem* JumpAttackEffectFX;
+
+	UNiagaraComponent* NiagaraJumpAttackEffect;
 
 	UFUNCTION()
 	void PerformJumpAttackHitCheck();

@@ -7,6 +7,8 @@
 #include "Components/CapsuleComponent.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
@@ -145,6 +147,16 @@ void ATDSAIJumpingEnemy::EndJumpAttack()
 	if (JumpAttackTimerHandle.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(JumpAttackTimerHandle);
+	}
+
+	if (JumpAttackEffectFX)
+	{
+		NiagaraJumpAttackEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), JumpAttackEffectFX, GetActorLocation());
+
+		if (!NiagaraJumpAttackEffect)
+		{
+			return;
+		}
 	}
 }
 

@@ -34,7 +34,7 @@ ATDS_WeaponDefault::ATDS_WeaponDefault()
 	ShootLocation = CreateDefaultSubobject<UArrowComponent>("ShootLocation");
 	ShootLocation->SetupAttachment(GetRootComponent());
 
-	TraceSpeed = 0.2f;
+	TraceSpeed = 0.1f;
 }
 
 void ATDS_WeaponDefault::BeginPlay()
@@ -633,7 +633,7 @@ void ATDS_WeaponDefault::SpawnTrailEffect()
 
 	FVector Direction = (TraceEnd - TraceStart).GetSafeNormal();
 	float Distance = FVector::Dist(TraceStart, TraceEnd);
-	float Speed = TraceSpeed > 0.0f ? TraceSpeed : 0.5f;
+	float Speed = TraceSpeed > 0.0f ? TraceSpeed : 0.1f;
 	float TravelTime = Distance / TraceSpeed;
 
 	ActiveTrailFX = TrailFX;
