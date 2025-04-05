@@ -21,9 +21,10 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void InitProjectile(FProjectileInfo InitParam);
-
 	FProjectileInfo GetProjectileSettings() const { return ProjectileSettings; };
+
+	UFUNCTION(BlueprintCallable)
+	void InitProjectile(FProjectileInfo InitParam);
 
 	UFUNCTION()
 	virtual void BulletCollisionSphereHit(class UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
