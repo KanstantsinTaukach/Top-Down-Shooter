@@ -9,9 +9,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "TDSJumpingEnemyAIController.h"
 
 ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
+	AIControllerClass = ATDSJumpingEnemyAIController::StaticClass();
+
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
@@ -22,36 +25,15 @@ ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Supe
 	}
 }
 
-ACharacter* ATDSAIJumpingEnemy::GetTarget() const
+void ATDSAIJumpingEnemy::JumpAttack(ACharacter* TargetCharacter)
 {
-	const auto MyController = Cast<AAIController>(GetController());
-	if (!MyController) return nullptr;
-
-	const auto BlackboardComponent = MyController->GetBlackboardComponent();
-	if (!BlackboardComponent) return nullptr;
-
-	FName EnemyActorKeyName = "EnemyActor";
-	UObject* TargetObject = BlackboardComponent->GetValueAsObject(EnemyActorKeyName);
-	if (!TargetObject) return nullptr;
-
-	ACharacter* TargetCharacter = Cast<ACharacter>(TargetObject);
-	if (!TargetCharacter) return nullptr;
-
-	return TargetCharacter;
-}
-
-void ATDSAIJumpingEnemy::JumpAttack()
-{
-	if (!CanAttack || IsJumpAttackOnCooldown || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance() || !CachedMovementComponent) return;
-
-	ACharacter* Target = GetTarget();
-	if (!Target) return;
+	if (!CanAttack || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance() || !CachedMovementComponent) return;
 
 	CanAttack = false;
 	IsJumpAttacking = true;
-	IsJumpAttackOnCooldown = true;
 
-	GetWorld()->GetTimerManager().SetTimer(JumpAttackCooldownTimerHandle, this, &ATDSAIJumpingEnemy::ResetJumpAttackCooldown, JumpAttackCooldown, false);
+	const auto Target = TargetCharacter;
+	if (!Target) return;
 
 	FVector SelfLocation = GetActorLocation();
 	FVector TargetLocation = Target->GetActorLocation();
@@ -158,11 +140,6 @@ void ATDSAIJumpingEnemy::EndJumpAttack()
 			return;
 		}
 	}
-}
-
-void ATDSAIJumpingEnemy::ResetJumpAttackCooldown()
-{
-	IsJumpAttackOnCooldown = false;
 }
 
 void ATDSAIJumpingEnemy::InitAnimation()
