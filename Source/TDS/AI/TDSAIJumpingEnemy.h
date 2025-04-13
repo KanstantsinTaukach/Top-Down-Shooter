@@ -18,7 +18,7 @@ public:
 	ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit);
 
 	UFUNCTION(BlueprintCallable, Category = "AI|JumpAttack")
-	void JumpAttack(ACharacter* TargetCharacter);
+	bool JumpAttack(AActor* TargetCharacter);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpAttack")
@@ -59,12 +59,9 @@ protected:
 
 	virtual void Tick(float DeltaTime) override;
 
-	FVector CalculateLaunchVelocity(const ACharacter* Target) const;
+	FVector CalculateLaunchVelocity(const AActor* Target) const;
 
 private:
-	UPROPERTY()
-	UCharacterMovementComponent* CachedMovementComponent = nullptr;
-
 	bool IsJumpAttacking = false;
 
 	float InitialGravityScale = 1.0f;

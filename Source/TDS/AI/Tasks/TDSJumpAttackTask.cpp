@@ -18,17 +18,13 @@ EBTNodeResult::Type UTDSJumpAttackTask::ExecuteTask(UBehaviorTreeComponent& Owne
 		const auto BlackboardComponent = MyController->GetBlackboardComponent();
 		if (!BlackboardComponent) return EBTNodeResult::Failed;
 
-		const auto TargetObject = BlackboardComponent->GetValueAsObject("EnemyActor");
-		if (!TargetObject) return EBTNodeResult::Failed;
-
-		ACharacter* TargetCharacter = Cast<ACharacter>(TargetObject);
-		if (!TargetCharacter) return EBTNodeResult::Failed;
+		const auto TargetActor = Cast<AActor>(BlackboardComponent->GetValueAsObject("EnemyActor"));
+		if (!TargetActor) return EBTNodeResult::Failed;
 
 		const auto MyPawn = Cast<ATDSAIJumpingEnemy>(MyController->GetPawn());
 		if (!MyPawn) return EBTNodeResult::Failed;
 
-		MyPawn->JumpAttack(Cast<ACharacter>(TargetCharacter));
-		return EBTNodeResult::Succeeded;
+		return MyPawn->JumpAttack(TargetActor) ? EBTNodeResult::Succeeded : EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::Failed;

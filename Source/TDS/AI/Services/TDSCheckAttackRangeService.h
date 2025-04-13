@@ -18,7 +18,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	FBlackboardKeySelector AttackRangeKey;
 
-	float DistanceToAttack = 700.0f;
+	UPROPERTY(EditAnywhere, Category = "AI", meta = (ClampMin = 0.0f))
+	float DistanceToAttack = 1000.0f;
 
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

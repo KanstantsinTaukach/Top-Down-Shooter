@@ -39,8 +39,6 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 
 	GetCharacterMovement()->MaxAcceleration = 500.0f;
 
-	ChangeMovementState(EAIMovementState::Run_State);
-
 	InitAttackParams();
 
 	ECollisionChannel MeleeAttackChannel = ECC_GameTraceChannel4;
@@ -63,6 +61,8 @@ void ATDSAICharacterBase::BeginPlay()
 	CheckAnimationArrays();
 
 	InitAnimation();
+
+	ChangeMovementState(EAIMovementState::Run_State);
 
 	check(LootDropComponent);
 
@@ -233,9 +233,9 @@ void ATDSAICharacterBase::EnableRagdoll()
 
 void ATDSAICharacterBase::CheckAnimationArrays()
 {
-	ensureMsgf(DeathAnimations.Num() > 0, TEXT("DeathAnimations array is empty in %s!"), *GetName());
-	ensureMsgf(ConfusionAnimations.Num() > 0, TEXT("ConfusionAnimations array is empty in %s!"), *GetName());
-	ensureMsgf(HitAnimations.Num() > 0, TEXT("HitAnimations array is empty in %s!"), *GetName());
+	ensureMsgf(DeathAnimations.Num() > 0,		TEXT("DeathAnimations array is empty in %s!"), *GetName());
+	ensureMsgf(ConfusionAnimations.Num() > 0,	TEXT("ConfusionAnimations array is empty in %s!"), *GetName());
+	ensureMsgf(HitAnimations.Num() > 0,			TEXT("HitAnimations array is empty in %s!"), *GetName());
 	ensureMsgf(LightAttackAnimations.Num() > 0, TEXT("LightAttackAnimations array is empty in %s!"), *GetName());
 	ensureMsgf(HeavyAttackAnimations.Num() > 0, TEXT("HeavyAttackAnimations array is empty in %s!"), *GetName());
 }

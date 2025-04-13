@@ -18,37 +18,32 @@ ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Supe
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	CachedMovementComponent = GetCharacterMovement();
-	if (CachedMovementComponent)
-	{
-		InitialGravityScale = GetCharacterMovement()->GravityScale;
-	}
+	InitialGravityScale = GetCharacterMovement()->GravityScale;
+
+	GetCharacterMovement()->MaxAcceleration = 800.0f;
 }
 
-void ATDSAIJumpingEnemy::JumpAttack(ACharacter* TargetCharacter)
+bool ATDSAIJumpingEnemy::JumpAttack(AActor* TargetActor)
 {
-	if (!CanAttack || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance() || !CachedMovementComponent) return;
+	if (!CanAttack || !JumpAttackAnimation || !GetMesh() || !GetMesh()->GetAnimInstance() || !TargetActor) return false;
 
 	CanAttack = false;
 	IsJumpAttacking = true;
 
-	const auto Target = TargetCharacter;
-	if (!Target) return;
-
 	FVector SelfLocation = GetActorLocation();
-	FVector TargetLocation = Target->GetActorLocation();
+	FVector TargetLocation = TargetActor->GetActorLocation();
 	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(SelfLocation, TargetLocation);
 	LookAtRotation.Pitch = GetActorRotation().Pitch;
 	LookAtRotation.Roll = GetActorRotation().Roll;
 	SetActorRotation(LookAtRotation);
 
-	FVector LaunchVelocity = CalculateLaunchVelocity(Target);
-	if (LaunchVelocity.IsNearlyZero()) return;
+	FVector LaunchVelocity = CalculateLaunchVelocity(TargetActor);
+	if (LaunchVelocity.IsNearlyZero()) return false;
 
 	LaunchCharacter(LaunchVelocity, true, true);
 
-	CachedMovementComponent->bOrientRotationToMovement = false;
-	CachedMovementComponent->bUseControllerDesiredRotation = false;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 
 	if (GetCapsuleComponent())
 	{
@@ -66,19 +61,21 @@ void ATDSAIJumpingEnemy::JumpAttack(ACharacter* TargetCharacter)
 		EndJumpAttack();
 		SetActorTickEnabled(false);
 	}
+
+	return true;
 }
 
-FVector ATDSAIJumpingEnemy::CalculateLaunchVelocity(const ACharacter* Target) const
+FVector ATDSAIJumpingEnemy::CalculateLaunchVelocity(const AActor* Target) const
 {
-	if (!Target || !CachedMovementComponent) return FVector::ZeroVector;
+	if (!Target) return FVector::ZeroVector;
 
 	FVector LaunchDirection = Target->GetActorLocation() - GetActorLocation();
 	LaunchDirection.Z = 0.0f;
 	float HorizontalDistance = LaunchDirection.Size();
 	LaunchDirection.Normalize();
 
-	float VerticalSpeed = FMath::Sqrt(2.0 * FMath::Abs(CachedMovementComponent->GetGravityZ()) * JumpHeight);
-	float TimeInAir = (2.0f * VerticalSpeed) / FMath::Abs(CachedMovementComponent->GetGravityZ());
+	float VerticalSpeed = FMath::Sqrt(2.0 * FMath::Abs(GetCharacterMovement()->GetGravityZ()) * JumpHeight);
+	float TimeInAir = (2.0f * VerticalSpeed) / FMath::Abs(GetCharacterMovement()->GetGravityZ());
 
 	float HorizontalSpeed = JumpDistance / FMath::Max(TimeInAir, 0.1f);
 	float SpeeedToTarget = HorizontalDistance / FMath::Max(TimeInAir, 0.1f);
@@ -92,15 +89,15 @@ void ATDSAIJumpingEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsJumpAttacking && GetMesh() && GetMesh()->GetAnimInstance() && CachedMovementComponent)
+	if (IsJumpAttacking && GetMesh() && GetMesh()->GetAnimInstance())
 	{
-		if (CachedMovementComponent->Velocity.Z < 0)
+		if (GetCharacterMovement()->Velocity.Z < 0)
 		{
-			CachedMovementComponent->GravityScale = InitialGravityScale * FallingGravityMultiplier;
+			GetCharacterMovement()->GravityScale = InitialGravityScale * FallingGravityMultiplier;
 		}
 		else
 		{
-			CachedMovementComponent->GravityScale = InitialGravityScale;
+			GetCharacterMovement()->GravityScale = InitialGravityScale;
 		}
 	}
 }
@@ -110,14 +107,11 @@ void ATDSAIJumpingEnemy::EndJumpAttack()
 	CanAttack = true;
 	IsJumpAttacking = false;
 
-	if (CachedMovementComponent)
-	{
-		CachedMovementComponent->bOrientRotationToMovement = true;
-		CachedMovementComponent->bUseControllerDesiredRotation = true;
-		CachedMovementComponent->GravityScale = InitialGravityScale;
-		CachedMovementComponent->Velocity = FVector::ZeroVector;
-		CachedMovementComponent->StopMovementImmediately();
-	}
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->GravityScale = InitialGravityScale;
+	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	GetCharacterMovement()->StopMovementImmediately();
 
 	if (GetCapsuleComponent())
 	{
