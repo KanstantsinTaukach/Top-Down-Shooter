@@ -61,6 +61,8 @@ AActor* UTDSAIPerceptionComponent::GetHighestPriorityTarget() const
 
 	for (const auto PerceiveActor : PerceiveActors)
 	{
+		if (!IsValid(PerceiveActor)) continue;
+
 		bool IsGrenade = Cast<ATDS_ProjectileDefault_Grenade>(PerceiveActor) != nullptr;
 
 		const auto HealthComponent = TDSUtils::GetTDSPlayerComponent<UTDSHealthComponent_Character>(PerceiveActor);
@@ -69,6 +71,8 @@ AActor* UTDSAIPerceptionComponent::GetHighestPriorityTarget() const
 		if (IsGrenade || IsAlivePlayer)
 		{
 			float Distance = (PerceiveActor->GetActorLocation() - Pawn->GetActorLocation()).Size();
+			if (Distance <= KINDA_SMALL_NUMBER) Distance = 1.0f;
+
 			float Score = IsGrenade ? 1.0f : (1.0f / Distance);
 
 			if (Score > BestScore)

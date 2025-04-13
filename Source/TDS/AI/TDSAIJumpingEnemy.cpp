@@ -9,11 +9,11 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "TDSJumpingEnemyAIController.h"
+#include "TDSAIController.h"
 
 ATDSAIJumpingEnemy::ATDSAIJumpingEnemy(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
-	AIControllerClass = ATDSJumpingEnemyAIController::StaticClass();
+	AIControllerClass = ATDSAIController::StaticClass();
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
