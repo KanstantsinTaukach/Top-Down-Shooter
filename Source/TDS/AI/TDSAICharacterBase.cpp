@@ -52,6 +52,8 @@ ATDSAICharacterBase::ATDSAICharacterBase(const FObjectInitializer& ObjInit) : Su
 	{
 		SkeletalMesh->SetCollisionResponseToChannel(MeleeAttackChannel, ECR_Ignore);
 	}
+
+	TimeToHitParamName = "TimeToHit";
 }
 
 void ATDSAICharacterBase::BeginPlay()
@@ -114,6 +116,8 @@ float ATDSAICharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEv
 	}
 		
 	HealthComponent->RemoveFromCurrentHealth(Damage);
+
+	GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 
 	if(!IsConfused && !IsDamaged && !IsDead)
 	{

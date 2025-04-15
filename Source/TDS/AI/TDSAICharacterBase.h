@@ -83,6 +83,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	FAIAttackParams HeavyAttackParams;
 
+	UPROPERTY(VisibleAnywhere, Category = "Effects")
+	FName TimeToHitParamName;
+
 	UFUNCTION()
 	virtual void OnAICharacterDeath();
 
