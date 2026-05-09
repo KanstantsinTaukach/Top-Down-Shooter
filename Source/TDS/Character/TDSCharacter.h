@@ -112,7 +112,7 @@ protected:
 
 	TArray<UTDSStateEffect*> StateEffects;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -196,12 +196,15 @@ private:
 
 	UFUNCTION()
 	void MovementTick(float DeltaSeconds);
-	
-	UFUNCTION(BlueprintCallable)
-	void CharacterUpdate();
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementState(EMovementState InMovementState);
+	UFUNCTION(Server, Reliable)
+	void SetMovementState_OnServer(EMovementState NewMovementState);
+	UFUNCTION(NetMulticast, Reliable)
+	void SetMovementState_Multicast(EMovementState NewMovementState);		
+	UFUNCTION(BlueprintCallable)
+	void CharacterUpdate();
 
 	UFUNCTION(BlueprintCallable)
 	void InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon);
@@ -220,4 +223,9 @@ private:
 	void EnableRagdoll();
 
 	void HandleDelayedDeathEvents();
+
+	UFUNCTION(Server, Unreliable)
+	void SetActorRotationByYaw_OnServer(float Yaw);
+	UFUNCTION(NetMulticast, Unreliable)
+	void SetActorRotationByYaw_Multicast(float Yaw);
 };

@@ -16,12 +16,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Net/UnrealNetwork.h"
+#include "TDS/TDS.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSCharacterLog, All, All);
 
@@ -35,7 +36,7 @@ ATDSCharacter::ATDSCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// Configure character movementö
+	// Configure character movementï¿½
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -71,22 +72,34 @@ ATDSCharacter::ATDSCharacter()
 	{
 		CharacterHealthComponent->OnDeath.AddDynamic(this, &ATDSCharacter::OnCharacterDeath);
 	}
+
+	bReplicates = true;
 }
 
 void ATDSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CursorMaterial)
+	if(GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
 	{
-		CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize, FVector(0));
-	}
+		if (CursorMaterial && GetLocalRole() == ROLE_AutonomousProxy || GetLocalRole() == ROLE_Authority)
+		{
+			CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize, FVector(0));
+		}
+	}	
 
 	check(StaminaComponent);
 	check(InventoryComponent);
 	check(CharacterHealthComponent);
 	
 	StaminaComponent->OnStaminaEmpty.AddUObject(this, &ATDSCharacter::OnStaminaEmpty);
+}
+
+void ATDSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATDSCharacter, MovementState);
 }
 
 void ATDSCharacter::Tick(float DeltaSeconds)
@@ -96,7 +109,7 @@ void ATDSCharacter::Tick(float DeltaSeconds)
 	if (CurrentCursor)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
-		if (PC)
+		if (PC && PC->IsLocalController())
 		{
 			FHitResult TraceHitResult;
 			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
@@ -227,57 +240,89 @@ void ATDSCharacter::MovementTick(float DeltaSeconds)
 {
 	if (IsAlive)
 	{
-		const FRotator Rotation = TopDownCameraComponent->GetComponentRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		const FVector DirectionForward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector DirectionRight = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		AddMovementInput(DirectionForward, AxisX);
-		AddMovementInput(DirectionRight, AxisY);
-
-		if (MovementState == EMovementState::Sprint_State)
+		if(GetController() && GetController()->IsLocalPlayerController())
 		{
-			FVector myRotationVector = GetVelocity();
-			FRotator myRotator = myRotationVector.ToOrientationRotator();
-			SetActorRotation((FQuat(myRotator)));
-		}
-		else
-		{
-			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			if (PlayerController)
+			const FRotator Rotation = TopDownCameraComponent->GetComponentRotation();
+			const FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
+			const FVector DirectionForward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			const FVector DirectionRight = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+			AddMovementInput(DirectionForward, AxisX);
+			AddMovementInput(DirectionRight, AxisY);
+
+			FString MovementStateString = UEnum::GetValueAsString(MovementState);
+			UE_LOG(LogTDS_Network, Display, TEXT("Movement state is: %s"), *MovementStateString);
+			
+			if (MovementState == EMovementState::Sprint_State)
 			{
-				FHitResult ResultHit;
-				PlayerController->GetHitResultUnderCursor(ECC_GameTraceChannel1, false, ResultHit);
-
-				float FindRatatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
-				SetActorRotation(FQuat(FRotator(0.0f, FindRatatorResultYaw, 0.0f)));
-
-				if (CurrentWeapon)
-				{
-					FVector Displacement = FVector(0);
-					switch (MovementState)
-					{
-					case EMovementState::Aim_State:
-						Displacement = FVector(0.0f, 0.0f, 120.0f);
-						CurrentWeapon->ShouldReduceDispersion = true;
-						break;
-					case EMovementState::Walk_State:
-						Displacement = FVector(0.0f, 0.0f, 80.0f);
-						CurrentWeapon->ShouldReduceDispersion = false;
-						break;
-					case EMovementState::Run_State:
-						Displacement = FVector(0.0f, 0.0f, 80.0f);
-						CurrentWeapon->ShouldReduceDispersion = false;
-						break;
-					case EMovementState::Sprint_State: break;
-					default: break;
-					}
-
-					CurrentWeapon->SetShootEndLocation(ResultHit.Location + Displacement);
-				}
+				FVector myRotationVector = GetVelocity();
+				FRotator myRotator = myRotationVector.ToOrientationRotator();
+				
+				SetActorRotation(FQuat(myRotator));
+				SetActorRotationByYaw_OnServer(myRotator.Yaw);
 			}
-		}
+			else
+			{
+				APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+				if (PlayerController)
+				{
+					FHitResult ResultHit;
+					PlayerController->GetHitResultUnderCursor(ECC_GameTraceChannel1, false, ResultHit);
+
+					float FindRatatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
+					
+					SetActorRotation(FQuat(FRotator(0.0f, FindRatatorResultYaw, 0.0f)));
+					SetActorRotationByYaw_OnServer(FindRatatorResultYaw);
+					
+					if (CurrentWeapon)
+					{
+						FVector Displacement = FVector(0);
+						switch (MovementState)
+						{
+						case EMovementState::Aim_State:
+							Displacement = FVector(0.0f, 0.0f, 120.0f);
+							CurrentWeapon->ShouldReduceDispersion = true;
+							break;
+						case EMovementState::Walk_State:
+							Displacement = FVector(0.0f, 0.0f, 80.0f);
+							CurrentWeapon->ShouldReduceDispersion = false;
+							break;
+						case EMovementState::Run_State:
+							Displacement = FVector(0.0f, 0.0f, 80.0f);
+							CurrentWeapon->ShouldReduceDispersion = false;
+							break;
+						case EMovementState::Sprint_State: break;
+						default: break;
+						}
+
+						CurrentWeapon->SetShootEndLocation(ResultHit.Location + Displacement);
+					}
+				}
+			}	
+		}		
 	}	
+}
+
+void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
+{
+	SetMovementState_OnServer(InMovementState);
+
+	ATDS_WeaponDefault* MyWeapon = GetCurrentWeapon();
+	if (MyWeapon)
+	{
+		MyWeapon->UpdateStateWeapon(MovementState);
+	}
+}
+
+void ATDSCharacter::SetMovementState_OnServer_Implementation(EMovementState NewMovementState)
+{
+	SetMovementState_Multicast(NewMovementState);
+}
+
+void ATDSCharacter::SetMovementState_Multicast_Implementation(EMovementState NewMovementState)
+{
+	MovementState = NewMovementState;
+	CharacterUpdate();
 }
 
 void ATDSCharacter::CharacterUpdate()
@@ -285,26 +330,14 @@ void ATDSCharacter::CharacterUpdate()
 	float ResSpeed = 600.0f;
 	switch (MovementState)
 	{
-	case EMovementState::Aim_State: ResSpeed = MovementInfo.AimSpeed; break;
-	case EMovementState::Walk_State: ResSpeed = MovementInfo.WalkSpeed; break;
-	case EMovementState::Run_State: ResSpeed = MovementInfo.RunSpeed; break;
-	case EMovementState::Sprint_State: ResSpeed = MovementInfo.SprintSpeed; break;
-	default: break;
+		case EMovementState::Aim_State: ResSpeed = MovementInfo.AimSpeed; break;
+		case EMovementState::Walk_State: ResSpeed = MovementInfo.WalkSpeed; break;
+		case EMovementState::Run_State: ResSpeed = MovementInfo.RunSpeed; break;
+		case EMovementState::Sprint_State: ResSpeed = MovementInfo.SprintSpeed; break;
+		default: break;
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = ResSpeed;
-}
-
-void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
-{
-	MovementState = InMovementState;
-	CharacterUpdate();
-
-	ATDS_WeaponDefault* MyWeapon = GetCurrentWeapon();
-	if (MyWeapon)
-	{
-		MyWeapon->UpdateStateWeapon(MovementState);
-	}
 }
 
 void ATDSCharacter::InputAttackPressed()
@@ -333,38 +366,41 @@ void ATDSCharacter::AttackCharEvent(bool bIsFiring)
 
 void ATDSCharacter::CameraSlide(float Value)
 {
-	float DistanceToCamera = CameraBoom->TargetArmLength;
-	if (Value == 0 || !GetWorld())
+	if(GetController() && GetController()->IsLocalPlayerController())
 	{
-		return;
-	}
-	if (Value < 0)
-	{
-		if (DistanceToCamera + CameraStep <= CameraHeightMax)
+		float DistanceToCamera = CameraBoom->TargetArmLength;
+		if (Value == 0 || !GetWorld())
 		{
-			if (!DoSmoothScrolling)
+			return;
+		}
+		if (Value < 0)
+		{
+			if (DistanceToCamera + CameraStep <= CameraHeightMax)
 			{
-				CameraBoom->TargetArmLength = DistanceToCamera + CameraStep;
-			}
-			else
-			{
-				DoSlideUp = true;
-				GetWorld()->GetTimerManager().SetTimer(CameraTimerHandle, this, &ATDSCharacter::CameraScroll, TimerStep, true);
+				if (!DoSmoothScrolling)
+				{
+					CameraBoom->TargetArmLength = DistanceToCamera + CameraStep;
+				}
+				else
+				{
+					DoSlideUp = true;
+					GetWorld()->GetTimerManager().SetTimer(CameraTimerHandle, this, &ATDSCharacter::CameraScroll, TimerStep, true);
+				}
 			}
 		}
-	}
-	else if (Value > 0)
-	{
-		if (DistanceToCamera - CameraStep >= CameraHeightMin)
+		else if (Value > 0)
 		{
-			if (!DoSmoothScrolling)
+			if (DistanceToCamera - CameraStep >= CameraHeightMin)
 			{
-				CameraBoom->TargetArmLength = DistanceToCamera - CameraStep;
-			}
-			else
-			{
-				DoSlideUp = false;
-				GetWorld()->GetTimerManager().SetTimer(CameraTimerHandle, this, &ATDSCharacter::CameraScroll, TimerStep, true);
+				if (!DoSmoothScrolling)
+				{
+					CameraBoom->TargetArmLength = DistanceToCamera - CameraStep;
+				}
+				else
+				{
+					DoSlideUp = false;
+					GetWorld()->GetTimerManager().SetTimer(CameraTimerHandle, this, &ATDSCharacter::CameraScroll, TimerStep, true);
+				}
 			}
 		}
 	}
@@ -372,23 +408,26 @@ void ATDSCharacter::CameraSlide(float Value)
 
 void ATDSCharacter::CameraScroll()
 {
-	CurrentCameraDistance += SmoothCameraStep;
-	float Distance = CameraBoom->TargetArmLength;
-	if (DoSlideUp)
+	if(GetController() && GetController()->IsLocalPlayerController())
 	{
-		Distance += SmoothCameraStep;
-	}
-	else
-	{
-		Distance -= SmoothCameraStep;
-	}
-	CameraBoom->TargetArmLength = Distance;
+		CurrentCameraDistance += SmoothCameraStep;
+		float Distance = CameraBoom->TargetArmLength;
+		if (DoSlideUp)
+		{
+			Distance += SmoothCameraStep;
+		}
+		else
+		{
+			Distance -= SmoothCameraStep;
+		}
+		CameraBoom->TargetArmLength = Distance;
 
-	if (CurrentCameraDistance >= CameraStep)
-	{
-		CurrentCameraDistance = 0;
-		GetWorld()->GetTimerManager().ClearTimer(CameraTimerHandle);
-	}
+		if (CurrentCameraDistance >= CameraStep)
+		{
+			CurrentCameraDistance = 0;
+			GetWorld()->GetTimerManager().ClearTimer(CameraTimerHandle);
+		}
+	}	
 }
 
 void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon)
@@ -792,5 +831,19 @@ void ATDSCharacter::ActivateSpecialAbility()
 
 			NewEffect->InitObject(this, Hit);
 		}
+	}
+}
+
+void ATDSCharacter::SetActorRotationByYaw_OnServer_Implementation(float Yaw)
+{
+	SetActorRotationByYaw_Multicast(Yaw);
+}
+
+void ATDSCharacter::SetActorRotationByYaw_Multicast_Implementation(float Yaw)
+{
+	if(Controller && !Controller->IsLocalPlayerController())
+	{
+		const FRotator YawRotation(0.0f, Yaw, 0.0f);
+		SetActorRotation(FQuat(YawRotation));
 	}
 }
