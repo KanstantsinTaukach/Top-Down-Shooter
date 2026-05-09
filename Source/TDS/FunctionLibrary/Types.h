@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Engine/World.h"
 #include "Engine/DataTable.h"
 #include "NiagaraFunctionLibrary.h"
 #include "../BuffSystem/TDSStateEffect.h"
@@ -427,4 +428,16 @@ public:
 
 		return true;
 	};
+
+	UFUNCTION(BlueprintCallable, Category="Network")
+	static void SeamlessServerTravel(UObject* WorldContextObject, const FString& MapName)
+	{
+		if(!WorldContextObject || MapName.IsEmpty()) return;
+
+		UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
+		if(!World || !World->IsServer()) return;
+		
+		FString URL = "/Game/Maps/" + MapName;
+		World->ServerTravel(URL, true);
+	}
 };
