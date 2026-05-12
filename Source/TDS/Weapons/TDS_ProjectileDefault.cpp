@@ -13,6 +13,8 @@ DEFINE_LOG_CATEGORY_STATIC(TDSProjectileLog, All, All);
 
 ATDS_ProjectileDefault::ATDS_ProjectileDefault()
 {
+	SetReplicates(true);
+	
 	PrimaryActorTick.bCanEverTick = true;
 
 	BulletCollisionSphere = CreateDefaultSubobject<USphereComponent>("CollisionSphere");
@@ -42,35 +44,6 @@ ATDS_ProjectileDefault::ATDS_ProjectileDefault()
 	BulletProjectileMovement->bShouldBounce = true;
 }
 
-void  ATDS_ProjectileDefault::InitProjectile(FProjectileInfo InitParam)
-{
-	BulletProjectileMovement->InitialSpeed = InitParam.ProjectileInitSpeed;
-	BulletProjectileMovement->MaxSpeed = InitParam.ProjectileInitSpeed;
-	this->SetLifeSpan(InitParam.ProjectileLifeTime);
-
-	if (InitParam.ProjectileStaticMesh)
-	{
-		BulletMesh->SetStaticMesh(InitParam.ProjectileStaticMesh);
-		BulletMesh->SetRelativeTransform(InitParam.ProjectileStaticMeshOffset);
-	}
-	else
-	{
-		BulletMesh->DestroyComponent();
-	}
-
-	if (InitParam.ProjectileTrailFX)
-	{
-		BulletFX->SetTemplate(InitParam.ProjectileTrailFX);
-		BulletFX->SetRelativeTransform(InitParam.ProjectileTrailFXOffset);
-	}
-	else
-	{
-		BulletFX->DestroyComponent();
-	}
-
-	ProjectileSettings = InitParam;
-}
-
 void ATDS_ProjectileDefault::BeginPlay()
 {
 	Super::BeginPlay();
@@ -83,6 +56,45 @@ void ATDS_ProjectileDefault::BeginPlay()
 	BulletCollisionSphere->OnComponentHit.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereHit);
 	BulletCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereBeginOverlap);
 	BulletCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &ATDS_ProjectileDefault::BulletCollisionSphereEndOverlap);
+}
+
+void  ATDS_ProjectileDefault::InitProjectile(FProjectileInfo InitParam)
+{
+	BulletProjectileMovement->InitialSpeed = InitParam.ProjectileInitSpeed;
+	BulletProjectileMovement->MaxSpeed = InitParam.ProjectileInitSpeed;
+	this->SetLifeSpan(InitParam.ProjectileLifeTime);
+
+	if (InitParam.ProjectileStaticMesh)
+	{
+		InitVisualMeshProjectile_Multicast(InitParam.ProjectileStaticMesh, InitParam.ProjectileStaticMeshOffset);
+	}
+	else
+	{
+		BulletMesh->DestroyComponent();
+	}
+
+	if (InitParam.ProjectileTrailFX)
+	{
+		InitVisualTrailFX_Multicast(InitParam.ProjectileTrailFX, InitParam.ProjectileTrailFXOffset);
+	}
+	else
+	{
+		BulletFX->DestroyComponent();
+	}
+
+	ProjectileSettings = InitParam;
+}
+
+void ATDS_ProjectileDefault::InitVisualMeshProjectile_Multicast_Implementation(UStaticMesh* NewMesh, FTransform MeshTransform)
+{
+	BulletMesh->SetStaticMesh(NewMesh);
+	BulletMesh->SetRelativeTransform(MeshTransform);
+}
+
+void ATDS_ProjectileDefault::InitVisualTrailFX_Multicast_Implementation(UParticleSystem* NewParticleSystem, FTransform ParticleTransform)
+{
+	BulletFX->SetTemplate(NewParticleSystem);
+	BulletFX->SetRelativeTransform(ParticleTransform);
 }
 
 void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -136,9 +148,4 @@ void ATDS_ProjectileDefault::BulletCollisionSphereEndOverlap(UPrimitiveComponent
 void ATDS_ProjectileDefault::ImpactProjectile()
 {
 	this->Destroy();
-}
-
-void ATDS_ProjectileDefault::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }

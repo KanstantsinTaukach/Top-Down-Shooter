@@ -28,6 +28,8 @@ DEFINE_LOG_CATEGORY_STATIC(TDSCharacterLog, All, All);
 
 ATDSCharacter::ATDSCharacter()
 {
+	bReplicates = true;
+	
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -36,13 +38,13 @@ ATDSCharacter::ATDSCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// Configure character movement�
+	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
 	GetCharacterMovement()->bSnapToPlaneAtStart = true;
 
-	// Create a camera boom...
+	// Create a camera boom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetUsingAbsoluteRotation(true); // Don't want arm to rotate when character does
@@ -50,7 +52,7 @@ ATDSCharacter::ATDSCharacter()
 	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
-	// Create a camera...
+	// Create a camera
 	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
@@ -72,8 +74,6 @@ ATDSCharacter::ATDSCharacter()
 	{
 		CharacterHealthComponent->OnDeath.AddDynamic(this, &ATDSCharacter::OnCharacterDeath);
 	}
-
-	bReplicates = true;
 }
 
 void ATDSCharacter::BeginPlay()
@@ -100,6 +100,7 @@ void ATDSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ATDSCharacter, MovementState);
+	DOREPLIFETIME(ATDSCharacter, CurrentWeapon);
 }
 
 void ATDSCharacter::Tick(float DeltaSeconds)
@@ -277,25 +278,27 @@ void ATDSCharacter::MovementTick(float DeltaSeconds)
 					if (CurrentWeapon)
 					{
 						FVector Displacement = FVector(0);
+						bool bShoudlReduceDispersion = false;
 						switch (MovementState)
 						{
 						case EMovementState::Aim_State:
 							Displacement = FVector(0.0f, 0.0f, 120.0f);
-							CurrentWeapon->ShouldReduceDispersion = true;
+							//CurrentWeapon->ShouldReduceDispersion = true;
+							bShoudlReduceDispersion = true;
 							break;
 						case EMovementState::Walk_State:
 							Displacement = FVector(0.0f, 0.0f, 80.0f);
-							CurrentWeapon->ShouldReduceDispersion = false;
+							//CurrentWeapon->ShouldReduceDispersion = false;
 							break;
 						case EMovementState::Run_State:
 							Displacement = FVector(0.0f, 0.0f, 80.0f);
-							CurrentWeapon->ShouldReduceDispersion = false;
+							//CurrentWeapon->ShouldReduceDispersion = false;
 							break;
 						case EMovementState::Sprint_State: break;
 						default: break;
 						}
 
-						CurrentWeapon->SetShootEndLocation(ResultHit.Location + Displacement);
+						CurrentWeapon->UpdateShootEndLocationByCharacter_OnServer(ResultHit.Location + Displacement, bShoudlReduceDispersion);
 					}
 				}
 			}	
@@ -310,7 +313,7 @@ void ATDSCharacter::ChangeMovementState(EMovementState InMovementState)
 	ATDS_WeaponDefault* MyWeapon = GetCurrentWeapon();
 	if (MyWeapon)
 	{
-		MyWeapon->UpdateStateWeapon(MovementState);
+		MyWeapon->UpdateStateWeapon_OnServer(InMovementState);
 	}
 }
 
@@ -356,7 +359,7 @@ void ATDSCharacter::AttackCharEvent(bool bIsFiring)
 	myWeapon = GetCurrentWeapon();
 	if (myWeapon)
 	{
-		myWeapon->SetWeaponStateFire(bIsFiring);
+		myWeapon->SetWeaponStateFire_OnServer(bIsFiring);
 	}
 	else
 	{
@@ -432,6 +435,7 @@ void ATDSCharacter::CameraScroll()
 
 void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon)
 {
+	//On Server
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->Destroy();
@@ -468,7 +472,7 @@ void ATDSCharacter::InitWeapon(FName IdWeaponName, FAdditionalWeaponInfo WeaponA
 			CurrentWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 
 			MyWeapon->SetWeaponInfo(MyWeaponInfo);
-			MyWeapon->UpdateStateWeapon(MovementState);
+			MyWeapon->UpdateStateWeapon_OnServer(MovementState);
 			MyWeapon->SetAdditionWeaponInfo(WeaponAdditionalInfo);
 
 			CurrentIndexWeapon = NewCurrentIndexWeapon;

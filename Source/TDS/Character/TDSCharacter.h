@@ -104,6 +104,7 @@ protected:
 
 	UDecalComponent* CurrentCursor = nullptr;
 
+	UPROPERTY(Replicated)
 	ATDS_WeaponDefault* CurrentWeapon = nullptr;
 
 	int32 CurrentIndexWeapon = 0;

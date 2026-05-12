@@ -19,8 +19,6 @@ class TDS_API ATDS_ProjectileDefault : public AActor
 public:	
 	ATDS_ProjectileDefault();
 
-	virtual void Tick(float DeltaTime) override;
-
 	FProjectileInfo GetProjectileSettings() const { return ProjectileSettings; };
 
 	UFUNCTION(BlueprintCallable)
@@ -35,6 +33,11 @@ public:
 	
 	UFUNCTION()
 	virtual void ImpactProjectile();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void InitVisualMeshProjectile_Multicast(UStaticMesh* NewMesh, FTransform MeshTransform);
+	UFUNCTION(NetMulticast, Reliable)
+	void InitVisualTrailFX_Multicast(UParticleSystem* NewParticleSystem, FTransform ParticleTransform);
 
 protected:
 	bool ShouldSpawnStateEffect = true;

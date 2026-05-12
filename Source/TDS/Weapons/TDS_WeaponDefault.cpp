@@ -11,11 +11,14 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "../Components/TDSInventoryComponent.h"
 #include "Perception/AISense_Damage.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(TDSWeaponDefaultLog, All, All);
 
 ATDS_WeaponDefault::ATDS_WeaponDefault()
 {
+	SetReplicates(true);
+	
 	PrimaryActorTick.bCanEverTick = true;
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("Scene");
@@ -47,6 +50,15 @@ void ATDS_WeaponDefault::BeginPlay()
 	check(ShootLocation);
 
 	WeaponInit();
+}
+
+void ATDS_WeaponDefault::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+ 	DOREPLIFETIME(ATDS_WeaponDefault, AdditionalWeaponInfo);
+	DOREPLIFETIME(ATDS_WeaponDefault, ShouldReduceDispersion);
+	DOREPLIFETIME(ATDS_WeaponDefault, ShootEndLocation);
 }
 
 void ATDS_WeaponDefault::Tick(float DeltaTime)
@@ -236,10 +248,10 @@ void ATDS_WeaponDefault::WeaponInit()
 		StaticMeshWeapon->DestroyComponent(true);
 	}
 
-	UpdateStateWeapon(EMovementState::Run_State);
+	UpdateStateWeapon_OnServer(EMovementState::Run_State);
 }
 
-void ATDS_WeaponDefault::SetWeaponStateFire(bool bIsFire)
+void ATDS_WeaponDefault::SetWeaponStateFire_OnServer_Implementation(bool bIsFire)
 {
 	if (CheckWeaponCanFire())
 	{
@@ -271,6 +283,12 @@ bool ATDS_WeaponDefault::CheckWeaponCanReload()
 	return false;
 }
 
+void ATDS_WeaponDefault::UpdateShootEndLocationByCharacter_OnServer_Implementation(FVector NewShootEndLocation, bool NewShouldReduceDispersion)
+{
+	ShootEndLocation = NewShootEndLocation;
+	ShouldReduceDispersion = NewShouldReduceDispersion;
+}
+
 int32 ATDS_WeaponDefault::GetAmmoForReload()
 {
 	int32 AvailableAmmoForWeapon = WeaponSettings.MaxRound;
@@ -297,6 +315,8 @@ FProjectileInfo ATDS_WeaponDefault::GetProjectile()
 
 void ATDS_WeaponDefault::Fire()
 {
+	//On server by WeaponFiring bool (SetWeaponStateFire_OnServer)
+	
 	if (!GetWorld() || !ShootLocation)
 	{
 		return;
@@ -358,7 +378,7 @@ void ATDS_WeaponDefault::Fire()
 	}
 }
 
-void ATDS_WeaponDefault::UpdateStateWeapon(EMovementState InMovementState)
+void ATDS_WeaponDefault::UpdateStateWeapon_OnServer_Implementation(EMovementState InMovementState)
 {
 	BlockFire = false;
 	switch (InMovementState)
@@ -387,7 +407,7 @@ void ATDS_WeaponDefault::UpdateStateWeapon(EMovementState InMovementState)
 	case EMovementState::Sprint_State:
 		WeaponAiming = false;
 		BlockFire = true;
-		SetWeaponStateFire(false);
+		SetWeaponStateFire_OnServer(false);
 		break;
 	default:
 		break;

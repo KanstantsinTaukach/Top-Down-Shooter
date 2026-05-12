@@ -15,10 +15,10 @@ void UTDSInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitInventory();
+	InitInventory_OnServer();
 }
 
-void UTDSInventoryComponent::InitInventory()
+void UTDSInventoryComponent::InitInventory_OnServer_Implementation()
 {
 	for (int8 i = 0; i < WeaponSlots.Num(); ++i)
 	{

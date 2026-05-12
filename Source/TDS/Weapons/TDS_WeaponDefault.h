@@ -20,12 +20,15 @@ class TDS_API ATDS_WeaponDefault : public AActor
 	
 public:	
 	ATDS_WeaponDefault();
+	
+	virtual void Tick(float DeltaTime) override;
 
 	FOnWeaponReloadStartSignature OnWeaponReloadStart;
 	FOnWeaponReloadEndSignature OnWeaponReloadEnd;
 	FOnWeaponFireSignature OnWeaponFire;
 
 	// Dispersion
+	UPROPERTY(Replicated)
 	bool ShouldReduceDispersion = false;
 	float CurrentDispersion = 0.0f;
 	float CurrentDispersionMax = 1.0f;
@@ -33,15 +36,16 @@ public:
 	float CurrentDispersionRecoil = 1.0f;
 	float CurrentDispersionReduction = 1.0f;
 
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponStateFire(bool bIsFire);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void SetWeaponStateFire_OnServer(bool bIsFire);
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetWeaponRound();
 
 	void Fire();
 
-	void UpdateStateWeapon(EMovementState InMovementState);
+	UFUNCTION(Server, Reliable)
+	void UpdateStateWeapon_OnServer(EMovementState InMovementState);
 
 	void InitReload();
 	void CancelReload();
@@ -61,11 +65,9 @@ public:
 
 	const FAdditionalWeaponInfo& GetAdditionWeaponInfo() const { return AdditionalWeaponInfo; };
 	void SetAdditionWeaponInfo(FAdditionalWeaponInfo NewAdditionWeaponInfo) { AdditionalWeaponInfo = NewAdditionWeaponInfo; };
-
-	const FVector& GetShootEndLocation() const { return ShootEndLocation; };
-	void SetShootEndLocation(FVector NewShootEndLocation) { ShootEndLocation = NewShootEndLocation; };
-
-	virtual void Tick(float DeltaTime) override;
+	
+	UFUNCTION(Server, Unreliable)
+	void UpdateShootEndLocationByCharacter_OnServer(FVector NewShootEndLocation, bool NewShouldReduceDispersion);	
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
@@ -84,9 +86,10 @@ protected:
 
 	UPROPERTY()
 	FWeaponInfo WeaponSettings;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo")
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "WeaponInfo")
 	FAdditionalWeaponInfo AdditionalWeaponInfo;
 
+	UPROPERTY(Replicated)
 	FVector ShootEndLocation = FVector(0);
 
 	UFUNCTION()
