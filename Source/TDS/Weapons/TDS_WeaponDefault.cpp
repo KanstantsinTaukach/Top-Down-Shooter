@@ -117,7 +117,7 @@ void ATDS_WeaponDefault::InitReload()
 
 		if (WeaponSettings.SoundReloadWeapon)
 		{
-			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
+			PlayReloadSound_Multicast(WeaponSettings.SoundReloadWeapon, ShootLocation->GetComponentLocation());
 		}
 
 		auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharReloadAim, WeaponSettings.AnimWeaponInfo.AnimCharReload, WeaponAiming);
@@ -126,7 +126,7 @@ void ATDS_WeaponDefault::InitReload()
 		auto AnimWeaponToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimWeaponReloadAim, WeaponSettings.AnimWeaponInfo.AnimWeaponReload, WeaponAiming);
 		if (AnimWeaponToPlay && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
 		{
-			SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(AnimWeaponToPlay);
+			PlayWeaponAnimation_Multicast(AnimWeaponToPlay);
 		}
 
 		if (WeaponSettings.ClipDropMesh.DropMesh)
@@ -135,6 +135,11 @@ void ATDS_WeaponDefault::InitReload()
 			DropClipTimer = WeaponSettings.ClipDropMesh.DropMeshTime;
 		}
 	}
+}
+
+void ATDS_WeaponDefault::PlayReloadSound_Multicast_Implementation(USoundBase* HitSound, FVector SoundLocation)
+{
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitSound, SoundLocation);
 }
 
 void ATDS_WeaponDefault::CancelReload()
@@ -211,7 +216,7 @@ void ATDS_WeaponDefault::ClipDropTick(float DeltaTime)
 		if (DropClipTimer <= 0.0f)
 		{
 			DropClipFlag = false;
-			InitDropMesh(WeaponSettings.ClipDropMesh);
+			InitDropMesh_Multicast(WeaponSettings.ClipDropMesh);
 		}
 		else
 		{
@@ -227,7 +232,7 @@ void ATDS_WeaponDefault::ShellDropTick(float DeltaTime)
 		if (DropShellTimer <= 0.0f)
 		{
 			DropShellFlag = false;
-			InitDropMesh(WeaponSettings.ShellBullets);
+			InitDropMesh_Multicast(WeaponSettings.ShellBullets);
 		}
 		else
 		{
@@ -321,19 +326,17 @@ void ATDS_WeaponDefault::Fire()
 	{
 		return;
 	}
-
-	auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharFireAim, WeaponSettings.AnimWeaponInfo.AnimCharFire, WeaponAiming);
-
+	
 	if (WeaponSettings.AnimWeaponInfo.AnimWeaponFire && SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
 	{
-		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSettings.AnimWeaponInfo.AnimWeaponFire);
+		PlayWeaponAnimation_Multicast(WeaponSettings.AnimWeaponInfo.AnimWeaponFire);
 	}	
 
 	if (WeaponSettings.ShellBullets.DropMesh)
 	{
 		if (WeaponSettings.ShellBullets.DropMeshTime <= 0.0f)
 		{
-			InitDropMesh(WeaponSettings.ShellBullets);
+			InitDropMesh_Multicast(WeaponSettings.ShellBullets);
 		}
 		else
 		{
@@ -345,10 +348,11 @@ void ATDS_WeaponDefault::Fire()
 	FireTimer = WeaponSettings.RateOfFire;
 	--AdditionalWeaponInfo.Round;
 	ChangeDispersionByShot();
-	
+
+	auto AnimCharacterToPlay = AnimUtils::FindAnimToPlay(WeaponSettings.AnimWeaponInfo.AnimCharFireAim, WeaponSettings.AnimWeaponInfo.AnimCharFire, WeaponAiming);
 	OnWeaponFire.Broadcast(AnimCharacterToPlay);	
 
-	SpawnMuzzleEffects();
+	SpawnMuzzleEffects_Multicast();
 
 	FProjectileInfo ProjectileInfo = GetProjectile();
 
@@ -376,6 +380,11 @@ void ATDS_WeaponDefault::Fire()
 			InitReload();
 		}
 	}
+}
+
+void ATDS_WeaponDefault::PlayWeaponAnimation_Multicast_Implementation(UAnimMontage* WeaponAnimation)
+{
+	SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponAnimation);
 }
 
 void ATDS_WeaponDefault::UpdateStateWeapon_OnServer_Implementation(EMovementState InMovementState)
@@ -505,7 +514,7 @@ int32 ATDS_WeaponDefault::GetNumberProjectileByShot() const
 	return WeaponSettings.NumberProjectilesByShot;
 }
 
-void ATDS_WeaponDefault::InitDropMesh(const FDropMeshInfo & DropMeshInfo)
+void ATDS_WeaponDefault::InitDropMesh_Multicast_Implementation(const FDropMeshInfo & DropMeshInfo)
 {
 	if (!GetWorld() || !DropMeshInfo.DropMesh)
 	{
@@ -595,7 +604,7 @@ void ATDS_WeaponDefault::HandleProjectileHit(FProjectileInfo ProjectileInfo)
 	}
 }
 
-void ATDS_WeaponDefault::SpawnMuzzleEffects() const
+void ATDS_WeaponDefault::SpawnMuzzleEffects_Multicast_Implementation() const
 {
 	if (!GetWorld())
 	{

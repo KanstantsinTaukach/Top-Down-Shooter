@@ -67,7 +67,10 @@ public:
 	void SetAdditionWeaponInfo(FAdditionalWeaponInfo NewAdditionWeaponInfo) { AdditionalWeaponInfo = NewAdditionWeaponInfo; };
 	
 	UFUNCTION(Server, Unreliable)
-	void UpdateShootEndLocationByCharacter_OnServer(FVector NewShootEndLocation, bool NewShouldReduceDispersion);	
+	void UpdateShootEndLocationByCharacter_OnServer(FVector NewShootEndLocation, bool NewShouldReduceDispersion);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayWeaponAnimation_Multicast(UAnimMontage* WeaponAnimation);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
@@ -92,8 +95,11 @@ protected:
 	UPROPERTY(Replicated)
 	FVector ShootEndLocation = FVector(0);
 
-	UFUNCTION()
-	void InitDropMesh(const FDropMeshInfo& DropMeshinfo);
+	UFUNCTION(NetMulticast, Unreliable)
+	void InitDropMesh_Multicast(const FDropMeshInfo& DropMeshInfo);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayReloadSound_Multicast(USoundBase* HitSound, FVector SoundLocation);
 
 	void FireTick(float DeltaTime);
 	void ReloadTick(float DeltaTime);
@@ -142,7 +148,9 @@ private:
 	FVector ApplyDispersionToShoot(FVector DirectionShoot) const;
 	float GetCurrentDispersion() const;
 
-	void SpawnMuzzleEffects() const;
+	UFUNCTION(NetMulticast, Unreliable)
+	void SpawnMuzzleEffects_Multicast() const;
+	
 	void SpawnTrailEffect();
 	void UpdateTrailEffect();
 	void SpawnImpactEffects(const FHitResult& Hit);

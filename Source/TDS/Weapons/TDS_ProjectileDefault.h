@@ -38,6 +38,13 @@ public:
 	void InitVisualMeshProjectile_Multicast(UStaticMesh* NewMesh, FTransform MeshTransform);
 	UFUNCTION(NetMulticast, Reliable)
 	void InitVisualTrailFX_Multicast(UParticleSystem* NewParticleSystem, FTransform ParticleTransform);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void ShowBulletHitDecal_Multicast(UMaterialInterface* DecalMaterial, UPrimitiveComponent* OtherComp, const FHitResult& Hit);
+	UFUNCTION(NetMulticast, Reliable)
+	void ShowBulletHitFX_Multicast(UParticleSystem* FXParticle, const FHitResult& Hit);
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayBulletHitSound_Multicast(USoundBase* HitSound, const FHitResult& Hit);
 
 protected:
 	bool ShouldSpawnStateEffect = true;

@@ -107,7 +107,7 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 			UMaterialInterface* MyMaterial = ProjectileSettings.HitDecals[MySurfaceType];
 			if (MyMaterial && OtherComp)
 			{
-				UGameplayStatics::SpawnDecalAttached(MyMaterial, FVector(10.0f), OtherComp, NAME_None, Hit.ImpactPoint, Hit.ImpactNormal.Rotation(), EAttachLocation::KeepWorldPosition, 10.0f);
+				ShowBulletHitDecal_Multicast(MyMaterial, OtherComp, Hit);
 			}
 		}
 		if (ProjectileSettings.HitFXs.Contains(MySurfaceType))
@@ -115,12 +115,12 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 			UParticleSystem* MyParticle = ProjectileSettings.HitFXs[MySurfaceType];
 			if (MyParticle)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MyParticle, FTransform(Hit.ImpactNormal.Rotation(), Hit.ImpactPoint, FVector(1.0f)));
+				ShowBulletHitFX_Multicast(MyParticle, Hit);				
 			}
 		}
 		if (ProjectileSettings.HitSound)
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ProjectileSettings.HitSound, Hit.ImpactPoint);
+			PlayBulletHitSound_Multicast(ProjectileSettings.HitSound, Hit);
 		}
 
 		if (ShouldSpawnStateEffect)
@@ -133,6 +133,21 @@ void ATDS_ProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitCo
 	UAISense_Damage::ReportDamageEvent(GetWorld(), Hit.GetActor(), GetInstigator(), ProjectileSettings.ProjectileDamage, GetOwner()->GetActorLocation(), Hit.Location);
 
 	ImpactProjectile();
+}
+
+void ATDS_ProjectileDefault::ShowBulletHitDecal_Multicast_Implementation(UMaterialInterface* DecalMaterial, UPrimitiveComponent* OtherComp, const FHitResult& Hit)
+{
+	UGameplayStatics::SpawnDecalAttached(DecalMaterial, FVector(10.0f), OtherComp, NAME_None, Hit.ImpactPoint, Hit.ImpactNormal.Rotation(), EAttachLocation::KeepWorldPosition, 10.0f);
+}
+
+void ATDS_ProjectileDefault::ShowBulletHitFX_Multicast_Implementation(UParticleSystem* FXParticle, const FHitResult& Hit)
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FXParticle, FTransform(Hit.ImpactNormal.Rotation(), Hit.ImpactPoint, FVector(1.0f)));
+}
+
+void ATDS_ProjectileDefault::PlayBulletHitSound_Multicast_Implementation(USoundBase* HitSound, const FHitResult& Hit)
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, Hit.ImpactPoint);
 }
 
 void ATDS_ProjectileDefault::BulletCollisionSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
